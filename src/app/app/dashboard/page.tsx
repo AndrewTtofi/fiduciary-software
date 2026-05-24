@@ -2,14 +2,104 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ClientShell } from "@/components/client/ClientShell";
 import { requireUser } from "@/lib/auth/guards";
+import { prisma } from "@/lib/db";
 import { getProspectForUser } from "@/lib/services/client-view";
+import { ClientDashboard } from "./ClientDashboard";
 
 export const metadata = { title: "Dashboard" };
+export const dynamic = "force-dynamic";
 
-export default async function ClientDashboard() {
+export default async function ClientDashboardPage() {
   const user = await requireUser();
+  const dbUser = await prisma.user.findUnique({ where: { id: user.id }, select: { fullName: true } });
   const prospect = await getProspectForUser(user.id);
   if (!prospect) redirect("/onboarding");
+
+  const client = await prisma.client.findUnique({
+    where: { userId: user.id },
+    include: {
+      services: true,
+      keyDates: {
+        where: { status: { in: ["upcoming", "overdue"] }, dueDate: { lte: in30days() } },
+        orderBy: { dueDate: "asc" },
+      },
+      documentRequests: { where: { state: "open" }, orderBy: { createdAt: "desc" } },
+      complianceFile: { select: { status: true, riskRating: true } },
+    },
+  });
+
+  if (!client) {
+    // Prospect-stage dashboard — preserve original visual output.
+    return <LegacyProspectDashboard prospect={prospect} user={user} />;
+  }
+
+  const recentStaffMessages = await prisma.message.count({
+    where: {
+      clientId: client.id,
+      sender: { role: "staff" },
+      createdAt: { gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) },
+    },
+  });
+
+  const recentActivity = await prisma.activityLog.findMany({
+    where: {
+      OR: [
+        { entityType: "client", entityId: client.id },
+        { entityType: "prospect", entityId: prospect.id },
+      ],
+    },
+    orderBy: { createdAt: "desc" },
+    take: 8,
+  });
+
+  const next14 = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000);
+  const hasUpcomingBooking = prospect.bookings.some(
+    (b) => b.status === "confirmed" && b.startsAt >= new Date() && b.startsAt <= next14,
+  );
+
+  return (
+    <ClientShell active="dashboard" approved={true}>
+      <ClientDashboard
+        name={dbUser?.fullName ?? "Client"}
+        since={client.createdAt}
+        complianceStatus={client.complianceFile?.status ?? null}
+        riskRating={client.complianceFile?.riskRating ?? null}
+        services={client.services.map((s) => ({ id: s.id, serviceType: s.serviceType, status: s.status }))}
+        upcomingKeyDates={client.keyDates.map((kd) => ({
+          id: kd.id,
+          description: kd.description,
+          dueDate: kd.dueDate,
+          status: kd.status,
+        }))}
+        openRequests={client.documentRequests.map((r) => ({
+          id: r.id,
+          description: r.description,
+          dueAt: r.dueAt,
+        }))}
+        unreadMessageCount={recentStaffMessages}
+        recentActivity={recentActivity.map((a) => ({ id: a.id, action: a.action, createdAt: a.createdAt }))}
+        hasUpcomingBookingWithin14Days={hasUpcomingBooking}
+      />
+    </ClientShell>
+  );
+}
+
+function in30days() {
+  return new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+}
+
+// ---------------------------------------------------------------------------
+// Prospect-stage dashboard — original JSX preserved verbatim
+// ---------------------------------------------------------------------------
+
+function LegacyProspectDashboard({
+  prospect,
+  user,
+}: {
+  prospect: Awaited<ReturnType<typeof getProspectForUser>>;
+  user: { fullName?: string | null };
+}) {
+  if (!prospect) return null;
 
   const status = prospect.status;
   const isApproved = status === "approved";
