@@ -140,6 +140,12 @@ enum DocPurpose {
   other
 }
 
+enum DocumentRequestState {
+  open
+  fulfilled
+  cancelled
+}
+
 model User {
   id            String    @id @default(uuid())
   email         String    @unique
@@ -173,6 +179,7 @@ model User {
   screeningRuns        ScreeningRun[]   @relation("ScreeningRunner")
   hitReviews           ScreeningHit[]   @relation("HitReviewer")
   reviewTaskAssignments ReviewTask[]    @relation("ReviewAssignee")
+  docRequestsMade      DocumentRequest[] @relation("DocRequestedBy")
 
   @@index([role])
 }
@@ -227,9 +234,13 @@ model Document {
   partyId      String?
   party        Party?    @relation(fields: [partyId], references: [id])
   purpose      DocPurpose @default(other)
+  serviceTypeKey String?
+
+  fulfillsRequest DocumentRequest? @relation("DocRequestFulfilledDoc")
 
   @@index([prospectId])
   @@index([partyId])
+  @@index([serviceTypeKey])
 }
 
 model Client {
@@ -243,12 +254,19 @@ model Client {
   primaryStaffId String
   primaryStaff   User         @relation("PrimaryStaff", fields: [primaryStaffId], references: [id])
   createdAt      DateTime     @default(now())
+  country              String?
+  address              String?
+  registrationNumber   String?
+  vatNumber            String?
+  taxResidency         String?
+  engagementLetterDate DateTime?
 
-  services       ClientService[]
-  keyDates       KeyDate[]
-  messages       Message[]
-  internalNotes  InternalNote[]
-  complianceFile ComplianceFile?
+  services         ClientService[]
+  keyDates         KeyDate[]
+  messages         Message[]
+  internalNotes    InternalNote[]
+  complianceFile   ComplianceFile?
+  documentRequests DocumentRequest[]
 }
 
 model ClientService {
@@ -562,4 +580,23 @@ model ReviewTask {
 
   @@index([complianceFileId, state])
   @@index([assignedToId, state])
+}
+
+model DocumentRequest {
+  id                  String    @id @default(uuid())
+  clientId            String
+  client              Client    @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  description         String
+  serviceTypeKey      String?
+  requestedById       String
+  requestedBy         User      @relation("DocRequestedBy", fields: [requestedById], references: [id])
+  dueAt               DateTime?
+  state               DocumentRequestState @default(open)
+  fulfilledById       String?
+  fulfilledAt         DateTime?
+  fulfilledDocumentId String?   @unique
+  fulfilledDocument   Document? @relation("DocRequestFulfilledDoc", fields: [fulfilledDocumentId], references: [id])
+  createdAt           DateTime  @default(now())
+
+  @@index([clientId, state])
 }
