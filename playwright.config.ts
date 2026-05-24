@@ -3,6 +3,7 @@ import { defineConfig, devices } from "@playwright/test";
 export default defineConfig({
   testDir: "./e2e",
   fullyParallel: false,    // shared dev DB; serialize specs
+  workers: 1,              // run one spec at a time — each resets the DB in beforeEach
   retries: 2,
   reporter: [["list"], ["html", { open: "never", outputFolder: "playwright-report" }]],
   use: {

@@ -40,6 +40,7 @@ services:
       # Faster file-change pickup over the bind mount on macOS/Windows.
       WATCHPACK_POLLING: "true"
       CHOKIDAR_USEPOLLING: "true"
+      ALLOW_TEST_RESET: "1"
     volumes:
       - ./:/app
       # Named volume masks the bind mount so the container keeps its own

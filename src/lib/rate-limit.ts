@@ -12,12 +12,21 @@ interface Hit {
 
 const store = new Map<string, Hit>();
 
+/** Flush all stored counters — only for use in test environments. */
+export function clearAllRateLimits() {
+  store.clear();
+}
+
 export async function rateLimit(opts: {
   bucket: Bucket;
   key: string;
   limit: number;
   windowSec: number;
 }): Promise<{ ok: boolean; remaining: number; resetIn: number }> {
+  // Bypass rate limiting entirely when the test-reset flag is set.
+  if (process.env.ALLOW_TEST_RESET === "1") {
+    return { ok: true, remaining: opts.limit - 1, resetIn: opts.windowSec };
+  }
   const k = `${opts.bucket}:${opts.key}`;
   const now = Date.now();
   const winMs = opts.windowSec * 1000;
