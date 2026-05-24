@@ -12,9 +12,17 @@ export type ActivityAction =
   | "client.status_changed"
   | "client.service_added"
   | "client.key_date_added"
+  | "client.profile_updated"
+  | "client.primary_staff_changed"
+  | "client.service_updated"
+  | "client.service_removed"
+  | "client.key_date_updated"
+  | "client.key_date_completed"
+  | "client.key_date_deleted"
   | "document.uploaded"
   | "document.viewed"
   | "document.status_changed"
+  | "document.deleted"
   | "note.added"
   | "booking.created"
   | "booking.reminder_sent"
@@ -32,11 +40,16 @@ export type ActivityAction =
   | "compliance.signed_off"
   | "compliance.blocked"
   | "compliance.review_task_created"
-  | "compliance.review_task_completed";
+  | "compliance.review_task_completed"
+  | "message.sent"
+  | "doc_request.created"
+  | "doc_request.cancelled"
+  | "doc_request.fulfilled";
 
 export async function logActivity(args: {
   entityType: "prospect" | "client" | "document" | "booking" | "user"
-    | "compliance_file" | "party" | "kyc_case" | "screening_run" | "review_task";
+    | "compliance_file" | "party" | "kyc_case" | "screening_run" | "review_task"
+    | "message" | "doc_request";
   entityId: string;
   action: ActivityAction;
   actorId?: string;

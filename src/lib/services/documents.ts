@@ -2,7 +2,7 @@ import crypto from "node:crypto";
 import { prisma } from "@/lib/db";
 import { storage } from "@/lib/providers/storage";
 import { logActivity } from "./activity";
-import type { DocType } from "@prisma/client";
+import type { DocPurpose, DocStatus, DocType } from "@prisma/client";
 
 const ALLOWED_MIME = new Set(["application/pdf", "image/jpeg", "image/png"]);
 export const MAX_BYTES = 10 * 1024 * 1024; // 10MB
@@ -14,6 +14,9 @@ export interface UploadInput {
   originalName: string;
   mime: string;
   buffer: Buffer;
+  serviceTypeKey?: string | null;
+  fulfillsRequestId?: string | null;
+  purpose?: DocPurpose;
 }
 
 export async function uploadDocument(input: UploadInput) {
@@ -39,8 +42,31 @@ export async function uploadDocument(input: UploadInput) {
       originalName: input.originalName,
       mime: input.mime,
       sizeBytes: stored.sizeBytes,
+      serviceTypeKey: input.serviceTypeKey ?? null,
+      ...(input.purpose !== undefined && { purpose: input.purpose }),
     },
   });
+
+  if (input.fulfillsRequestId) {
+    try {
+      await prisma.documentRequest.update({
+        where: { id: input.fulfillsRequestId, state: "open" },
+        data: {
+          state: "fulfilled",
+          fulfilledById: input.userId,
+          fulfilledAt: new Date(),
+          fulfilledDocumentId: doc.id,
+        },
+      });
+      await logActivity({
+        entityType: "doc_request", entityId: input.fulfillsRequestId,
+        action: "doc_request.fulfilled", actorId: input.userId,
+        meta: { documentId: doc.id },
+      });
+    } catch {
+      // Already fulfilled or cancelled — fine, the doc still uploaded.
+    }
+  }
 
   await logActivity({
     entityType: "document",
@@ -58,4 +84,41 @@ function pickExt(mime: string, name: string): string {
   if (fromMime) return fromMime;
   const dot = name.lastIndexOf(".");
   return dot >= 0 ? name.slice(dot).toLowerCase().replace(/[^a-z0-9.]/g, "") : "";
+}
+
+export async function setDocumentStatus(documentId: string, status: DocStatus, actorId: string) {
+  const updated = await prisma.document.update({
+    where: { id: documentId },
+    data: { status },
+    select: { id: true, prospectId: true },
+  });
+  await logActivity({
+    entityType: "document", entityId: documentId,
+    action: "document.status_changed", actorId,
+    meta: { status },
+  });
+  return updated;
+}
+
+export async function deleteDocument(documentId: string, actorId: string) {
+  const doc = await prisma.document.findUnique({
+    where: { id: documentId },
+    select: { id: true, fulfillsRequest: { select: { id: true } } },
+  });
+  if (!doc) throw new Error("Document not found");
+
+  await prisma.$transaction(async (tx) => {
+    if (doc.fulfillsRequest) {
+      await tx.documentRequest.update({
+        where: { id: doc.fulfillsRequest.id },
+        data: { state: "open", fulfilledAt: null, fulfilledById: null, fulfilledDocumentId: null },
+      });
+    }
+    await tx.document.delete({ where: { id: documentId } });
+  });
+
+  await logActivity({
+    entityType: "document", entityId: documentId,
+    action: "document.deleted", actorId,
+  });
 }
