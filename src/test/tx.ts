@@ -35,7 +35,7 @@ export function wrapTx(tx: PrismaClient): PrismaClient {
           return fnOrArray(wrapTx(tx));
         };
       }
-      const val = (target as Record<string | symbol, unknown>)[prop];
+      const val = (target as unknown as Record<string | symbol, unknown>)[prop];
       if (typeof val === "function") return val.bind(target);
       return val;
     },

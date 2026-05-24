@@ -175,7 +175,7 @@ describe("onboarding/submit PUT route (submitProspect)", () => {
     await inRollbackTx(prisma, async (tx) => {
       sessionState.user = null;
       const { PUT } = await loadRoute(tx);
-      await expect(PUT(makeReq({ method: "PUT" }))).rejects.toThrow();
+      await expect(PUT()).rejects.toThrow();
     });
   });
 
@@ -184,7 +184,7 @@ describe("onboarding/submit PUT route (submitProspect)", () => {
       const user = await createUser(tx, { role: "prospect" });
       sessionState.user = { id: user.id, email: user.email, fullName: user.fullName, role: "prospect" };
       const { PUT } = await loadRoute(wrapTx(tx));
-      const res = await PUT(makeReq({ method: "PUT" }));
+      const res = await PUT();
       expect(res.status).toBe(422);
     });
   });
@@ -196,7 +196,7 @@ describe("onboarding/submit PUT route (submitProspect)", () => {
       sessionState.user = { id: user.id, email: user.email, fullName: user.fullName, role: "prospect" };
       const { PUT } = await loadRoute(wrapTx(tx));
       // No documents seeded → missing passport + proof_of_address
-      const res = await PUT(makeReq({ method: "PUT" }));
+      const res = await PUT();
       expect(res.status).toBe(422);
     });
   });
@@ -208,7 +208,7 @@ describe("onboarding/submit PUT route (submitProspect)", () => {
       await seedDocument(tx, prospect.id, "passport");
       sessionState.user = { id: user.id, email: user.email, fullName: user.fullName, role: "prospect" };
       const { PUT } = await loadRoute(wrapTx(tx));
-      const res = await PUT(makeReq({ method: "PUT" }));
+      const res = await PUT();
       expect(res.status).toBe(422);
     });
   });
@@ -221,7 +221,7 @@ describe("onboarding/submit PUT route (submitProspect)", () => {
       await seedDocument(tx, prospect.id, "proof_of_address");
       sessionState.user = { id: user.id, email: user.email, fullName: user.fullName, role: "prospect" };
       const { PUT } = await loadRoute(wrapTx(tx));
-      const res = await PUT(makeReq({ method: "PUT" }));
+      const res = await PUT();
       expect(res.status).toBe(200);
       const json = await res.json();
       expect(json.ok).toBe(true);

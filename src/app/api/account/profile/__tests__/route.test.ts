@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll, afterEach, vi } from "vitest";
 import type { PrismaClient } from "@prisma/client";
 import { getTestPrisma, stopTestPrisma } from "@/test/db";
-import { inRollbackTx } from "@/test/tx";
+import { inRollbackTx, wrapTx } from "@/test/tx";
 import { createClient } from "@/test/seed";
 import { makeReq } from "@/test/route";
 
@@ -20,25 +20,6 @@ vi.mock("@/lib/auth/guards", () => ({
     return sessionState.user;
   },
 }));
-
-/**
- * Wrap a tx client so that $transaction calls pass through to the tx itself.
- * updateClientSelfProfile calls prisma.$transaction(async (innerTx) => {...}),
- * but interactive-transaction clients don't expose $transaction.
- * This shim delegates $transaction by simply calling the callback with the tx.
- */
-function wrapTx(tx: PrismaClient): PrismaClient {
-  return new Proxy(tx, {
-    get(target, prop) {
-      if (prop === "$transaction") {
-        return (fn: (tx: PrismaClient) => Promise<unknown>) => fn(wrapTx(tx));
-      }
-      const val = (target as Record<string | symbol, unknown>)[prop];
-      if (typeof val === "function") return val.bind(target);
-      return val;
-    },
-  });
-}
 
 // Inject `db` into module so service code sees seeded data.
 async function loadRoute(db: PrismaClient) {
