@@ -1,48 +1,33 @@
 "use client";
-
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 
-export function MessageComposer({ prospectId }: { prospectId: string }) {
-  const [body, setBody] = useState("");
-  const [pending, start] = useTransition();
+export function MessageComposer() {
   const router = useRouter();
+  const [pending, start] = useTransition();
+  const [body, setBody] = useState("");
 
-  function onSend() {
+  function send() {
     if (!body.trim()) return;
     start(async () => {
-      const res = await fetch("/api/messages", {
+      const res = await fetch(`/api/account/messages`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prospectId, body }),
+        body: JSON.stringify({ body }),
       });
-      if (res.ok) {
-        setBody("");
-        router.refresh();
-      }
+      if (res.ok) { setBody(""); router.refresh(); }
+      else { const j = await res.json().catch(() => ({})); alert(j.error ?? "Send failed"); }
     });
   }
 
   return (
-    <div className="flex gap-3 items-end">
-      <textarea
-        rows={2}
-        value={body}
-        onChange={(e) => setBody(e.target.value)}
-        placeholder="Type a message…"
-        className="textarea flex-1"
-        onKeyDown={(e) => {
-          if ((e.metaKey || e.ctrlKey) && e.key === "Enter") onSend();
-        }}
-      />
-      <button
-        type="button"
-        onClick={onSend}
-        disabled={pending || !body.trim()}
-        className="btn btn-primary px-5 py-3 disabled:opacity-40"
-      >
-        {pending ? "Sending…" : "Send"}
-      </button>
+    <div className="bg-[var(--client-surface)] border border-token rounded-card p-4">
+      <textarea value={body} onChange={(e) => setBody(e.target.value)} placeholder="Type a message…" rows={4} className="input w-full" />
+      <div className="flex justify-end mt-3">
+        <button type="button" onClick={send} disabled={pending || !body.trim()} className="btn btn-primary px-4 py-2 disabled:opacity-50">
+          {pending ? "Sending…" : "Send"}
+        </button>
+      </div>
     </div>
   );
 }

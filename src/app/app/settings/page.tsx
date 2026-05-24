@@ -13,6 +13,31 @@ export default async function SettingsPage() {
   const prospect = await prisma.prospect.findUnique({ where: { userId: user.id } });
   const isApproved = prospect?.status === "approved";
 
+  const client = await prisma.client.findUnique({
+    where: { userId: user.id },
+    select: {
+      address: true,
+      taxResidency: true,
+      companyName: true,
+      registrationNumber: true,
+      vatNumber: true,
+      engagementLetterDate: true,
+    },
+  });
+
+  const clientFields = client
+    ? {
+        address: client.address,
+        taxResidency: client.taxResidency,
+        companyName: client.companyName,
+        registrationNumber: client.registrationNumber,
+        vatNumber: client.vatNumber,
+        engagementLetterDate: client.engagementLetterDate
+          ? client.engagementLetterDate.toISOString().split("T")[0]
+          : null,
+      }
+    : null;
+
   return (
     <ClientShell active="settings" approved={isApproved}>
       <div className="max-w-[680px]">
@@ -27,6 +52,7 @@ export default async function SettingsPage() {
             phone: dbUser.phone ?? "",
             languagePref: dbUser.languagePref,
           }}
+          clientFields={clientFields}
         />
       </div>
     </ClientShell>

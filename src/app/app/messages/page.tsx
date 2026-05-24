@@ -1,17 +1,23 @@
 import { redirect } from "next/navigation";
 import { ClientShell } from "@/components/client/ClientShell";
 import { requireUser } from "@/lib/auth/guards";
-import { getProspectForUser } from "@/lib/services/client-view";
+import { prisma } from "@/lib/db";
+import { getMessagesForUser } from "@/lib/services/client-portal";
 import { MessageComposer } from "./MessageComposer";
 
 export const metadata = { title: "Messages" };
+export const dynamic = "force-dynamic";
 
 export default async function MessagesPage() {
   const user = await requireUser();
-  const prospect = await getProspectForUser(user.id);
-  if (!prospect) redirect("/onboarding");
-  const isApproved = prospect.status === "approved";
-  const messages = [...prospect.messages].reverse();
+  const [prospect, client, messages] = await Promise.all([
+    prisma.prospect.findUnique({ where: { userId: user.id }, select: { id: true, status: true } }),
+    prisma.client.findUnique({ where: { userId: user.id }, select: { id: true } }),
+    getMessagesForUser(user.id),
+  ]);
+  if (!prospect && !client) redirect("/onboarding");
+
+  const isApproved = (prospect?.status === "approved") || !!client;
 
   return (
     <ClientShell active="messages" approved={isApproved}>
@@ -24,31 +30,33 @@ export default async function MessagesPage() {
           </p>
         </div>
 
-        <div className="surface rounded-card flex flex-col" style={{ minHeight: 480 }}>
-          <ul className="flex flex-col gap-6 p-6 flex-1">
-            {messages.length === 0 ? (
-              <li className="text-meta text-muted text-center py-20">No messages yet.</li>
-            ) : messages.map((m) => {
-              const mine = m.senderId === user.id;
-              return (
-                <li key={m.id} className={`flex ${mine ? "justify-end" : "justify-start"}`}>
-                  <div className={`max-w-[80%] rounded-elem px-4 py-3 ${mine ? "" : "border"}`}
-                       style={mine
-                         ? { background: "var(--accent)", color: "var(--dark)" }
-                         : { background: "var(--bg)", borderColor: "var(--border)" }}>
-                    <div className="text-[12px] opacity-70 mb-1 font-medium">
-                      {mine ? "You" : m.sender.fullName} · {m.createdAt.toLocaleString("en-GB", { dateStyle: "short", timeStyle: "short" })}
-                    </div>
-                    <div className="text-meta whitespace-pre-wrap">{m.body}</div>
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
-          <div className="border-t p-4" style={{ borderColor: "var(--border)" }}>
-            <MessageComposer prospectId={prospect.id} />
-          </div>
+        <div className="bg-[var(--client-surface)] border border-token rounded-card p-6 mb-6 flex flex-col gap-4">
+          {messages.length === 0 && <p className="text-muted text-meta">No messages yet. Send the first one below.</p>}
+          {messages.map((m) => {
+            const isMine = m.senderId === user.id;
+            const isStaff = m.sender?.role === "staff";
+            const bubbleCls = isMine
+              ? "bg-accent text-dark"
+              : isStaff
+                ? "bg-dark text-white"
+                : "bg-[var(--client-bg)]";
+            const label = isStaff
+              ? `${m.sender?.fullName ?? "ORO team"} · ORO Staff`
+              : (m.sender?.fullName ?? "ORO team");
+            return (
+              <div key={m.id} className={`flex flex-col ${isMine ? "items-end" : "items-start"}`}>
+                <div className="text-[11px] text-muted">
+                  {label} · {new Date(m.createdAt).toLocaleString()}
+                </div>
+                <div className={`mt-1 rounded-card px-4 py-2 max-w-[70%] ${bubbleCls}`}>
+                  <p className="text-meta whitespace-pre-wrap">{m.body}</p>
+                </div>
+              </div>
+            );
+          })}
         </div>
+
+        <MessageComposer />
       </div>
     </ClientShell>
   );
