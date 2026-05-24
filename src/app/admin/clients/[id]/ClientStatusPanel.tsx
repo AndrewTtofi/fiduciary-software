@@ -1,19 +1,20 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 import type { ClientStatus } from "@prisma/client";
+import { ReassignModal } from "./ReassignModal";
 
 interface Person { id: string; name: string; role: string }
 
 export function ClientStatusPanel({
-  clientId, status, primaryStaff, extras, partners,
+  clientId, status, primaryStaff, extras, staff,
 }: {
   clientId: string;
   status: ClientStatus;
   primaryStaff: Person;
   extras: Person[];
-  partners: { id: string; fullName: string }[];
+  staff: { id: string; fullName: string }[];
 }) {
   const [pending, start] = useTransition();
   const router = useRouter();
@@ -48,21 +49,9 @@ export function ClientStatusPanel({
       <Member member={primaryStaff} accent />
       {extras.map((m) => <Member key={m.id} member={m} />)}
 
-      <details className="mt-3">
-        <summary className="cursor-pointer text-meta text-admin-muted text-[12px] font-semibold">Reassign / Manage Team</summary>
-        <div className="mt-3 flex flex-col gap-2">
-          {partners.map((p) => (
-            <button
-              key={p.id}
-              type="button"
-              className="text-[12px] text-left px-3 py-2 rounded-inner border border-admin-border hover:border-accent"
-              onClick={() => alert(`Assignment to ${p.fullName} happens on services from the Services Engaged list (slice 7 finalize).`)}
-            >
-              + Assign {p.fullName}
-            </button>
-          ))}
-        </div>
-      </details>
+      <div className="mt-3">
+        <ReassignModal clientId={clientId} currentPrimaryId={primaryStaff.id} staff={staff} />
+      </div>
     </section>
   );
 }
