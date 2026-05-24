@@ -122,3 +122,60 @@ describe("updateClientSelfProfile", () => {
     ).rejects.toThrow(/unknown/i);
   });
 });
+
+import { uploadClientDocument } from "../client-portal";
+
+const uploadDocMock = vi.hoisted(() => vi.fn());
+vi.mock("@/lib/services/documents", () => ({
+  uploadDocument: uploadDocMock,
+  MAX_BYTES: 10 * 1024 * 1024,
+}));
+
+describe("uploadClientDocument", () => {
+  beforeEach(() => { uploadDocMock.mockReset(); });
+
+  it("rejects fulfillment of a DocumentRequest not owned by the user's client", async () => {
+    db.userById.set("u6", { id: "u6" });
+    db.clientByUserId.set("u6", { id: "c6", userId: "u6", prospectId: "p6" });
+    db.docRequestById.set("dr1", { id: "dr1", clientId: "other-client", serviceTypeKey: "company_formation" });
+    await expect(
+      uploadClientDocument("u6", {
+        file: Buffer.from("x"), originalName: "x.pdf", mime: "application/pdf",
+        fulfillsRequestId: "dr1",
+      }),
+    ).rejects.toThrow(/not yours/i);
+    expect(uploadDocMock).not.toHaveBeenCalled();
+  });
+
+  it("forwards purpose=other + the request's serviceTypeKey on fulfillment", async () => {
+    db.userById.set("u7", { id: "u7" });
+    db.clientByUserId.set("u7", { id: "c7", userId: "u7", prospectId: "p7" });
+    db.docRequestById.set("dr2", { id: "dr2", clientId: "c7", serviceTypeKey: "tax_residency" });
+    uploadDocMock.mockResolvedValue({ ok: true, doc: { id: "d99" } });
+    await uploadClientDocument("u7", {
+      file: Buffer.from("x"), originalName: "x.pdf", mime: "application/pdf",
+      fulfillsRequestId: "dr2",
+    });
+    expect(uploadDocMock).toHaveBeenCalledWith(expect.objectContaining({
+      prospectId: "p7",
+      userId: "u7",
+      purpose: "other",
+      type: "other",
+      serviceTypeKey: "tax_residency",
+      fulfillsRequestId: "dr2",
+    }));
+  });
+
+  it("uploads as Correspondence when no folder and no request", async () => {
+    db.userById.set("u8", { id: "u8" });
+    db.clientByUserId.set("u8", { id: "c8", userId: "u8", prospectId: "p8" });
+    uploadDocMock.mockResolvedValue({ ok: true, doc: { id: "d100" } });
+    await uploadClientDocument("u8", {
+      file: Buffer.from("x"), originalName: "y.pdf", mime: "application/pdf",
+    });
+    expect(uploadDocMock).toHaveBeenCalledWith(expect.objectContaining({
+      prospectId: "p8",
+      serviceTypeKey: null,
+    }));
+  });
+});

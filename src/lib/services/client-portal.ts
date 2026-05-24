@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db";
 import { logActivity } from "@/lib/services/activity";
 import { email } from "@/lib/providers/email";
+import { uploadDocument } from "@/lib/services/documents";
 
 export async function getMessagesForUser(userId: string) {
   const [prospect, client] = await Promise.all([
@@ -111,4 +112,43 @@ export async function updateClientSelfProfile(userId: string, patch: SelfProfile
 
 function escapeHtml(s: string) {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+export interface ClientUploadArgs {
+  file: Buffer;
+  originalName: string;
+  mime: string;
+  serviceTypeKey?: string | null;
+  fulfillsRequestId?: string | null;
+}
+
+export async function uploadClientDocument(userId: string, args: ClientUploadArgs) {
+  const client = await prisma.client.findUnique({
+    where: { userId },
+    select: { id: true, prospectId: true },
+  });
+  if (!client) throw new Error("No client for user");
+
+  let serviceTypeKey: string | null = args.serviceTypeKey ?? null;
+  if (args.fulfillsRequestId) {
+    const req = await prisma.documentRequest.findUnique({
+      where: { id: args.fulfillsRequestId },
+      select: { clientId: true, serviceTypeKey: true, state: true },
+    });
+    if (!req) throw new Error("Request not found");
+    if (req.clientId !== client.id) throw new Error("Request is not yours");
+    if (!args.serviceTypeKey) serviceTypeKey = req.serviceTypeKey;
+  }
+
+  return uploadDocument({
+    prospectId: client.prospectId,
+    userId,
+    type: "other",
+    purpose: "other",
+    originalName: args.originalName,
+    mime: args.mime,
+    buffer: args.file,
+    serviceTypeKey,
+    fulfillsRequestId: args.fulfillsRequestId ?? null,
+  });
 }
