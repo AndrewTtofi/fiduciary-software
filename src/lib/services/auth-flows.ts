@@ -34,6 +34,10 @@ export async function registerProspect(input: RegisterInput) {
   const rawToken = makeToken();
   const hashed = hashToken(rawToken);
 
+  // In dev, skip the email round-trip — auto-verify so the user can sign in
+  // immediately. Production still requires clicking the link.
+  const autoVerify = env().NODE_ENV === "development";
+
   const user = await prisma.user.create({
     data: {
       email: parsed.email,
@@ -41,6 +45,7 @@ export async function registerProspect(input: RegisterInput) {
       fullName: parsed.fullName,
       phone: `${parsed.phoneCountry}${parsed.phoneNumber}`,
       role: Role.prospect,
+      ...(autoVerify ? { emailVerified: new Date() } : {}),
       verificationTokens: {
         create: {
           token: hashed,
