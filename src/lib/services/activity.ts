@@ -19,6 +19,7 @@ export type ActivityAction =
   | "client.key_date_updated"
   | "client.key_date_completed"
   | "client.key_date_deleted"
+  | "client.self_profile_updated"
   | "document.uploaded"
   | "document.viewed"
   | "document.status_changed"
