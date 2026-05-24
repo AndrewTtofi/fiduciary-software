@@ -39,3 +39,52 @@ export async function createClient(tx: PrismaClient, opts: { userId?: string; pr
 export async function createStaff(tx: PrismaClient) {
   return createUser(tx, { role: "staff" });
 }
+
+export async function createComplianceFile(
+  tx: PrismaClient,
+  opts: { prospectId?: string; status?: "open" | "in_review" | "cleared" | "blocked"; riskRating?: "low" | "standard" | "high" } = {},
+) {
+  const prospectId = opts.prospectId ?? (await createProspect(tx)).id;
+  return tx.complianceFile.create({
+    data: {
+      prospectId,
+      status: opts.status ?? "open",
+      ...(opts.riskRating !== undefined && { riskRating: opts.riskRating }),
+    },
+  });
+}
+
+export async function createParty(
+  tx: PrismaClient,
+  opts: {
+    complianceFileId: string;
+    role?: "main_contact" | "ubo" | "director" | "shareholder" | "signatory" | "intermediary";
+    type?: "individual" | "entity";
+    fullName?: string;
+    isPep?: boolean;
+  },
+) {
+  let counter2 = 0;
+  const uniq2 = () => `${Date.now()}-${++counter2}`;
+  return tx.party.create({
+    data: {
+      complianceFileId: opts.complianceFileId,
+      type: opts.type ?? "individual",
+      role: opts.role ?? "ubo",
+      fullName: opts.fullName ?? `Party-${uniq2()}`,
+      isPep: opts.isPep ?? false,
+    },
+  });
+}
+
+export async function createKycCase(
+  tx: PrismaClient,
+  opts: { partyId: string; state?: "pending" | "in_progress" | "passed" | "blocked" },
+) {
+  return tx.kycCase.create({
+    data: {
+      partyId: opts.partyId,
+      state: opts.state ?? "pending",
+    },
+  });
+}
