@@ -20,6 +20,13 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
+# Build-time placeholders so Prisma client / env validation don't fail
+# during `next build`'s "Collecting page data" phase. Real values come
+# from docker-compose env_file at runtime.
+ENV DATABASE_URL=postgresql://build:build@localhost:5432/build
+ENV AUTH_SECRET=build-time-secret-not-used-at-runtime-xxxxxxxx
+ENV ENCRYPTION_KEY_B64=YnVpbGQtdGltZS1lbmNyeXB0aW9uLWtleS1ub3QtdXNlZA==
+ENV APP_URL=http://localhost
 RUN npx prisma generate
 RUN npm run build
 RUN npm run worker:build
