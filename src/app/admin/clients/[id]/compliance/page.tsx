@@ -24,14 +24,25 @@ export default async function ClientCompliancePage({ params }: { params: Promise
   });
   if (!file) notFound();
   if (!file.riskComputed) await recomputeAndStoreRisk(file.id, null);
+
+  const overrideHistory = await prisma.activityLog.findMany({
+    where: { entityType: "compliance_file", entityId: file.id, action: "compliance.risk_overridden" },
+    orderBy: { createdAt: "desc" },
+    take: 10,
+    include: { actor: true },
+  });
+
   return (
     <AdminShell active="clients">
-      <ComplianceDashboard file={serialize(file)} parentLink={`/admin/clients/${id}/compliance`} />
+      <ComplianceDashboard
+        file={serialize(file, overrideHistory)}
+        parentLink={`/admin/clients/${id}/compliance`}
+      />
     </AdminShell>
   );
 }
 
-function serialize(f: any) {
+function serialize(f: any, overrideHistory: any[] = []) {
   return {
     ...f,
     signedOffAt: f.signedOffAt?.toISOString() ?? null,
@@ -41,6 +52,7 @@ function serialize(f: any) {
         ...p.kycCase,
         latestScreeningRun: p.kycCase.latestScreeningRun ? {
           ...p.kycCase.latestScreeningRun,
+          ranAt: p.kycCase.latestScreeningRun.ranAt?.toISOString() ?? null,
           hits: p.kycCase.latestScreeningRun.hits.map((h: any) => ({
             id: h.id, matchedName: h.matchedName, matchedTopics: h.matchedTopics, reviewStatus: h.reviewStatus,
           })),
@@ -51,5 +63,17 @@ function serialize(f: any) {
       id: t.id, kind: t.kind, dueAt: t.dueAt?.toISOString() ?? null,
       assignedTo: t.assignedTo ? { fullName: t.assignedTo.fullName } : null,
     })),
+    riskOverrideHistory: overrideHistory.map((h: any) => {
+      const meta = (h.meta ?? {}) as Record<string, unknown>;
+      return {
+        id: h.id,
+        createdAt: h.createdAt.toISOString(),
+        actor: h.actor?.fullName ?? "System",
+        before: (meta.before as string | null) ?? null,
+        after: (meta.after as string | null) ?? null,
+        reason: (meta.reason as string | null) ?? null,
+        escalated: !!(meta.escalated),
+      };
+    }),
   };
 }

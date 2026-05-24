@@ -2,12 +2,23 @@
 import { useTransition, useState } from "react";
 import { useRouter } from "next/navigation";
 
-export function RiskPanel({ fileId, computed, computedScore, rating, overrideReason }: {
+type OverrideHistoryEntry = {
+  id: string;
+  createdAt: string;
+  actor: string;
+  before: string | null;
+  after: string | null;
+  reason: string | null;
+  escalated: boolean;
+};
+
+export function RiskPanel({ fileId, computed, computedScore, rating, overrideReason, history = [] }: {
   fileId: string;
   computed: string | null;
   computedScore: number | null;
   rating: string | null;
   overrideReason: string | null;
+  history?: OverrideHistoryEntry[];
 }) {
   const router = useRouter();
   const [pending, start] = useTransition();
@@ -58,6 +69,23 @@ export function RiskPanel({ fileId, computed, computedScore, rating, overrideRea
         </label>
         <button type="button" onClick={confirmOverride} disabled={pending} className="btn btn-primary px-4 py-2">Save</button>
       </div>
+
+      {history.length > 0 && (
+        <details className="mt-4">
+          <summary className="text-meta font-bold uppercase tracking-widest text-admin-muted cursor-pointer">
+            Override history ({history.length})
+          </summary>
+          <ul className="mt-3 flex flex-col gap-2">
+            {history.map((h) => (
+              <li key={h.id} className="text-[12px] flex flex-col">
+                <span className="font-mono text-admin-muted">{new Date(h.createdAt).toLocaleString()}</span>
+                <span><b>{h.actor}</b> {h.before} → {h.after}{h.escalated && <span className="ml-1 badge badge-pending">escalated</span>}</span>
+                <span className="text-admin-muted italic">&ldquo;{h.reason}&rdquo;</span>
+              </li>
+            ))}
+          </ul>
+        </details>
+      )}
     </section>
   );
 }

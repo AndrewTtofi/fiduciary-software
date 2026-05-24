@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition, use, useEffect } from "react";
-import { signIn } from "next-auth/react";
+import { signIn, getSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -21,7 +21,18 @@ export function AuthTabs({
   const [error, setError] = useState<string | null>(searchParams.error ?? null);
   const [pending, start] = useTransition();
   const router = useRouter();
-  const nextPath = searchParams.next || "/onboarding";
+  const explicitNext = searchParams.next;
+
+  async function landingForRole(): Promise<string> {
+    if (explicitNext) return explicitNext;
+    const s = await getSession();
+    switch (s?.user?.role) {
+      case "staff": return "/admin";
+      case "partner": return "/partner";
+      case "client": return "/app";
+      default: return "/onboarding";
+    }
+  }
 
   useEffect(() => { setError(null); }, [tab]);
 
@@ -41,7 +52,7 @@ export function AuthTabs({
         );
         return;
       }
-      router.push(nextPath);
+      router.push(await landingForRole());
       router.refresh();
     });
   }
@@ -63,6 +74,18 @@ export function AuthTabs({
       if (!res.ok) {
         const body = (await res.json().catch(() => ({}))) as { error?: string };
         setError(body.error ?? "Registration failed. Please try again.");
+        return;
+      }
+      // Dev auto-verifies; try to sign in immediately. If that fails (prod
+      // requires the email link), fall through to the verify-sent page.
+      const signin = await signIn("credentials", {
+        email: formData.get("email"),
+        password: formData.get("password"),
+        redirect: false,
+      });
+      if (signin && !signin.error) {
+        router.push("/onboarding");
+        router.refresh();
         return;
       }
       router.push("/verify-sent");

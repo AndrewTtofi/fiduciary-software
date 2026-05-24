@@ -18,8 +18,11 @@
     "prisma:seed": "tsx prisma/seed.ts",
     "prisma:studio": "prisma studio",
     "test": "vitest run",
-    "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "test:unit": "vitest run --project=unit",
+    "test:integration": "vitest run --project=integration",
+    "test:watch": "vitest --project=unit",
+    "test:coverage": "vitest run --coverage",
+    "test:e2e": "playwright test"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
@@ -40,6 +43,8 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@playwright/test": "^1.60.0",
+    "@testcontainers/postgresql": "^12.0.0",
     "@types/node": "^22.9.0",
     "@types/node-cron": "^3.0.11",
     "@types/nodemailer": "^6.4.17",

@@ -44,6 +44,7 @@ export type ActivityAction =
   | "compliance.review_task_completed"
   | "message.sent"
   | "doc_request.created"
+  | "doc_request.updated"
   | "doc_request.cancelled"
   | "doc_request.fulfilled";
 

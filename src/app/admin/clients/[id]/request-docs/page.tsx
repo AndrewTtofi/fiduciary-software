@@ -4,6 +4,7 @@ import { requireRole } from "@/lib/auth/guards";
 import { prisma } from "@/lib/db";
 import { RequestForm } from "./RequestForm";
 import { CancelRequestClient } from "../CancelRequestClient";
+import { EditRequestClient } from "./EditRequestClient";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Request documents" };
@@ -38,7 +39,12 @@ export default async function RequestDocsPage({ params }: { params: Promise<{ id
                     State: <span className="font-mono">{r.state}</span>
                   </div>
                 </div>
-                {r.state === "open" && <CancelRequestClient id={r.id} />}
+                {r.state === "open" && (
+                  <div className="flex gap-1 items-center shrink-0">
+                    <EditRequestClient id={r.id} description={r.description} dueAt={r.dueAt?.toISOString() ?? null} />
+                    <CancelRequestClient id={r.id} />
+                  </div>
+                )}
               </li>
             ))}
           </ul>
