@@ -47,10 +47,6 @@ describe("auto-rescreen worker", () => {
       const kyc = await createKycCase(tx, { partyId: party.id, state: "passed" });
 
       // Seed old screening run (400 days ago, outcome=clear, no hits).
-      // NOTE: The initial broad-filter in autoRescreenTick uses cutoff(365) —
-      // only runs older than 365 days pass the initial query regardless of risk
-      // band. This is a known bug (see CONCERNS in test report). To test the
-      // happy path we seed the run as 400 days old so it clears the filter.
       const oldRun = await tx.screeningRun.create({
         data: {
           kycCaseId: kyc.id,
@@ -101,7 +97,6 @@ describe("auto-rescreen worker", () => {
       const party = await createParty(tx, { complianceFileId: cf.id, role: "main_contact" });
       const kyc = await createKycCase(tx, { partyId: party.id, state: "passed" });
 
-      // Same note as test 1: must be > 365d old to pass the broad filter
       const oldRun = await tx.screeningRun.create({
         data: {
           kycCaseId: kyc.id,
@@ -140,6 +135,56 @@ describe("auto-rescreen worker", () => {
         where: { complianceFileId: cf.id, kind: "screening_hit", state: "open" },
       });
       expect(tasks).toHaveLength(1);
+    });
+  });
+
+  it("picks up standard-risk case with 100-day-old run (cadence=90d, overdue)", async () => {
+    await inRollbackTx(prisma, async (rawTx) => {
+      const tx = wrapTx(rawTx);
+
+      const client = await createClient(tx);
+      const cf = await createComplianceFile(tx, {
+        prospectId: (await tx.client.findUniqueOrThrow({ where: { id: client.id }, include: { prospect: true } })).prospectId,
+        status: "cleared",
+        riskRating: "standard",
+      });
+      const party = await createParty(tx, { complianceFileId: cf.id, role: "main_contact" });
+      const kyc = await createKycCase(tx, { partyId: party.id, state: "passed" });
+
+      // 100 days ago — older than the 90d standard cadence and older than the 30d outer filter
+      const oldRun = await tx.screeningRun.create({
+        data: {
+          kycCaseId: kyc.id,
+          provider: "stub",
+          query: {},
+          outcome: "clear",
+          hitCount: 0,
+          ranAt: new Date(Date.now() - 100 * 24 * 60 * 60 * 1000),
+        },
+      });
+      await tx.kycCase.update({ where: { id: kyc.id }, data: { latestScreeningRunId: oldRun.id } });
+
+      const hitResult: ScreeningResult = {
+        outcome: "hits",
+        hits: [{
+          externalId: "ext-std-1",
+          matchedName: party.fullName,
+          matchedSchema: "Person",
+          matchedTopics: ["sanction"],
+          matchScore: 0.9,
+          matchedListings: {},
+        }],
+        raw: {},
+      };
+
+      const { autoRescreenTick } = await loadJob(tx, hitResult);
+      await autoRescreenTick();
+
+      const task = await tx.reviewTask.findFirst({
+        where: { complianceFileId: cf.id, kind: "screening_hit", state: "open" },
+      });
+      expect(task).not.toBeNull();
+      expect(task?.kind).toBe("screening_hit");
     });
   });
 

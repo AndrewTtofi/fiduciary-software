@@ -21,6 +21,13 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   });
   if (!prospect) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
+  if (parsed.data.partnerId !== null) {
+    const target = await prisma.user.findUnique({ where: { id: parsed.data.partnerId }, select: { role: true } });
+    if (!target || target.role !== "partner") {
+      return NextResponse.json({ error: "Target is not a partner" }, { status: 400 });
+    }
+  }
+
   const draft = (prospect.draft as Record<string, unknown> | null) ?? {};
   draft.__assignedPartnerId = parsed.data.partnerId;
   await prisma.prospect.update({ where: { id: prospect.id }, data: { draft: draft as never } });

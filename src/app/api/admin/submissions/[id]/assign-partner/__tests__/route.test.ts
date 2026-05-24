@@ -131,13 +131,7 @@ describe("admin/submissions/[id]/assign-partner POST", () => {
     });
   });
 
-  /**
-   * CONCERN: The route does NOT validate that the target user has role=partner.
-   * Any valid UUID (including a staff user) can be assigned as a partner.
-   * This test documents the current (permissive) behavior.
-   * A production-hardening fix would add: if (partner.role !== 'partner') return 400.
-   */
-  it("concern: non-partner user id is accepted without role check → 200", async () => {
+  it("non-partner user id is rejected with role check → 400", async () => {
     await inRollbackTx(prisma, async (rawTx) => {
       const tx = wrapTx(rawTx);
       const actor = await createStaff(tx);
@@ -149,8 +143,9 @@ describe("admin/submissions/[id]/assign-partner POST", () => {
         makeReq({ method: "POST", body: { partnerId: nonPartner.id } }),
         makeParams({ id: prospect.id })
       );
-      // Documents current behavior: no role validation → 200
-      expect(res.status).toBe(200);
+      expect(res.status).toBe(400);
+      const json = await res.json();
+      expect(json.error).toBe("Target is not a partner");
     });
   });
 });

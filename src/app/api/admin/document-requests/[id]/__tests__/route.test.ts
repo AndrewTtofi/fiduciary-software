@@ -118,6 +118,41 @@ describe("admin/document-requests/[id] PATCH", () => {
     });
   });
 
+  it("edit description + dueAt of open request → 200, values updated", async () => {
+    await inRollbackTx(prisma, async (rawTx) => {
+      const tx = wrapTx(rawTx);
+      const client = await createClient(tx);
+      const staff = await createStaff(tx);
+      const docReq = await createDocumentRequest(tx, client.id, staff.id);
+      sessionState.user = { id: staff.id, email: staff.email, fullName: staff.fullName, role: "staff" };
+      const { PATCH } = await loadRoute(tx);
+      const res = await PATCH(
+        makeReq({ method: "PATCH", body: { description: "Updated description text", dueAt: "2027-01-15" } }),
+        makeParams({ id: docReq.id })
+      );
+      expect(res.status).toBe(200);
+      const json = await res.json();
+      expect(json.ok).toBe(true);
+      const updated = await tx.documentRequest.findUnique({ where: { id: docReq.id } });
+      expect(updated?.description).toBe("Updated description text");
+      expect(updated?.dueAt?.toISOString().slice(0, 10)).toBe("2027-01-15");
+    });
+  });
+
+  it("edit with neither description nor dueAt → 422", async () => {
+    await inRollbackTx(prisma, async (rawTx) => {
+      const tx = wrapTx(rawTx);
+      const staff = await createStaff(tx);
+      sessionState.user = { id: staff.id, email: staff.email, fullName: staff.fullName, role: "staff" };
+      const { PATCH } = await loadRoute(tx);
+      const res = await PATCH(
+        makeReq({ method: "PATCH", body: {} }),
+        makeParams({ id: "any" })
+      );
+      expect(res.status).toBe(422);
+    });
+  });
+
   it("cancel a fulfilled request → 400", async () => {
     await inRollbackTx(prisma, async (rawTx) => {
       const tx = wrapTx(rawTx);

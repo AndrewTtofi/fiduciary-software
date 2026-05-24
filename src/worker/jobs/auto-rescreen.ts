@@ -14,7 +14,7 @@ export async function autoRescreenTick() {
       party: { complianceFile: { riskRating: { not: null }, status: "cleared" } },
       OR: [
         { latestScreeningRun: { is: null } },
-        { latestScreeningRun: { ranAt: { lt: cutoff(365) } } }, // floor; refined per case below
+        { latestScreeningRun: { ranAt: { lt: cutoff(30) } } }, // use shortest cadence; refined per case below
       ],
     },
     include: {

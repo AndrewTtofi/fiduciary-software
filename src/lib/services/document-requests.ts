@@ -25,6 +25,27 @@ export async function createDocumentRequest(clientId: string, input: CreateReque
   return created;
 }
 
+export async function updateDocumentRequest(
+  requestId: string,
+  patch: { description?: string; dueAt?: string | null },
+  actorId: string,
+) {
+  const req = await prisma.documentRequest.findUnique({ where: { id: requestId }, select: { state: true, clientId: true } });
+  if (!req) throw new Error("Request not found");
+  if (req.state !== "open") throw new Error("Only open requests can be edited");
+
+  const data: { description?: string; dueAt?: Date | null } = {};
+  if (patch.description !== undefined) data.description = patch.description;
+  if (patch.dueAt !== undefined) data.dueAt = patch.dueAt ? new Date(patch.dueAt) : null;
+
+  await prisma.documentRequest.update({ where: { id: requestId }, data });
+  await logActivity({
+    entityType: "doc_request", entityId: requestId,
+    action: "doc_request.updated", actorId,
+    meta: { clientId: req.clientId, ...patch },
+  });
+}
+
 export async function cancelDocumentRequest(requestId: string, actorId: string) {
   const req = await prisma.documentRequest.findUnique({ where: { id: requestId }, select: { state: true, clientId: true } });
   if (!req) throw new Error("Request not found");
