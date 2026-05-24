@@ -21,7 +21,7 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
-      - run: npm ci --no-audit --no-fund
+      - run: npm ci --no-audit --no-fund --legacy-peer-deps
       - run: npx prisma generate
       - run: npx prisma validate
       - run: npm run lint
