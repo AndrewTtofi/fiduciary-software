@@ -7,7 +7,7 @@ type Hit = { id: string; matchedName: string; matchedTopics: string[]; reviewSta
 type KycCase = {
   id: string;
   state: "pending" | "in_progress" | "passed" | "blocked";
-  latestScreeningRun: null | { id: string; outcome: "clear" | "hits" | "error"; hitCount: number; hits: Hit[] };
+  latestScreeningRun: null | { id: string; outcome: "clear" | "hits" | "error"; hitCount: number; ranAt: string; hits: Hit[] };
 };
 type Party = {
   id: string;
@@ -16,6 +16,16 @@ type Party = {
   type: string;
   kycCase: KycCase | null;
 };
+type OverrideHistoryEntry = {
+  id: string;
+  createdAt: string;
+  actor: string;
+  before: string | null;
+  after: string | null;
+  reason: string | null;
+  escalated: boolean;
+};
+
 type File = {
   id: string;
   status: "open" | "in_review" | "cleared" | "blocked";
@@ -27,6 +37,7 @@ type File = {
   signedOffNote: string | null;
   parties: Party[];
   reviewTasks: { id: string; kind: string; dueAt: string | null; assignedTo: { fullName: string } | null }[];
+  riskOverrideHistory?: OverrideHistoryEntry[];
 };
 
 export function ComplianceDashboard({ file, parentLink }: { file: File; parentLink: string }) {
@@ -46,9 +57,10 @@ export function ComplianceDashboard({ file, parentLink }: { file: File; parentLi
         computedScore={file.riskComputedScore}
         rating={file.riskRating}
         overrideReason={file.riskOverrideReason}
+        history={file.riskOverrideHistory ?? []}
       />
 
-      <PartiesTable fileId={file.id} parties={file.parties} parentLink={parentLink} />
+      <PartiesTable fileId={file.id} parties={file.parties} parentLink={parentLink} riskRating={file.riskRating} />
 
       {file.reviewTasks.length > 0 && (
         <section className="bg-admin-surface border border-admin-border rounded-card p-6">
