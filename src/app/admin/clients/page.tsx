@@ -44,7 +44,7 @@ export default async function AdminClientsPage({ searchParams }: PageProps) {
   const partners = await prisma.user.findMany({ where: { role: "partner" }, select: { id: true, fullName: true } });
   const approvedProspects = await prisma.prospect.findMany({
     where: { status: ProspectStatus.approved, client: null },
-    include: { user: true },
+    include: { user: true, complianceFile: { select: { status: true } } },
     orderBy: { reviewedAt: "desc" },
   });
 
@@ -65,6 +65,7 @@ export default async function AdminClientsPage({ searchParams }: PageProps) {
           referenceNumber: p.referenceNumber,
           name: p.user.fullName,
           services: (Array.isArray(p.servicesSelected) ? (p.servicesSelected as string[]) : []),
+          compliance: p.complianceFile?.status ?? "open",
         }))} />
       </div>
 
