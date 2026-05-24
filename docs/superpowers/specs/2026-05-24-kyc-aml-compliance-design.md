@@ -239,9 +239,11 @@ Manual one-off screens always render all current hits in the UI regardless of de
 
 ### 5.3 Bands
 
-- 0–3 → `low`
-- 4–7 → `standard`
-- 8+ → `high`
+- 0–2 → `low`
+- 3–5 → `standard`
+- 6+ → `high`
+
+(Initial draft used 0–3 / 4–7 / 8+ but the test scenarios — e.g. "Cyprus crypto exchange with €1M+ turnover" — sum to ~6 with the current factor weights, and *should* be `high` per regulator expectation. The tightened bands keep the high-risk signal usable; if factor weights are later inflated, revisit.)
 
 ### 5.4 Hard overrides (bypass score)
 
