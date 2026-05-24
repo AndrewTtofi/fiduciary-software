@@ -37,43 +37,64 @@ export default async function AdminSubmissionsPage({ searchParams }: PageProps) 
 
   return (
     <AdminShell active="submissions" search={{ placeholder: "Search reference, name, email…" }}>
-      <div className="flex justify-between items-end mb-8 flex-wrap gap-4">
-        <div>
-          <h1 className="text-2xl font-bold">Submissions Queue</h1>
-          <p className="text-meta text-admin-muted mt-1">Review and manage incoming client applications.</p>
-        </div>
+      <div className="mb-12">
+        <div className="eyebrow eyebrow-line mb-5">Intake</div>
+        <h1
+          className="font-display text-[44px] leading-[1.05] tracking-[-0.025em] text-ink"
+          style={{ fontVariationSettings: '"opsz" 144, "SOFT" 60' }}
+        >
+          Submissions{" "}
+          <span
+            className="italic text-accent-deep"
+            style={{ fontVariationSettings: '"opsz" 144, "SOFT" 100, "WONK" 1', fontWeight: 300 }}
+          >
+            queue.
+          </span>
+        </h1>
+        <p className="mt-4 max-w-[60ch] text-[15px] leading-[1.7] text-muted">
+          Applications submitted by prospective clients via the onboarding wizard.
+          Review the file, exchange messages, run compliance, and convert once
+          approved.
+        </p>
       </div>
 
-      <div className="flex gap-3 mb-6 flex-wrap">
+      <hr className="hairline mb-8" />
+
+      {/* ── Filter chips ──────────────────────────────────────────── */}
+      <div className="flex gap-3 mb-10 flex-wrap">
         {[
           { key: "all", label: "All" },
           { key: "pending", label: "Pending" },
           { key: "needs_info", label: "Needs Info" },
           { key: "approved", label: "Approved" },
           { key: "rejected", label: "Rejected" },
-        ].map((f) => (
-          <Link
-            key={f.key}
-            href={f.key === "all" ? "/admin/submissions" : `/admin/submissions?status=${f.key}`}
-            className={`px-3 py-1.5 rounded-inner text-meta font-medium transition-colors ${
-              statusFilter === f.key ? "" : "bg-admin-surface text-admin-fg"
-            }`}
-            style={
-              statusFilter === f.key
-                ? { background: "var(--dark)", color: "white", borderColor: "var(--dark)" }
-                : { border: "1px solid var(--border)" }
-            }
-          >
-            {f.label}
-          </Link>
-        ))}
+        ].map((f) => {
+          const isActive = statusFilter === f.key;
+          return (
+            <Link
+              key={f.key}
+              href={f.key === "all" ? "/admin/submissions" : `/admin/submissions?status=${f.key}`}
+              className={`px-4 py-2 font-mono text-[10px] tracking-[0.22em] uppercase transition-all duration-500 ${
+                isActive ? "text-bone" : "text-muted hover:text-ink"
+              }`}
+              style={
+                isActive
+                  ? { background: "var(--ink)", border: "1px solid var(--ink)" }
+                  : { background: "transparent", border: "1px solid var(--admin-border)" }
+              }
+            >
+              {f.label}
+            </Link>
+          );
+        })}
       </div>
 
-      <div className="bg-admin-surface border border-admin-border rounded-elem overflow-hidden">
+      {/* ── Table ─────────────────────────────────────────────────── */}
+      <div className="surface overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[800px]">
+          <table className="w-full min-w-[840px]">
             <thead>
-              <tr style={{ background: "#FDFDFD" }}>
+              <tr style={{ borderBottom: "1px solid var(--admin-border)" }}>
                 <Th>Reference</Th>
                 <Th>Applicant</Th>
                 <Th>Services</Th>
@@ -85,7 +106,17 @@ export default async function AdminSubmissionsPage({ searchParams }: PageProps) 
             <tbody>
               {rows.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="p-12 text-center text-admin-muted text-meta">No submissions match this filter.</td>
+                  <td colSpan={6} className="p-16 text-center">
+                    <p
+                      className="font-display italic text-[24px] text-muted mb-2"
+                      style={{ fontVariationSettings: '"opsz" 144, "SOFT" 100, "WONK" 1', fontWeight: 300 }}
+                    >
+                      No submissions match.
+                    </p>
+                    <p className="text-[13px] text-muted">
+                      Try a different filter, or wait for the next application to arrive.
+                    </p>
+                  </td>
                 </tr>
               ) : rows.map((p) => {
                 const country = p.details.find((d) => d.fieldName === "residenceCountry")?.fieldValue
@@ -93,21 +124,43 @@ export default async function AdminSubmissionsPage({ searchParams }: PageProps) 
                               ?? "—";
                 const services = Array.isArray(p.servicesSelected) ? (p.servicesSelected as string[]) : [];
                 return (
-                  <tr key={p.id} className="border-t border-admin-border hover:bg-admin-bg cursor-pointer">
+                  <tr key={p.id} className="group" style={{ borderTop: "1px solid var(--admin-border)" }}>
                     <Td>
-                      <Link href={`/admin/submissions/${p.referenceNumber}`} className="font-mono text-meta text-admin-muted hover:text-accent">
+                      <Link
+                        href={`/admin/submissions/${p.referenceNumber}`}
+                        className="font-mono figure text-[12px] tracking-[0.04em] text-accent-deep link-gold"
+                      >
                         {p.referenceNumber}
                       </Link>
                     </Td>
                     <Td>
                       <Link href={`/admin/submissions/${p.referenceNumber}`} className="block">
-                        <span className="font-semibold block">{p.user.fullName}</span>
-                        <span className="text-[12px] text-admin-muted">{p.user.email}</span>
+                        <span className="font-display text-[17px] tracking-[-0.005em] text-ink leading-tight block group-hover:text-accent-deep transition-colors duration-500">
+                          {p.user.fullName}
+                        </span>
+                        <span className="block mt-0.5 font-mono text-[10px] tracking-[0.14em] uppercase text-muted">
+                          {p.user.email}
+                        </span>
                       </Link>
                     </Td>
-                    <Td>{services.map(pretty).join(", ") || "—"}</Td>
-                    <Td>{country}</Td>
-                    <Td>{p.createdAt.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}</Td>
+                    <Td>
+                      <div className="flex gap-1.5 flex-wrap">
+                        {services.length === 0 && <span className="text-muted">—</span>}
+                        {services.map((s) => (
+                          <span
+                            key={s}
+                            className="font-mono text-[9.5px] tracking-[0.14em] uppercase px-2 py-1"
+                            style={{ background: "var(--admin-bg)", color: "var(--admin-fg)", border: "1px solid var(--admin-border)" }}
+                          >
+                            {pretty(s)}
+                          </span>
+                        ))}
+                      </div>
+                    </Td>
+                    <Td className="font-mono figure text-[12px] uppercase tracking-[0.12em] text-muted">{country}</Td>
+                    <Td className="font-mono figure text-[12px] text-muted">
+                      {p.createdAt.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}
+                    </Td>
                     <Td>
                       <span className={`badge ${statusClass(p.status)}`}>{prettyStatus(p.status)}</span>
                     </Td>
@@ -123,10 +176,14 @@ export default async function AdminSubmissionsPage({ searchParams }: PageProps) 
 }
 
 function Th({ children }: { children: React.ReactNode }) {
-  return <th className="text-left p-4 text-[11px] uppercase tracking-widest text-admin-muted font-semibold">{children}</th>;
+  return (
+    <th className="text-left px-6 py-4 font-mono text-[9.5px] tracking-[0.24em] uppercase text-muted font-medium">
+      {children}
+    </th>
+  );
 }
-function Td({ children }: { children: React.ReactNode }) {
-  return <td className="p-4 text-meta align-middle">{children}</td>;
+function Td({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+  return <td className={`px-6 py-5 align-middle ${className}`}>{children}</td>;
 }
 function pretty(s: string) {
   return s.split("_").map((w) => w[0].toUpperCase() + w.slice(1)).join(" ");

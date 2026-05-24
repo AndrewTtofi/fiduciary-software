@@ -50,15 +50,28 @@ export default async function AdminClientsPage({ searchParams }: PageProps) {
 
   return (
     <AdminShell active="clients" search={{ placeholder: "Search clients, companies…" }}>
-      <div className="flex justify-between items-end mb-8 flex-wrap gap-4">
+      {/* ── Hero ─────────────────────────────────────────────────── */}
+      <div className="mb-12 flex justify-between items-end flex-wrap gap-6">
         <div>
-          <h1 className="font-display text-3xl flex items-center">
-            Active Clients
-            <span className="ml-3 font-mono text-meta px-2 py-0.5 rounded border border-admin-border text-admin-muted bg-admin-bg">
-              {rows.length}
+          <div className="eyebrow eyebrow-line mb-5">Engagements</div>
+          <h1
+            className="font-display text-[44px] leading-[1.05] tracking-[-0.025em] text-ink"
+            style={{ fontVariationSettings: '"opsz" 144, "SOFT" 60' }}
+          >
+            Active{" "}
+            <span
+              className="italic text-accent-deep"
+              style={{ fontVariationSettings: '"opsz" 144, "SOFT" 100, "WONK" 1', fontWeight: 300 }}
+            >
+              clients.
             </span>
           </h1>
-          <p className="text-meta text-admin-muted mt-1">Manage ongoing relationships and service delivery.</p>
+          <div className="mt-3 flex items-center gap-5 font-mono text-[10px] tracking-[0.22em] uppercase text-muted">
+            <span>{rows.length} on roster</span>
+            {approvedProspects.length > 0 && (
+              <span className="text-accent-deep">· {approvedProspects.length} awaiting conversion</span>
+            )}
+          </div>
         </div>
         <ConvertModal candidates={approvedProspects.map((p) => ({
           prospectId: p.id,
@@ -69,7 +82,10 @@ export default async function AdminClientsPage({ searchParams }: PageProps) {
         }))} />
       </div>
 
-      <div className="flex gap-4 mb-6 overflow-x-auto pb-1">
+      <hr className="hairline mb-8" />
+
+      {/* ── Filters ──────────────────────────────────────────────── */}
+      <div className="flex gap-4 mb-10 overflow-x-auto pb-1">
         <FilterSelect name="service" label="Service Type" current={serviceFilter} options={[
           { value: "all", label: "All Services" },
           { value: "company_formation", label: "Company Formation" },
@@ -91,54 +107,96 @@ export default async function AdminClientsPage({ searchParams }: PageProps) {
         ]} />
       </div>
 
-      <div className="bg-admin-surface border border-admin-border rounded-elem overflow-hidden">
+      {/* ── Table ────────────────────────────────────────────────── */}
+      <div className="surface overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full min-w-[1000px]">
             <thead>
-              <tr style={{ background: "#FDFDFD" }}>
-                <Th>Client Name</Th>
-                <Th>Services Engaged</Th>
-                <Th>Assigned Partner</Th>
-                <Th>Client Since</Th>
-                <Th>Next Key Date</Th>
+              <tr style={{ borderBottom: "1px solid var(--admin-border)" }}>
+                <Th>Client</Th>
+                <Th>Services</Th>
+                <Th>Partner</Th>
+                <Th>Since</Th>
+                <Th>Next key date</Th>
                 <Th>Status</Th>
               </tr>
             </thead>
             <tbody>
               {rows.length === 0 ? (
-                <tr><td colSpan={6} className="p-12 text-center text-admin-muted text-meta">No clients yet.</td></tr>
+                <tr>
+                  <td colSpan={6} className="p-16 text-center">
+                    <p
+                      className="font-display italic text-[24px] text-muted mb-2"
+                      style={{ fontVariationSettings: '"opsz" 144, "SOFT" 100, "WONK" 1', fontWeight: 300 }}
+                    >
+                      No clients yet.
+                    </p>
+                    <p className="text-[13px] text-muted">
+                      Convert an approved submission to add your first engagement.
+                    </p>
+                  </td>
+                </tr>
               ) : rows.map((c) => {
                 const partnerName = c.services.find((s) => s.assignedPartner)?.assignedPartner?.fullName ?? "—";
                 const nextKey = c.keyDates[0];
                 return (
-                  <tr key={c.id} className="border-t border-admin-border hover:bg-admin-bg cursor-pointer">
+                  <tr
+                    key={c.id}
+                    className="group"
+                    style={{ borderTop: "1px solid var(--admin-border)" }}
+                  >
                     <Td>
                       <Link href={`/admin/clients/${c.id}`} className="block">
-                        <span className="font-semibold block text-dark">{c.user.fullName}</span>
-                        <span className="text-[12px] text-admin-muted">{c.companyName ?? "—"}</span>
+                        <span className="font-display text-[17px] tracking-[-0.005em] text-ink leading-tight block group-hover:text-accent-deep transition-colors duration-500">
+                          {c.user.fullName}
+                        </span>
+                        <span className="block mt-0.5 font-mono text-[10px] tracking-[0.16em] uppercase text-muted">
+                          {c.companyName ?? "—"}
+                        </span>
                       </Link>
                     </Td>
                     <Td>
-                      <div className="flex gap-1 flex-wrap">
+                      <div className="flex gap-1.5 flex-wrap">
                         {c.services.map((s) => (
-                          <span key={s.id} className="text-[11px] rounded-[3px] px-1.5 py-0.5"
-                                style={{ background: "#F3F4F6", color: "#4B5563" }}>{shortService(s.serviceType)}</span>
+                          <span
+                            key={s.id}
+                            className="font-mono text-[9.5px] tracking-[0.14em] uppercase px-2 py-1"
+                            style={{
+                              background: "var(--admin-bg)",
+                              color: "var(--admin-fg)",
+                              border: "1px solid var(--admin-border)",
+                            }}
+                          >
+                            {shortService(s.serviceType)}
+                          </span>
                         ))}
                       </div>
                     </Td>
-                    <Td>{partnerName}</Td>
-                    <Td className="font-mono text-meta text-admin-muted">{c.createdAt.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}</Td>
+                    <Td className="text-[13px] text-ink">{partnerName}</Td>
+                    <Td className="font-mono figure text-[12px] text-muted">
+                      {c.createdAt.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}
+                    </Td>
                     <Td>
                       {nextKey ? (
-                        <>
-                          <div className="text-meta">{nextKey.description}</div>
-                          <div className={`font-mono text-meta ${nextKey.status === "overdue" ? "text-[#DC2626]" : "text-accent font-semibold"}`}>
-                            {nextKey.status === "overdue" ? "Overdue" : nextKey.dueDate.toLocaleDateString("en-GB", { day: "2-digit", month: "short" })}
+                        <div>
+                          <div className="text-[13px] text-ink leading-tight">{nextKey.description}</div>
+                          <div
+                            className={`font-mono figure text-[11px] tracking-[0.06em] mt-0.5 ${
+                              nextKey.status === "overdue" ? "text-oxblood" : "text-accent-deep"
+                            }`}
+                          >
+                            {nextKey.status === "overdue"
+                              ? "OVERDUE"
+                              : nextKey.dueDate.toLocaleDateString("en-GB", { day: "2-digit", month: "short" })}
                           </div>
-                        </>
-                      ) : <span className="text-admin-muted">—</span>}
+                        </div>
+                      ) : <span className="text-muted">—</span>}
                     </Td>
-                    <Td><span className={`badge ${clientStatusClass(c.status)}`}>{prettyClientStatus(c.status)}</span></Td>
+                    <Td>
+                      <span className={`badge ${clientStatusClass(c.status)}`}>
+                        {prettyClientStatus(c.status)}
+                      </span>
+                    </Td>
                   </tr>
                 );
               })}
@@ -151,10 +209,14 @@ export default async function AdminClientsPage({ searchParams }: PageProps) {
 }
 
 function Th({ children }: { children: React.ReactNode }) {
-  return <th className="text-left p-4 text-[11px] uppercase tracking-widest text-admin-muted font-semibold whitespace-nowrap">{children}</th>;
+  return (
+    <th className="text-left px-6 py-4 font-mono text-[9.5px] tracking-[0.24em] uppercase text-muted whitespace-nowrap font-medium">
+      {children}
+    </th>
+  );
 }
 function Td({ children, className = "" }: { children: React.ReactNode; className?: string }) {
-  return <td className={`p-4 align-middle text-meta ${className}`}>{children}</td>;
+  return <td className={`px-6 py-5 align-middle ${className}`}>{children}</td>;
 }
 function shortService(s: string) {
   return s === "company_formation" ? "Formation"

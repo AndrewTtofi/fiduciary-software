@@ -1,28 +1,45 @@
 import type { Metadata } from "next";
+import { Fraunces, Manrope, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
+
+const fraunces = Fraunces({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-display",
+  axes: ["SOFT", "WONK", "opsz"],
+  style: ["normal", "italic"],
+});
+
+const manrope = Manrope({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-body",
+});
+
+const plexMono = IBM_Plex_Mono({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-mono",
+  weight: ["400", "500"],
+});
 
 export const metadata: Metadata = {
   title: {
-    default: "ORO Corporate Services · Your Gateway to Business in Cyprus",
-    template: "%s · ORO Corporate Services",
+    default: "ORO Corporate Services · Private Counsel · Cyprus",
+    template: "%s · ORO",
   },
   description:
-    "Seamless company formation, tax residency, and corporate solutions for international entrepreneurs and high-net-worth individuals.",
+    "Private corporate counsel for international principals. Discreet incorporation, fiduciary administration, tax residency, and family-office services from Cyprus.",
   icons: { icon: "/favicon.ico" },
   robots: { index: true, follow: true },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
-        <link
-          rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=IBM+Plex+Mono:wght@400;500&display=swap"
-        />
-      </head>
+    <html
+      lang="en"
+      className={`${fraunces.variable} ${manrope.variable} ${plexMono.variable}`}
+    >
       <body>{children}</body>
     </html>
   );

@@ -1,12 +1,19 @@
 import Link from "next/link";
 
 export function Logo({ href = "/", size = "md" }: { href?: string; size?: "sm" | "md" | "lg" }) {
-  const markSize = size === "lg" ? "w-9 h-9 text-lg" : size === "sm" ? "w-7 h-7 text-sm" : "w-8 h-8 text-base";
-  const wordSize = size === "lg" ? "text-2xl" : size === "sm" ? "text-lg" : "text-xl";
+  const wordSize = size === "lg" ? "text-[32px]" : size === "sm" ? "text-[18px]" : "text-[22px]";
+  const taglineSize = size === "lg" ? "text-[10px]" : "text-[9px]";
   return (
-    <Link href={href} className="inline-flex items-center gap-2.5 font-display font-semibold">
-      <span className={`grid place-items-center rounded bg-dark text-accent ${markSize}`}>O</span>
-      <span className={wordSize}>ORO CORPORATE</span>
+    <Link href={href} className="group inline-flex items-baseline gap-3">
+      <span
+        className={`font-display ${wordSize} leading-none tracking-[-0.025em] text-ink transition-colors duration-500 group-hover:text-accent-deep`}
+        style={{ fontVariationSettings: '"opsz" 144, "SOFT" 50', fontWeight: 400 }}
+      >
+        ORO
+      </span>
+      <span className={`font-mono ${taglineSize} tracking-[0.28em] uppercase text-muted hidden sm:inline`}>
+        Private Counsel
+      </span>
     </Link>
   );
 }

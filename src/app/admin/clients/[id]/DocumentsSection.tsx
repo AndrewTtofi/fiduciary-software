@@ -24,11 +24,13 @@ export function DocumentsSection({
     return taxonomy.find((t) => t.key === key)?.label ?? key;
   };
 
-  const folderKeys = [
-    BUCKET_KYC,
-    ...services.map((s) => s.serviceType),
-    BUCKET_CORRESPONDENCE,
-  ];
+  const folderKeys = Array.from(
+    new Set<string>([
+      BUCKET_KYC,
+      ...services.map((s) => s.serviceType),
+      BUCKET_CORRESPONDENCE,
+    ]),
+  );
 
   const docsByFolder = new Map<string, DocRowProps[]>();
   for (const d of documents) {

@@ -1,101 +1,132 @@
 import type { Config } from "tailwindcss";
 
 /**
- * Two-palette design system. Tokens come from the design export under ORO.zip.
- * Admin chrome  → cool gray  (entry: admin-client-profile.html)
- * Client chrome → warm off-white (8/12 exported screens)
- * Both share gold accent #C8A45A and near-black #0A0A0A.
+ * ORO — Mediterranean private-bank design system.
+ *
+ * Palette: warm ivory paper, ink, brushed champagne gold, taupe shadow,
+ * oxblood for danger. Distinct admin/client/marketing chromes but all
+ * share the same tonal family — refined rather than utilitarian.
+ *
+ * Typography: Fraunces (variable serif, optical sizing) for display;
+ * Manrope for body; IBM Plex Mono for figures and metadata.
  */
 const config: Config = {
   content: ["./src/**/*.{ts,tsx}"],
   theme: {
     container: {
       center: true,
-      padding: "40px",
+      padding: "48px",
       screens: {
         sm: "640px",
         md: "768px",
         lg: "1024px",
-        xl: "1180px",
-        "2xl": "1440px",
+        xl: "1240px",
+        "2xl": "1480px",
       },
     },
     extend: {
       colors: {
-        // Shared
-        accent: "#C8A45A",
-        dark: "#0A0A0A",
+        // Shared tonal anchors
+        accent: "#B08D3E",         // brushed champagne gold
+        "accent-deep": "#8A6B26",
+        "accent-soft": "#E9DDBE",
+        ink: "#1A1612",            // warm-black, never #000
+        bone: "#FBF8F2",           // paper, never #FFF
+        taupe: "#6B6256",
+        oxblood: "#7A1F1F",
+
+        // Legacy shared name kept for backwards compat
+        dark: "#1A1612",
 
         // Admin chrome
         admin: {
-          bg: "#F9FAFB",
-          surface: "#FFFFFF",
-          fg: "#111827",
-          muted: "#6B7280",
-          border: "#E5E7EB",
+          bg: "#F2EDE4",
+          surface: "#FBF8F2",
+          fg: "#1A1612",
+          muted: "#7A7060",
+          border: "#E5DDC9",
         },
 
         // Client / marketing chrome
         client: {
-          bg: "#FAF8F5",
-          surface: "#FFFFFF",
-          fg: "#2D2D2D",
-          muted: "#666666",
-          border: "#E8E4DF",
+          bg: "#F5EFE3",
+          surface: "#FBF8F2",
+          fg: "#1A1612",
+          muted: "#7A7060",
+          border: "#E5DDC9",
         },
 
-        // Status palette (same in both)
+        // Status — muted, never saturated
         status: {
-          "pending-bg": "#FEF3C7",
-          "pending-fg": "#92400E",
-          "approved-bg": "#D1FAE5",
-          "approved-fg": "#065F46",
-          "info-bg": "#DBEAFE",
-          "info-fg": "#1E40AF",
-          "done-bg": "#F3F4F6",
-          "done-fg": "#374151",
-          danger: "#DC2626",
+          "pending-bg": "#F1E4C5",
+          "pending-fg": "#6E4F12",
+          "approved-bg": "#D9E1CC",
+          "approved-fg": "#3A4D2A",
+          "info-bg": "#D9E1E5",
+          "info-fg": "#2A3D49",
+          "done-bg": "#E8E2D5",
+          "done-fg": "#4B4338",
+          danger: "#7A1F1F",
         },
       },
       fontFamily: {
-        display: ["'Playfair Display'", "serif"],
-        body: ["'Plus Jakarta Sans'", "system-ui", "sans-serif"],
-        mono: ["'IBM Plex Mono'", "monospace"],
+        display: ["var(--font-display)", "'Cormorant Garamond'", "Georgia", "serif"],
+        body: ["var(--font-body)", "system-ui", "sans-serif"],
+        mono: ["var(--font-mono)", "ui-monospace", "monospace"],
       },
       fontSize: {
-        h1: ["clamp(48px, 6vw, 84px)", { lineHeight: "1.05", letterSpacing: "-0.02em" }],
-        h2: ["clamp(36px, 4vw, 56px)", { lineHeight: "1.15", letterSpacing: "-0.01em" }],
-        h3: ["24px", { lineHeight: "1.25" }],
-        lead: ["20px", { lineHeight: "1.5" }],
-        body: ["17px", { lineHeight: "1.6" }],
-        meta: ["14px", { lineHeight: "1.5" }],
+        h1: ["clamp(56px, 7vw, 104px)", { lineHeight: "0.98", letterSpacing: "-0.035em" }],
+        h2: ["clamp(40px, 4.5vw, 64px)", { lineHeight: "1.08", letterSpacing: "-0.025em" }],
+        h3: ["28px", { lineHeight: "1.2", letterSpacing: "-0.015em" }],
+        lead: ["20px", { lineHeight: "1.55", letterSpacing: "-0.005em" }],
+        body: ["16px", { lineHeight: "1.65" }],
+        meta: ["13px", { lineHeight: "1.5", letterSpacing: "0.01em" }],
+        eyebrow: ["11px", { lineHeight: "1.4", letterSpacing: "0.22em" }],
       },
       borderRadius: {
-        card: "12px",
-        elem: "8px",
-        inner: "6px",
+        card: "2px",
+        elem: "2px",
+        inner: "1px",
+        pill: "999px",
       },
       boxShadow: {
-        "card-hover": "0 20px 40px rgba(0,0,0,0.05)",
-        "card-soft": "0 4px 20px rgba(0,0,0,0.03)",
+        "card-soft": "0 1px 0 rgba(229,221,201,0.6), 0 24px 48px -32px rgba(60,40,16,0.18)",
+        "card-hover": "0 1px 0 rgba(229,221,201,0.8), 0 40px 80px -28px rgba(60,40,16,0.22)",
+        "inset-line": "inset 0 -1px 0 rgba(229,221,201,1)",
+        gold: "0 0 0 1px rgba(176,141,62,0.4), 0 8px 32px -8px rgba(176,141,62,0.35)",
       },
       transitionTimingFunction: {
-        "out-expo": "cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+        "out-expo": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "in-out-luxe": "cubic-bezier(0.65, 0, 0.35, 1)",
+      },
+      transitionDuration: {
+        "400": "400ms",
+        "600": "600ms",
+        "900": "900ms",
       },
       keyframes: {
-        "pulse-accent": {
-          "0%": { boxShadow: "0 0 0 0 rgba(200,164,90,0.4)" },
-          "70%": { boxShadow: "0 0 0 10px rgba(200,164,90,0)" },
-          "100%": { boxShadow: "0 0 0 0 rgba(200,164,90,0)" },
+        "fade-rise": {
+          from: { opacity: "0", transform: "translateY(12px)" },
+          to: { opacity: "1", transform: "translateY(0)" },
         },
-        "scale-in": {
-          from: { transform: "scale(0)" },
-          to: { transform: "scale(1)" },
+        "fade-in": {
+          from: { opacity: "0" },
+          to: { opacity: "1" },
+        },
+        "draw-line": {
+          from: { transform: "scaleX(0)" },
+          to: { transform: "scaleX(1)" },
+        },
+        "shimmer": {
+          "0%": { backgroundPosition: "-200% 0" },
+          "100%": { backgroundPosition: "200% 0" },
         },
       },
       animation: {
-        "pulse-accent": "pulse-accent 2s infinite",
-        "scale-in": "scale-in 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+        "fade-rise": "fade-rise 900ms cubic-bezier(0.16, 1, 0.3, 1) both",
+        "fade-in": "fade-in 600ms cubic-bezier(0.16, 1, 0.3, 1) both",
+        "draw-line": "draw-line 700ms cubic-bezier(0.65, 0, 0.35, 1) both",
+        "shimmer": "shimmer 8s linear infinite",
       },
     },
   },

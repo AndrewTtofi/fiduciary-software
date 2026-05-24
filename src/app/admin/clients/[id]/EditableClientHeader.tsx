@@ -10,18 +10,24 @@ type Profile = {
   registrationNumber: string | null;
   vatNumber: string | null;
   taxResidency: string | null;
-  engagementLetterDate: string | null; // ISO
+  engagementLetterDate: string | null;
   phone: string | null;
 };
 
 export function EditableClientHeader({
-  clientId, initials, name, reference, since, email, initial,
+  clientId,
+  initials,
+  name,
+  reference,
+  since,
+  email,
+  initial,
 }: {
   clientId: string;
   initials: string;
   name: string;
   reference: string;
-  since: string; // ISO
+  since: string;
   email: string;
   initial: Profile;
 }) {
@@ -35,87 +41,179 @@ export function EditableClientHeader({
       const res = await fetch(`/api/admin/clients/${clientId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          companyName: draft.companyName,
-          country: draft.country,
-          address: draft.address,
-          registrationNumber: draft.registrationNumber,
-          vatNumber: draft.vatNumber,
-          taxResidency: draft.taxResidency,
-          engagementLetterDate: draft.engagementLetterDate,
-          phone: draft.phone,
-        }),
+        body: JSON.stringify(draft),
       });
-      if (res.ok) { setEditing(false); router.refresh(); }
-      else { const j = await res.json().catch(() => ({})); alert(j.error ?? "Save failed"); }
+      if (res.ok) {
+        setEditing(false);
+        router.refresh();
+      } else {
+        const j = await res.json().catch(() => ({}));
+        alert(j.error ?? "Save failed");
+      }
     });
   }
 
+  const sinceFormatted = new Date(since).toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  });
+
   return (
-    <section className="bg-admin-surface border border-admin-border rounded-card p-6 mb-6">
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex gap-4 items-start">
-          <div className="w-14 h-14 rounded-full grid place-items-center text-meta font-bold bg-accent text-dark">{initials}</div>
-          <div>
-            <h1 className="font-display text-2xl">{name}</h1>
-            <p className="text-meta text-admin-muted">
-              {draft.companyName ?? "—"} · Ref {reference} · Client since {new Date(since).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}
-            </p>
-            <p className="text-meta text-admin-muted mt-1">
-              <a href={`mailto:${email}`} className="underline">{email}</a> · {draft.phone ?? "—"}
-            </p>
+    <section className="mb-10">
+      <div className="grid grid-cols-1 lg:grid-cols-[auto_1fr_auto] gap-8 items-start">
+        <div className="relative">
+          <div
+            className="w-20 h-20 grid place-items-center font-mono text-[13px] tracking-[0.16em] uppercase"
+            style={{
+              background: "var(--ink)",
+              color: "var(--accent)",
+              borderRadius: "999px",
+              boxShadow: "0 0 0 1px rgba(176,141,62,0.5), 0 14px 32px -10px rgba(60,40,16,0.4)",
+            }}
+          >
+            {initials}
           </div>
+          <div
+            aria-hidden
+            className="absolute inset-[-6px] rounded-full pointer-events-none"
+            style={{ boxShadow: "0 0 0 1px rgba(176,141,62,0.2)" }}
+          />
         </div>
-        <button type="button" onClick={() => setEditing((v) => !v)} className="btn px-3 py-1.5 text-meta">
-          {editing ? "Cancel" : "Edit"}
-        </button>
+
+        <div className="min-w-0">
+          <div className="eyebrow mb-3">Engagement</div>
+          <h1
+            className="font-display text-[clamp(36px,4vw,52px)] leading-[1.02] tracking-[-0.025em] text-ink"
+            style={{ fontVariationSettings: '"opsz" 144, "SOFT" 60' }}
+          >
+            {name}
+          </h1>
+          {draft.companyName && (
+            <div
+              className="mt-1.5 font-display italic text-[22px] text-accent-deep"
+              style={{ fontVariationSettings: '"opsz" 144, "SOFT" 100, "WONK" 1', fontWeight: 300 }}
+            >
+              {draft.companyName}
+            </div>
+          )}
+
+          <dl className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-x-10 gap-y-4">
+            <Fact label="Reference" value={reference} mono />
+            <Fact label="Client since" value={sinceFormatted} />
+            <Fact label="Email" value={email} href={`mailto:${email}`} />
+            <Fact label="Telephone" value={draft.phone ?? "—"} mono />
+          </dl>
+        </div>
+
+        <div className="flex justify-end">
+          <button
+            type="button"
+            onClick={() => setEditing((v) => !v)}
+            className="btn btn-outline"
+          >
+            {editing ? "Cancel" : "Edit profile"}
+          </button>
+        </div>
       </div>
 
-      {editing && (
-        <div className="mt-6 grid gap-3 md:grid-cols-2">
-          <Field label="Company name"><input value={draft.companyName ?? ""} onChange={(e) => setDraft({ ...draft, companyName: e.target.value || null })} className="input" /></Field>
-          <Field label="Phone"><input value={draft.phone ?? ""} onChange={(e) => setDraft({ ...draft, phone: e.target.value || null })} className="input" /></Field>
-          <Field label="Country (ISO, e.g. CY)"><input maxLength={2} value={draft.country ?? ""} onChange={(e) => setDraft({ ...draft, country: e.target.value.toUpperCase() || null })} className="input" /></Field>
-          <Field label="Tax residency (ISO)"><input maxLength={2} value={draft.taxResidency ?? ""} onChange={(e) => setDraft({ ...draft, taxResidency: e.target.value.toUpperCase() || null })} className="input" /></Field>
-          <Field label="Registered address" className="md:col-span-2"><textarea value={draft.address ?? ""} onChange={(e) => setDraft({ ...draft, address: e.target.value || null })} rows={2} className="input" /></Field>
-          <Field label="Cyprus HE number"><input value={draft.registrationNumber ?? ""} onChange={(e) => setDraft({ ...draft, registrationNumber: e.target.value || null })} className="input" /></Field>
-          <Field label="VAT number"><input value={draft.vatNumber ?? ""} onChange={(e) => setDraft({ ...draft, vatNumber: e.target.value || null })} className="input" /></Field>
-          <Field label="Engagement letter date"><input type="date" value={draft.engagementLetterDate?.slice(0, 10) ?? ""} onChange={(e) => setDraft({ ...draft, engagementLetterDate: e.target.value || null })} className="input" /></Field>
-          <div className="md:col-span-2 flex gap-2 justify-end mt-2">
-            <button type="button" onClick={() => { setDraft(initial); setEditing(false); }} className="btn px-4 py-2">Cancel</button>
-            <button type="button" onClick={save} disabled={pending} className="btn btn-primary px-4 py-2 disabled:opacity-50">{pending ? "Saving…" : "Save"}</button>
+      <hr className="hairline-gold my-8" />
+
+      {editing ? (
+        <div className="grid gap-5 md:grid-cols-2 surface p-7">
+          <FieldEdit label="Company name">
+            <input value={draft.companyName ?? ""} onChange={(e) => setDraft({ ...draft, companyName: e.target.value || null })} className="input" />
+          </FieldEdit>
+          <FieldEdit label="Telephone">
+            <input value={draft.phone ?? ""} onChange={(e) => setDraft({ ...draft, phone: e.target.value || null })} className="input figure" />
+          </FieldEdit>
+          <FieldEdit label="Country">
+            <input maxLength={2} value={draft.country ?? ""} onChange={(e) => setDraft({ ...draft, country: e.target.value.toUpperCase() || null })} className="input figure" placeholder="ISO-2 (e.g. CY)" />
+          </FieldEdit>
+          <FieldEdit label="Tax residency">
+            <input maxLength={2} value={draft.taxResidency ?? ""} onChange={(e) => setDraft({ ...draft, taxResidency: e.target.value.toUpperCase() || null })} className="input figure" placeholder="ISO-2 (e.g. CY)" />
+          </FieldEdit>
+          <FieldEdit label="Registered address" className="md:col-span-2">
+            <textarea value={draft.address ?? ""} onChange={(e) => setDraft({ ...draft, address: e.target.value || null })} rows={2} className="input" />
+          </FieldEdit>
+          <FieldEdit label="Cyprus HE number">
+            <input value={draft.registrationNumber ?? ""} onChange={(e) => setDraft({ ...draft, registrationNumber: e.target.value || null })} className="input figure" />
+          </FieldEdit>
+          <FieldEdit label="VAT number">
+            <input value={draft.vatNumber ?? ""} onChange={(e) => setDraft({ ...draft, vatNumber: e.target.value || null })} className="input figure" />
+          </FieldEdit>
+          <FieldEdit label="Engagement letter date" className="md:col-span-2">
+            <input type="date" value={draft.engagementLetterDate?.slice(0, 10) ?? ""} onChange={(e) => setDraft({ ...draft, engagementLetterDate: e.target.value || null })} className="input figure" />
+          </FieldEdit>
+          <div className="md:col-span-2 flex gap-3 justify-end mt-2">
+            <button type="button" onClick={() => { setDraft(initial); setEditing(false); }} className="btn btn-outline">
+              Discard
+            </button>
+            <button type="button" onClick={save} disabled={pending} className="btn btn-primary disabled:opacity-40">
+              {pending ? "Saving…" : "Save changes"}
+            </button>
           </div>
         </div>
-      )}
-
-      {!editing && (
-        <div className="mt-6 grid gap-2 md:grid-cols-3 text-meta">
-          <Pair label="Country" value={draft.country} />
-          <Pair label="Tax residency" value={draft.taxResidency} />
-          <Pair label="HE number" value={draft.registrationNumber} />
-          <Pair label="VAT number" value={draft.vatNumber} />
-          <Pair label="Engagement letter" value={draft.engagementLetterDate ? new Date(draft.engagementLetterDate).toLocaleDateString("en-GB") : null} />
-          <Pair label="Address" value={draft.address} className="md:col-span-3" />
-        </div>
+      ) : (
+        <dl className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-x-10 gap-y-6">
+          <Fact label="Country" value={draft.country ?? "—"} mono />
+          <Fact label="Tax residency" value={draft.taxResidency ?? "—"} mono />
+          <Fact label="HE number" value={draft.registrationNumber ?? "—"} mono />
+          <Fact label="VAT number" value={draft.vatNumber ?? "—"} mono />
+          <Fact
+            label="Engagement letter"
+            value={draft.engagementLetterDate ? new Date(draft.engagementLetterDate).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) : "—"}
+          />
+          <Fact label="Address" value={draft.address ?? "—"} className="md:col-span-2 lg:col-span-1" />
+        </dl>
       )}
     </section>
   );
 }
 
-function Field({ label, children, className = "" }: { label: string; children: React.ReactNode; className?: string }) {
+function Fact({
+  label,
+  value,
+  mono,
+  href,
+  className = "",
+}: {
+  label: string;
+  value: string;
+  mono?: boolean;
+  href?: string;
+  className?: string;
+}) {
+  const valueNode = (
+    <span className={`block ${mono ? "font-mono figure" : "font-body"} text-[14px] text-ink leading-snug truncate`} title={value}>
+      {value}
+    </span>
+  );
   return (
-    <label className={`flex flex-col gap-1 ${className}`}>
-      <span className="text-[11px] uppercase tracking-widest text-admin-muted font-semibold">{label}</span>
-      {children}
-    </label>
+    <div className={className}>
+      <dt className="font-mono text-[9.5px] tracking-[0.24em] uppercase text-muted mb-1.5">
+        {label}
+      </dt>
+      <dd className="text-ink">
+        {href ? <a href={href} className="link-gold">{valueNode}</a> : valueNode}
+      </dd>
+    </div>
   );
 }
 
-function Pair({ label, value, className = "" }: { label: string; value: string | null; className?: string }) {
+function FieldEdit({
+  label,
+  children,
+  className = "",
+}: {
+  label: string;
+  children: React.ReactNode;
+  className?: string;
+}) {
   return (
-    <div className={className}>
-      <div className="text-[11px] uppercase tracking-widest text-admin-muted">{label}</div>
-      <div className="font-mono">{value ?? "—"}</div>
-    </div>
+    <label className={`flex flex-col gap-2 ${className}`}>
+      <span className="font-mono text-[10px] tracking-[0.22em] uppercase text-muted">{label}</span>
+      {children}
+    </label>
   );
 }
