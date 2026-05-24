@@ -10,6 +10,19 @@ This project follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) lo
 
 ## Unreleased
 
+### Added — Bucket-A polish (PR #4)
+- Hit-review status pill per party on the compliance file dashboard: shows "N to review" in red when unreviewed hits exist.
+- "Last screened / next due" per-party indicator with risk-band cadence math (high=30d, standard=90d, low=365d); turns red when overdue.
+- Doc purpose dropdown on admin upload (replaces silent default); staff can pick passport / proof_of_address / source_of_funds / other before choosing a file.
+- "No-delete" audit note on the client documents page.
+- Edit DocumentRequest before fulfilment — modal on `/admin/clients/[id]/request-docs` pre-filled with description + dueAt; calls PATCH route.
+- Risk-override history block on the compliance RiskPanel (collapsible `<details>`, last 10 overrides).
+
+### Fixed — Bucket-A bug fixes
+- `assign-partner` route now rejects non-partner target users with 400 (was accepting any UUID).
+- `auto-rescreen` outer query widened from 365d to 30d so high/standard-band cases are no longer excluded from the per-tick sweep.
+- `ActivityAction` union gains `doc_request.updated`.
+
 ### Added — Test hardening (PR #4)
 - Vitest projects split into `unit` (fast, mocked Prisma) and `integration` (real Postgres via @testcontainers/postgresql).
 - ~270 new tests across API routes (~30 routes, 4-6 tests each), worker jobs (auto-rescreen, periodic-review, backfill-compliance), service-layer (screening, client-portal migrated to real DB).
