@@ -36,6 +36,7 @@ const providers = [
       if (!parsed.success) return null;
       const user = await prisma.user.findUnique({ where: { email: parsed.data.email.toLowerCase() } });
       if (!user || !user.passwordHash) return null;
+      if (user.deactivatedAt) return null;
       const ok = await argon2.verify(user.passwordHash, parsed.data.password);
       if (!ok) return null;
       if (!user.emailVerified) {
