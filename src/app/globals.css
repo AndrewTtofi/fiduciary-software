@@ -409,7 +409,10 @@
   .acc { border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface); overflow: hidden; }
   .acc-item { border-bottom: 1px solid var(--border); }
   .acc-item:last-child { border-bottom: 0; }
-  .acc-q { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 20px; cursor: pointer; font-weight: 500; font-size: 1rem; }
+  .acc-q { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 20px; cursor: pointer; font-weight: 500; font-size: 1rem; list-style: none; }
+  .acc-q::-webkit-details-marker { display: none; }
+  .acc-q svg { width: 18px; height: 18px; color: var(--muted); flex: none; transition: transform var(--dur-base) var(--ease-out); }
+  details[open] .acc-q svg { transform: rotate(180deg); }
   .acc-a { padding: 0 20px 20px; color: var(--muted); font-size: 0.875rem; line-height: 1.6; }
 }
 

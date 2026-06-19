@@ -10,30 +10,26 @@ export default function ServicesMarketingPage() {
     <div className="shell-marketing">
       <TopNav />
       <main>
-        <section className="py-20 lg:py-24">
-          <div className="container max-w-[1000px]">
-            <p className="eyebrow mb-6">Our Expertise</p>
-            <h1 className="text-h2 font-display mb-6">Comprehensive Solutions for International Founders</h1>
-            <p className="text-lead text-muted max-w-[60ch] mb-16">
-              From your first Cyprus company to ongoing tax and compliance, ORO delivers the
-              full stack of fiduciary services under one roof.
-            </p>
-            <div className="grid gap-8 md:grid-cols-2">
+        <section className="section">
+          <div className="mx-auto max-w-[1200px]">
+            <div className="sec-head">
+              <div className="eyebrow">OUR EXPERTISE</div>
+              <h2>Comprehensive solutions for international founders.</h2>
+              <p>From your first Cyprus company to ongoing tax and compliance, ORO delivers the full stack of fiduciary services under one roof.</p>
+            </div>
+
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {SERVICES.map((s) => (
-                <article key={s.key} className="surface rounded-card p-8 flex gap-6">
-                  <div className="w-12 h-12 shrink-0 grid place-items-center rounded-elem bg-dark text-accent">
-                    <span className="w-6 h-6 block">{ServiceIcons[s.key]}</span>
-                  </div>
-                  <div>
-                    <h2 className="text-h3 mb-2">{s.title}</h2>
-                    <p className="text-muted">{s.longBlurb}</p>
-                  </div>
-                </article>
+                <div key={s.key} className="svc-card">
+                  <div className="svc-ic">{ServiceIcons[s.key]}</div>
+                  <h3>{s.title}</h3>
+                  <p>{s.longBlurb}</p>
+                </div>
               ))}
             </div>
 
-            <div className="mt-20 text-center">
-              <Link href="/login" className="btn btn-primary px-8 py-4">Begin your application</Link>
+            <div className="mt-12 flex justify-center">
+              <Link href="/login" className="btn btn-primary btn-lg">Begin your application →</Link>
             </div>
           </div>
         </section>
