@@ -10,6 +10,10 @@ This project follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) lo
 
 ## Unreleased
 
+### Changed — "Quiet Authority" redesign (foundation)
+- Re-skinned the design system from the warm "private-bank" serif aesthetic to the platform prototype: indigo brand (`#2E4A8B`) + champagne-gold accent (`#C9A86A`), cool light-gray surfaces, navy ink, **system sans** (dropped Fraunces serif), rounded 6–8px corners, navy-tinted shadows.
+- `tailwind.config.ts` + `globals.css` retoken (names kept stable so utilities re-skin without edits); added prototype component classes (card/kpi/table/timeline/bubble/note/chip/avatar). Primary buttons now brand-blue; gold reserved as accent.
+
 ### Added — Self-hosted deploy pipeline
 - `deploy/deploy-oro.sh` — idempotent ORO deploy (pulls prebuilt GHCR image, self-signed HTTPS on :443 + HTTP on :80, persistent `.env`, proxy re-resolve).
 - `.github/workflows/deploy.yml` — `deploy-oro` workflow on a self-hosted runner (`oro-ci`); SSHes to the ORO host over the private network and runs the deploy. Triggers on CI success on `main` + manual dispatch.
