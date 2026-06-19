@@ -3,166 +3,84 @@ import { signOut } from "@/lib/auth";
 
 type AdminTab = "submissions" | "bookings" | "clients" | "users" | "compliance" | "analytics" | "content" | "settings";
 
+const I = {
+  submissions: <svg className="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><path d="M14 2v6h6M9 13h6M9 17h6" /></svg>,
+  bookings: <svg className="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" /><path d="M16 2v4M8 2v4M3 10h18" /></svg>,
+  clients: <svg className="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" /></svg>,
+  compliance: <svg className="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>,
+  users: <svg className="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>,
+  analytics: <svg className="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3v18h18" /><path d="m19 9-5 5-4-4-3 3" /></svg>,
+  content: <svg className="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" /><path d="M3 9h18M9 21V9" /></svg>,
+  settings: <svg className="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" /></svg>,
+  logout: <svg className="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" /></svg>,
+  search: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>,
+  bell: <svg className="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0" /></svg>,
+};
+
+const TITLES: Record<AdminTab, string> = {
+  submissions: "Submissions", bookings: "Bookings", clients: "Clients", users: "Users",
+  compliance: "Compliance", analytics: "Analytics", content: "Content", settings: "Settings",
+};
+
 export function AdminShell({
   children,
   active,
   search,
   topRight,
+  title,
 }: {
   children: React.ReactNode;
   active: AdminTab;
   search?: { placeholder: string };
   topRight?: React.ReactNode;
+  title?: string;
 }) {
+  const Item = ({ id, href, icon, label }: { id: AdminTab; href: string; icon: React.ReactNode; label: string }) => (
+    <Link href={href} className={`sb-item${active === id ? " active" : ""}`}>{icon}<span>{label}</span></Link>
+  );
+
   return (
-    <div className="shell-admin min-h-screen grid grid-cols-1 lg:grid-cols-[260px_1fr]">
-      {/* ─── Side rail ───────────────────────────────────────────── */}
-      <aside
-        className="hidden lg:flex flex-col gap-12 px-7 py-9 text-bone relative"
-        style={{
-          background: "linear-gradient(180deg, #1A1612 0%, #221C15 100%)",
-        }}
-      >
-        {/* Brand mark */}
-        <Link href="/admin" className="group block">
-          <div className="font-display text-[26px] leading-none tracking-[-0.02em] text-accent">
-            ORO
+    <div className="shell shell-admin">
+      <aside className="sidebar">
+        <div className="sb-org">
+          <span className="mk">O</span>
+          <div>
+            <div className="nm">ORO</div>
+            <div className="rl">Firm admin</div>
           </div>
-          <div className="mt-2 font-mono text-[9.5px] tracking-[0.32em] uppercase text-bone/45">
-            Private&nbsp;·&nbsp;Counsel
-          </div>
-          <div
-            className="mt-5 h-px w-12 origin-left transition-transform duration-700 ease-out-expo group-hover:scale-x-[2.2]"
-            style={{ background: "linear-gradient(90deg, #B08D3E 0%, transparent 100%)" }}
-          />
-        </Link>
-
-        {/* Nav — capitalised serif eyebrow + grouped items */}
-        <nav className="flex flex-col gap-7 flex-1">
-          <NavGroup label="Pipeline">
-            <NavLink href="/admin/submissions" label="Submissions" active={active === "submissions"} />
-            <NavLink href="/admin/bookings" label="Bookings" active={active === "bookings"} />
-          </NavGroup>
-          <NavGroup label="Engagements">
-            <NavLink href="/admin/clients" label="Clients" active={active === "clients"} />
-            <NavLink href="/admin/compliance/tasks" label="Compliance" active={active === "compliance"} />
-          </NavGroup>
-          <NavGroup label="Firm">
-            <NavLink href="/admin/users" label="Users" active={active === "users"} />
-            <NavLink href="/admin/analytics" label="Analytics" active={active === "analytics"} />
-            <NavLink href="/admin/content" label="Content" active={active === "content"} />
-          </NavGroup>
+        </div>
+        <nav className="sb-nav">
+          <div className="sb-group">Pipeline</div>
+          <Item id="submissions" href="/admin/submissions" icon={I.submissions} label="Submissions" />
+          <Item id="bookings" href="/admin/bookings" icon={I.bookings} label="Bookings" />
+          <div className="sb-group">Engagements</div>
+          <Item id="clients" href="/admin/clients" icon={I.clients} label="Clients" />
+          <Item id="compliance" href="/admin/compliance/tasks" icon={I.compliance} label="Compliance" />
+          <div className="sb-group">Firm</div>
+          <Item id="users" href="/admin/users" icon={I.users} label="Users" />
+          <Item id="analytics" href="/admin/analytics" icon={I.analytics} label="Analytics" />
+          <Item id="content" href="/admin/content" icon={I.content} label="Content" />
         </nav>
-
-        <div className="flex flex-col gap-1 pt-6 border-t border-bone/10">
-          <NavLink href="/admin/settings" label="Settings" active={active === "settings"} />
+        <div className="sb-foot">
+          <Item id="settings" href="/admin/settings" icon={I.settings} label="Settings" />
           <form action={async () => { "use server"; await signOut({ redirectTo: "/" }); }}>
-            <button
-              type="submit"
-              className="w-full text-left flex items-center gap-3 px-3 py-2.5 text-[12px] tracking-[0.04em] uppercase font-medium text-bone/45 hover:text-oxblood transition-colors duration-500"
-            >
-              Sign Out
-            </button>
+            <button type="submit" className="sb-item w-full" style={{ background: "transparent", border: 0 }}>{I.logout}<span>Log out</span></button>
           </form>
         </div>
-
-        {/* Subtle gold hairline at the right edge of the rail */}
-        <div
-          aria-hidden
-          className="absolute top-0 right-0 w-px h-full opacity-30"
-          style={{ background: "linear-gradient(180deg, transparent 0%, #B08D3E 35%, #B08D3E 65%, transparent 100%)" }}
-        />
       </aside>
 
-      {/* ─── Main column ─────────────────────────────────────────── */}
-      <div className="flex flex-col min-w-0">
-        <header
-          className="h-[72px] flex items-center justify-between px-10 shrink-0"
-          style={{
-            background: "var(--admin-surface)",
-            boxShadow: "0 1px 0 rgba(229,221,201,0.6)",
-          }}
-        >
-          {search ? (
-            <div className="relative w-[360px]">
-              <svg
-                aria-hidden
-                className="absolute left-3.5 top-1/2 -translate-y-1/2 text-admin-muted"
-                width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"
-              >
-                <circle cx="11" cy="11" r="7" />
-                <path d="m20 20-3.5-3.5" />
-              </svg>
-              <input
-                className="w-full pl-10 pr-3 py-2.5 text-[13px] italic placeholder:not-italic placeholder:text-admin-muted/70"
-                style={{
-                  background: "transparent",
-                  border: "1px solid transparent",
-                  borderBottom: "1px solid var(--admin-border)",
-                  borderRadius: 0,
-                  outline: "none",
-                }}
-                placeholder={search.placeholder}
-              />
-            </div>
-          ) : <span />}
-          {topRight ?? (
-            <div
-              className="w-10 h-10 grid place-items-center font-mono text-[11px] tracking-[0.1em] uppercase"
-              style={{
-                background: "var(--ink)",
-                color: "var(--accent)",
-                borderRadius: "999px",
-                boxShadow: "0 0 0 1px rgba(176,141,62,0.4), 0 8px 24px -8px rgba(60,40,16,0.3)",
-              }}
-            >
-              JD
-            </div>
-          )}
-        </header>
-        <main className="px-10 py-12 flex-1 overflow-y-auto page-enter">{children}</main>
+      <div className="min-w-0">
+        <div className="appbar">
+          <h1>{title ?? TITLES[active]}</h1>
+          <div className="appbar-right">
+            {search && <div className="searchbox">{I.search}<input placeholder={search.placeholder} /></div>}
+            {topRight}
+            <div className="bell">{I.bell}<span className="dot" /></div>
+            <div className="avatar">AD</div>
+          </div>
+        </div>
+        <main className="appmain page-enter">{children}</main>
       </div>
     </div>
-  );
-}
-
-function NavGroup({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div className="flex flex-col gap-1">
-      <div className="px-3 mb-2 font-mono text-[9.5px] tracking-[0.28em] uppercase text-bone/35">
-        {label}
-      </div>
-      {children}
-    </div>
-  );
-}
-
-function NavLink({ href, label, active }: { href: string; label: string; active: boolean }) {
-  return (
-    <Link
-      href={href}
-      className={`group relative flex items-center gap-3 px-3 py-2.5 text-[13px] font-medium tracking-[0.005em] transition-colors duration-500 ${
-        active ? "text-bone" : "text-bone/55 hover:text-bone"
-      }`}
-    >
-      {/* Gold tick on the left when active */}
-      <span
-        aria-hidden
-        className={`absolute left-0 top-1/2 -translate-y-1/2 w-[3px] origin-center transition-all duration-500 ${
-          active ? "h-5 opacity-100" : "h-0 opacity-0"
-        }`}
-        style={{ background: "#B08D3E" }}
-      />
-      <span className="relative">
-        {label}
-        <span
-          aria-hidden
-          className={`absolute -bottom-0.5 left-0 right-0 h-px transition-transform duration-500 origin-left ${
-            active ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
-          }`}
-          style={{ background: "rgba(176,141,62,0.5)" }}
-        />
-      </span>
-    </Link>
   );
 }
