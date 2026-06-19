@@ -108,6 +108,18 @@ CADDY
 docker compose pull
 docker compose up -d
 
+# 5b) sync DB schema. This repo ships NO prisma migrations (it uses `db push`),
+#     so the entrypoint's `migrate deploy` is a no-op and would leave an empty
+#     database. `db push` (without --accept-data-loss) applies additive schema
+#     changes and refuses destructive ones, so it's safe to run every deploy.
+echo "[deploy] syncing DB schema (prisma db push)…"
+for i in $(seq 1 20); do
+  if docker compose exec -T web node ./node_modules/prisma/build/index.js db push --skip-generate >/dev/null 2>&1; then
+    echo "[deploy] schema synced"; break
+  fi
+  sleep 3
+done
+
 # 6) recreating web changes its container IP — bounce the proxy so Caddy
 #    re-resolves the upstream (otherwise it 503s on a stale IP).
 docker compose restart proxy
