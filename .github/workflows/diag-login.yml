@@ -1,0 +1,42 @@
+name: diag-login
+
+# One-off read-only diagnostic: dump prod user rows (role, emailVerified,
+# deactivated, hash alg) and test the demo password against the live argon2,
+# to root-cause "can't login". No writes. Manual trigger only.
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: diag-login
+  cancel-in-progress: false
+
+jobs:
+  diag:
+    name: Diagnose login (self-hosted → 10.50.40.100)
+    runs-on: [self-hosted, oro-ci]
+    steps:
+      - name: Inspect users over the private network
+        env:
+          ORO_DEPLOY_KEY: ${{ secrets.ORO_DEPLOY_KEY }}
+          ORO_HOST: 10.50.40.100
+          DIAG_B64: Y29uc3QgeyBQcmlzbWFDbGllbnQgfSA9IHJlcXVpcmUoJ0BwcmlzbWEvY2xpZW50Jyk7CmNvbnN0IGFyZ29uMiA9IHJlcXVpcmUoJ2FyZ29uMicpOwooYXN5bmMgKCkgPT4gewogIGNvbnN0IHAgPSBuZXcgUHJpc21hQ2xpZW50KCk7CiAgY29uc3QgdXNlcnMgPSBhd2FpdCBwLnVzZXIuZmluZE1hbnkoeyBzZWxlY3Q6IHsgZW1haWw6dHJ1ZSwgcm9sZTp0cnVlLCBlbWFpbFZlcmlmaWVkOnRydWUsIGRlYWN0aXZhdGVkQXQ6dHJ1ZSwgcGFzc3dvcmRIYXNoOnRydWUgfSwgb3JkZXJCeTp7IGVtYWlsOidhc2MnIH0gfSk7CiAgY29uc29sZS5sb2coJ1RPVEFMIFVTRVJTOicsIHVzZXJzLmxlbmd0aCk7CiAgZm9yIChjb25zdCB1IG9mIHVzZXJzKSB7CiAgICBsZXQgb2sgPSAnbi9hJzsKICAgIHRyeSB7IG9rID0gdS5wYXNzd29yZEhhc2ggPyBTdHJpbmcoYXdhaXQgYXJnb24yLnZlcmlmeSh1LnBhc3N3b3JkSGFzaCwgJ29yb0RlbW8hMScpKSA6ICdOT19IQVNIJzsgfQogICAgY2F0Y2ggKGUpIHsgb2sgPSAnVkVSSUZZX0VSUjonICsgZS5tZXNzYWdlOyB9CiAgICBjb25zb2xlLmxvZyhgJHt1LmVtYWlsfSB8IHJvbGU9JHt1LnJvbGV9IHwgdmVyaWZpZWQ9JHshIXUuZW1haWxWZXJpZmllZH0gfCBkZWFjdGl2YXRlZD0keyEhdS5kZWFjdGl2YXRlZEF0fSB8IGhhc2hBbGc9JHt1LnBhc3N3b3JkSGFzaCA/IHUucGFzc3dvcmRIYXNoLnNsaWNlKDAsOSkgOiAnbm9uZSd9IHwgb3JvRGVtbyExX09LPSR7b2t9YCk7CiAgfQogIGF3YWl0IHAuJGRpc2Nvbm5lY3QoKTsKfSkoKS5jYXRjaChlID0+IHsgY29uc29sZS5lcnJvcignRElBR19GQVRBTCcsIGUpOyBwcm9jZXNzLmV4aXQoMSk7IH0pOwo=
+        run: |
+          set -euo pipefail
+          install -m 700 -d "$HOME/.ssh"
+          printf '%s\n' "$ORO_DEPLOY_KEY" > "$HOME/.ssh/oro_deploy"
+          chmod 600 "$HOME/.ssh/oro_deploy"
+          trap 'rm -f "$HOME/.ssh/oro_deploy"' EXIT
+
+          ssh -i "$HOME/.ssh/oro_deploy" -o BatchMode=yes -o StrictHostKeyChecking=accept-new \
+              ubuntu@"$ORO_HOST" "DIAG_B64='$DIAG_B64' bash -s" <<'REMOTE'
+            set -euo pipefail
+            cd /opt/oro
+            echo "===== .env auth-relevant ====="
+            grep -E '^(AUTH_URL|APP_URL|AUTH_SECRET|AUTH_TRUST_HOST|NEXTAUTH)' .env | sed -E 's/(SECRET=).*/\1<redacted>/'
+            echo "===== user diagnostic ====="
+            echo "$DIAG_B64" | base64 -d > /tmp/oro_diag.js
+            docker compose cp /tmp/oro_diag.js web:/tmp/oro_diag.js
+            docker compose exec -T web node /tmp/oro_diag.js
+            rm -f /tmp/oro_diag.js
+          REMOTE
