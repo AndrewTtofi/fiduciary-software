@@ -14,10 +14,19 @@ export async function middleware(req: NextRequest) {
   const guard = protectedPrefixes.find((g) => pathname === g.prefix || pathname.startsWith(`${g.prefix}/`));
   if (!guard) return NextResponse.next();
 
+  // Cookie security must mirror the scheme NextAuth actually uses to SET the
+  // cookie, which is derived from AUTH_URL — NOT from NODE_ENV. This deployment
+  // serves prod over plain HTTP, so NextAuth sets the non-secure
+  // `authjs.session-token`; with secureCookie keyed to NODE_ENV, getToken would
+  // look for `__Secure-authjs.session-token`, never find it, and bounce every
+  // authenticated user back to /login. Tying it to the AUTH_URL scheme keeps
+  // middleware and the auth handler in agreement, and auto-upgrades to secure
+  // cookies if/when AUTH_URL becomes https://.
+  const authUrl = process.env.AUTH_URL ?? process.env.NEXTAUTH_URL ?? "";
   const token = await getToken({
     req,
     secret: process.env.AUTH_SECRET,
-    secureCookie: process.env.NODE_ENV === "production",
+    secureCookie: authUrl.startsWith("https://"),
   });
 
   if (!token) {
