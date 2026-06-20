@@ -1,0 +1,43 @@
+name: seed-oro
+
+# One-off / on-demand: seed the production ORO database via the self-hosted
+# runner over the private network. Idempotent — the seed uses upserts, so it is
+# safe to run repeatedly. Manual trigger only.
+#
+# Reuses the same access path as deploy-oro: the runner SSHes to the ORO box
+# with ORO_DEPLOY_KEY and runs the compiled seed inside the web container.
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: seed-oro
+  cancel-in-progress: false
+
+jobs:
+  seed:
+    name: Seed ORO DB (self-hosted → 10.50.40.100)
+    runs-on: [self-hosted, oro-ci]
+    steps:
+      - name: Seed over the private network
+        env:
+          ORO_DEPLOY_KEY: ${{ secrets.ORO_DEPLOY_KEY }}
+          ORO_HOST: 10.50.40.100
+        run: |
+          set -euo pipefail
+          install -m 700 -d "$HOME/.ssh"
+          printf '%s\n' "$ORO_DEPLOY_KEY" > "$HOME/.ssh/oro_deploy"
+          chmod 600 "$HOME/.ssh/oro_deploy"
+          trap 'rm -f "$HOME/.ssh/oro_deploy"' EXIT
+
+          ssh -i "$HOME/.ssh/oro_deploy" -o BatchMode=yes -o StrictHostKeyChecking=accept-new \
+              ubuntu@"$ORO_HOST" '
+            set -euo pipefail
+            cd /opt/oro
+            echo "[seed] user count BEFORE:"
+            docker compose exec -T db psql -U oro -d oro -tAc "select count(*) from \"User\"" || true
+            echo "[seed] running idempotent seed…"
+            docker compose exec -T web node ./dist-worker/worker/seed.js
+            echo "[seed] user count AFTER:"
+            docker compose exec -T db psql -U oro -d oro -tAc "select count(*) from \"User\""
+          '
