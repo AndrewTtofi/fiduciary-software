@@ -53,19 +53,8 @@ export default async function AdminClientsPage({ searchParams }: PageProps) {
       {/* ── Hero ─────────────────────────────────────────────────── */}
       <div className="mb-12 flex justify-between items-end flex-wrap gap-6">
         <div>
-          <div className="eyebrow eyebrow-line mb-5">Engagements</div>
-          <h1
-            className="font-display text-[44px] leading-[1.05] tracking-[-0.025em] text-ink"
-            style={{ fontVariationSettings: '"opsz" 144, "SOFT" 60' }}
-          >
-            Active{" "}
-            <span
-              className="italic text-accent-deep"
-              style={{ fontVariationSettings: '"opsz" 144, "SOFT" 100, "WONK" 1', fontWeight: 300 }}
-            >
-              clients.
-            </span>
-          </h1>
+          <div className="eyebrow mb-2">Engagements</div>
+          <h2 style={{ fontSize: "1.563rem", fontWeight: 700, letterSpacing: "-0.02em" }}>Active clients</h2>
           <div className="mt-3 flex items-center gap-5 font-mono text-[10px] tracking-[0.22em] uppercase text-muted">
             <span>{rows.length} on roster</span>
             {approvedProspects.length > 0 && (
@@ -125,12 +114,7 @@ export default async function AdminClientsPage({ searchParams }: PageProps) {
               {rows.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="p-16 text-center">
-                    <p
-                      className="font-display italic text-[24px] text-muted mb-2"
-                      style={{ fontVariationSettings: '"opsz" 144, "SOFT" 100, "WONK" 1', fontWeight: 300 }}
-                    >
-                      No clients yet.
-                    </p>
+                    <p className="mb-2" style={{ fontSize: "1.125rem", fontWeight: 600 }}>No clients yet.</p>
                     <p className="text-[13px] text-muted">
                       Convert an approved submission to add your first engagement.
                     </p>

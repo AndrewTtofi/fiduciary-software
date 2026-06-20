@@ -10,9 +10,16 @@ This project follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) lo
 
 ## Unreleased
 
-### Changed — "Quiet Authority" redesign (foundation)
+### Changed — "Quiet Authority" redesign (full)
 - Re-skinned the design system from the warm "private-bank" serif aesthetic to the platform prototype: indigo brand (`#2E4A8B`) + champagne-gold accent (`#C9A86A`), cool light-gray surfaces, navy ink, **system sans** (dropped Fraunces serif), rounded 6–8px corners, navy-tinted shadows.
-- `tailwind.config.ts` + `globals.css` retoken (names kept stable so utilities re-skin without edits); added prototype component classes (card/kpi/table/timeline/bubble/note/chip/avatar). Primary buttons now brand-blue; gold reserved as accent.
+- `tailwind.config.ts` + `globals.css` retoken (names kept stable so utilities re-skin without edits); added prototype component classes (card/kpi/table/timeline/bubble/note/chip/avatar/sidebar/appbar/auth).
+- **Marketing** rebuilt to prototype layout: home (hero/3-step/services/proof/testimonials/CTA), services, pricing, FAQ; new **Terms** + **Privacy** pages; public nav + dark footer.
+- **Sign-in** rebuilt to a centered auth card; `Logo` → sans wordmark (auth + onboarding).
+- **Client portal**: light sidebar + appbar shell; dashboard, prospect dashboard, and sub-pages aligned (KPI cards, brand timeline, message bubbles, badges).
+- **Admin app**: light sidebar + appbar shell; submissions/clients/compliance + client detail headings to plain bold sans; conversation bubbles → brand.
+
+### Fixed
+- Client login redirected to `/app`, which had no index page → 404. Added `/app` → `/app/dashboard` redirect.
 
 ### Added — Self-hosted deploy pipeline
 - `deploy/deploy-oro.sh` — idempotent ORO deploy (pulls prebuilt GHCR image, self-signed HTTPS on :443 + HTTP on :80, persistent `.env`, proxy re-resolve).

@@ -2,76 +2,47 @@ import Link from "next/link";
 
 export function Footer() {
   return (
-    <footer className="text-bone relative" style={{ background: "var(--ink)" }}>
-      {/* Top gold hairline */}
-      <div
-        aria-hidden
-        className="absolute top-0 left-0 right-0 h-px"
-        style={{ background: "linear-gradient(90deg, transparent, rgba(176,141,62,0.55) 50%, transparent)" }}
-      />
-
-      <div className="container py-20">
-        <div className="grid gap-16 lg:grid-cols-[2fr_1fr_1fr_1fr]">
-          {/* Brand */}
-          <div>
-            <Link href="/" className="block mb-6">
-              <span
-                className="font-display text-[40px] leading-none tracking-[-0.03em] text-accent"
-                style={{ fontVariationSettings: '"opsz" 144, "SOFT" 60', fontWeight: 400 }}
-              >
-                ORO
-              </span>
-            </Link>
-            <p className="max-w-[36ch] text-bone/55 text-[15px] leading-[1.75]">
-              Private corporate counsel for international principals. By engagement,
-              by invitation.
-            </p>
-            <div className="mt-8 font-mono text-[10px] tracking-[0.3em] uppercase text-bone/35">
-              Est. MMV · Limassol · Nicosia
-            </div>
+    <footer className="pubfooter">
+      <div className="cols">
+        <div>
+          <div className="wordmark" style={{ marginBottom: 16 }}>
+            <span className="seal" />
+            <span className="mk">O</span>
+            <span>ORO</span>
           </div>
-
-          {/* Practice */}
-          <div>
-            <h4 className="font-mono text-[10px] tracking-[0.28em] uppercase text-accent mb-6">Practice</h4>
-            <ul className="flex flex-col gap-3 text-[14px] text-bone/55">
-              <li><Link href="#services" className="link-gold">Incorporation</Link></li>
-              <li><Link href="#services" className="link-gold">Tax Residency</Link></li>
-              <li><Link href="#services" className="link-gold">Immigration</Link></li>
-              <li><Link href="#services" className="link-gold">Banking</Link></li>
-            </ul>
-          </div>
-
-          {/* Firm */}
-          <div>
-            <h4 className="font-mono text-[10px] tracking-[0.28em] uppercase text-accent mb-6">The Firm</h4>
-            <ul className="flex flex-col gap-3 text-[14px] text-bone/55">
-              <li><Link href="#about" className="link-gold">About</Link></li>
-              <li><Link href="#counsel" className="link-gold">Counsel</Link></li>
-              <li><Link href="#news" className="link-gold">Notes</Link></li>
-              <li><Link href="#careers" className="link-gold">Careers</Link></li>
-            </ul>
-          </div>
-
-          {/* Contact */}
-          <div>
-            <h4 className="font-mono text-[10px] tracking-[0.28em] uppercase text-accent mb-6">Contact</h4>
-            <ul className="flex flex-col gap-3 text-[14px] text-bone/55 leading-relaxed">
-              <li>Stadiou 15<br />Nicosia 1010, Cyprus</li>
-              <li className="figure pt-2">+357 22 037 060</li>
-              <li>info@oro.cy</li>
-            </ul>
-          </div>
+          <p style={{ maxWidth: "36ch", color: "#8C97B5", fontSize: "0.875rem" }}>
+            Private corporate counsel for international principals. Incorporation,
+            tax residency, banking and fiduciary administration from Cyprus.
+          </p>
         </div>
-
-        <div className="mt-20 pt-8 border-t border-bone/10 flex justify-between flex-wrap gap-3 text-[11px] font-mono tracking-[0.18em] uppercase text-bone/40">
-          <span>© MMXXVI · ORO Corporate Services Limited</span>
-          <span className="flex gap-8">
-            <Link href="#" className="link-gold">Privacy</Link>
-            <Link href="#" className="link-gold">Terms</Link>
-            <Link href="#" className="link-gold">Regulatory</Link>
-          </span>
+        <div>
+          <h4>Services</h4>
+          <Link href="/services">Company formation</Link>
+          <Link href="/services">Tax residency</Link>
+          <Link href="/services">Immigration</Link>
+          <Link href="/services">Banking</Link>
         </div>
+        <div>
+          <h4>Platform</h4>
+          <Link href="/#how">How it works</Link>
+          <Link href="/pricing">Pricing</Link>
+          <Link href="/faq">FAQ</Link>
+          <Link href="/login">Start application</Link>
+        </div>
+        <div>
+          <h4>Access</h4>
+          <Link href="/login">Client login</Link>
+          <Link href="/login">Admin login</Link>
+          <Link href="/login">Apply now</Link>
+        </div>
+      </div>
+      <div className="legal">
+        <span>© 2026 ORO Corporate Services Limited.</span>
+        <span style={{ display: "flex", gap: 20, flexWrap: "wrap" }}>
+          <Link href="/terms">Terms</Link>
+          <Link href="/privacy">Privacy</Link>
+          <span>EU data residency · GDPR-ready</span>
+        </span>
       </div>
     </footer>
   );

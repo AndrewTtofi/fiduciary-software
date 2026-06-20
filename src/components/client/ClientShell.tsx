@@ -1,147 +1,85 @@
 import Link from "next/link";
 import { signOut } from "@/lib/auth";
 
-interface NavItem { label: string; href: string; locked?: boolean }
+type ActiveKey = "dashboard" | "application" | "messages" | "documents" | "booking" | "settings";
+
+const I = {
+  dashboard: <svg className="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="9" rx="1" /><rect x="14" y="3" width="7" height="5" rx="1" /><rect x="14" y="12" width="7" height="9" rx="1" /><rect x="3" y="16" width="7" height="5" rx="1" /></svg>,
+  briefcase: <svg className="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" /><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" /></svg>,
+  documents: <svg className="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><path d="M14 2v6h6M9 13h6M9 17h6" /></svg>,
+  message: <svg className="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>,
+  calendar: <svg className="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" /><path d="M16 2v4M8 2v4M3 10h18" /></svg>,
+  settings: <svg className="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" /></svg>,
+  logout: <svg className="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" /></svg>,
+  lock: <svg className="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" width="16" height="16"><rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>,
+  search: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>,
+  bell: <svg className="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0" /></svg>,
+};
+
+const TITLES: Record<ActiveKey, string> = {
+  dashboard: "Dashboard",
+  application: "My application",
+  documents: "Documents",
+  messages: "Messages",
+  booking: "Book consultation",
+  settings: "Settings",
+};
 
 export function ClientShell({
   children,
   active,
   approved,
+  title,
 }: {
   children: React.ReactNode;
-  active: "dashboard" | "application" | "messages" | "documents" | "booking" | "settings";
+  active: ActiveKey;
   approved: boolean;
+  title?: string;
 }) {
-  const nav: NavItem[] = [
-    { label: "Overview", href: "/app/dashboard" },
-    { label: "My File", href: "/app/application" },
-    { label: "Correspondence", href: "/app/messages" },
-    { label: "Documents", href: "/app/documents" },
-    { label: "Consultation", href: "/app/booking", locked: !approved },
-  ];
+  const Item = ({ id, icon, label, locked }: { id: ActiveKey; icon: React.ReactNode; label: string; locked?: boolean }) => {
+    const cls = `sb-item${active === id ? " active" : ""}${locked ? " locked" : ""}`;
+    const inner = <>{icon}<span>{label}</span>{locked && <span className="lockic">{I.lock}</span>}</>;
+    return locked ? <span className={cls} aria-disabled>{inner}</span> : <Link href={`/app/${id}`} className={cls}>{inner}</Link>;
+  };
 
   return (
-    <div className="shell-client min-h-screen grid grid-cols-1 lg:grid-cols-[280px_1fr]">
-      {/* ─── Side rail ───────────────────────────────────────────── */}
-      <aside
-        className="hidden lg:flex flex-col gap-12 px-8 py-10 text-bone relative"
-        style={{
-          background: "linear-gradient(180deg, #1A1612 0%, #221C15 100%)",
-        }}
-      >
-        <Link href="/app/dashboard" className="group block">
-          <div className="font-display text-[28px] leading-none tracking-[-0.02em] text-accent">
-            ORO
+    <div className="shell shell-client">
+      <aside className="sidebar">
+        <div className="sb-org">
+          <span className="mk">O</span>
+          <div>
+            <div className="nm">ORO</div>
+            <div className="rl">Client portal</div>
           </div>
-          <div className="mt-2 font-mono text-[9.5px] tracking-[0.32em] uppercase text-bone/45">
-            Client Portal
-          </div>
-          <div
-            className="mt-5 h-px w-12 origin-left transition-transform duration-700 ease-out-expo group-hover:scale-x-[2.2]"
-            style={{ background: "linear-gradient(90deg, #B08D3E 0%, transparent 100%)" }}
-          />
-        </Link>
-
-        <nav className="flex flex-col gap-1 flex-1">
-          {nav.map((n) => {
-            const isActive = active === routeKey(n.href);
-            const base =
-              "group relative flex items-center gap-3 px-3 py-3 text-[13px] font-medium tracking-[0.005em] transition-colors duration-500";
-            const tone = isActive
-              ? "text-bone"
-              : n.locked
-              ? "text-bone/25 cursor-not-allowed"
-              : "text-bone/55 hover:text-bone";
-
-            const inner = (
-              <>
-                <span
-                  aria-hidden
-                  className={`absolute left-0 top-1/2 -translate-y-1/2 w-[3px] origin-center transition-all duration-500 ${
-                    isActive ? "h-5 opacity-100" : "h-0 opacity-0"
-                  }`}
-                  style={{ background: "#B08D3E" }}
-                />
-                <span className="relative">
-                  {n.label}
-                  {n.locked && (
-                    <span
-                      className="ml-2 font-mono text-[9px] tracking-[0.2em] uppercase opacity-60"
-                      aria-hidden
-                    >
-                      Locked
-                    </span>
-                  )}
-                  <span
-                    aria-hidden
-                    className={`absolute -bottom-0.5 left-0 right-0 h-px transition-transform duration-500 origin-left ${
-                      isActive ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
-                    }`}
-                    style={{ background: "rgba(176,141,62,0.5)" }}
-                  />
-                </span>
-              </>
-            );
-
-            return n.locked ? (
-              <span key={n.href} className={`${base} ${tone}`} aria-disabled>{inner}</span>
-            ) : (
-              <Link
-                key={n.href}
-                href={n.href}
-                className={`${base} ${tone}`}
-                aria-current={isActive ? "page" : undefined}
-              >
-                {inner}
-              </Link>
-            );
-          })}
+        </div>
+        <nav className="sb-nav">
+          <div className="sb-group">Overview</div>
+          <Item id="dashboard" icon={I.dashboard} label="Dashboard" />
+          <Item id="application" icon={I.briefcase} label="My application" />
+          <div className="sb-group">Engagement</div>
+          <Item id="documents" icon={I.documents} label="Documents" />
+          <Item id="messages" icon={I.message} label="Messages" />
+          <Item id="booking" icon={I.calendar} label="Book consultation" locked={!approved} />
         </nav>
-
-        <div className="flex flex-col gap-1 pt-6 border-t border-bone/10">
-          <Link
-            href="/app/settings"
-            className={`group relative flex items-center px-3 py-3 text-[13px] font-medium transition-colors duration-500 ${
-              active === "settings" ? "text-bone" : "text-bone/55 hover:text-bone"
-            }`}
-          >
-            <span
-              aria-hidden
-              className={`absolute left-0 top-1/2 -translate-y-1/2 w-[3px] origin-center transition-all duration-500 ${
-                active === "settings" ? "h-5 opacity-100" : "h-0 opacity-0"
-              }`}
-              style={{ background: "#B08D3E" }}
-            />
-            Settings
-          </Link>
+        <div className="sb-foot">
+          <Link href="/app/settings" className={`sb-item${active === "settings" ? " active" : ""}`}>{I.settings}<span>Settings</span></Link>
           <form action={async () => { "use server"; await signOut({ redirectTo: "/" }); }}>
-            <button
-              type="submit"
-              className="w-full text-left px-3 py-3 text-[12px] tracking-[0.04em] uppercase font-medium text-bone/45 hover:text-oxblood transition-colors duration-500"
-            >
-              Sign Out
-            </button>
+            <button type="submit" className="sb-item w-full" style={{ background: "transparent", border: 0 }}>{I.logout}<span>Log out</span></button>
           </form>
         </div>
-
-        {/* Right hairline */}
-        <div
-          aria-hidden
-          className="absolute top-0 right-0 w-px h-full opacity-30"
-          style={{ background: "linear-gradient(180deg, transparent 0%, #B08D3E 35%, #B08D3E 65%, transparent 100%)" }}
-        />
       </aside>
 
-      <main className="px-6 lg:px-20 py-14 overflow-y-auto page-enter">{children}</main>
+      <div>
+        <div className="appbar">
+          <h1>{title ?? TITLES[active]}</h1>
+          <div className="appbar-right">
+            <div className="searchbox">{I.search}<input placeholder="Search…" /></div>
+            <div className="bell">{I.bell}<span className="dot" /></div>
+            <div className="avatar">CL</div>
+          </div>
+        </div>
+        <main className="appmain page-enter">{children}</main>
+      </div>
     </div>
   );
-}
-
-function routeKey(href: string): "dashboard" | "application" | "messages" | "documents" | "booking" | "settings" {
-  if (href.includes("dashboard")) return "dashboard";
-  if (href.includes("application")) return "application";
-  if (href.includes("messages")) return "messages";
-  if (href.includes("documents")) return "documents";
-  if (href.includes("booking")) return "booking";
-  return "settings";
 }
