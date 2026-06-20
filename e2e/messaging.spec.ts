@@ -67,6 +67,9 @@ test("staff sends a message → client sees it in /app/messages", async ({ page,
   await page.goto("/admin/clients");
   await page.getByRole("button", { name: /convert from prospect/i }).click();
   await page.waitForSelector("text=Convert from Prospect", { timeout: 5000 });
+  // Wait for the cleared candidate to render before converting — otherwise
+  // `.first()` can race and convert a different approved prospect (e.g. the seed's).
+  await expect(page.getByText(/cleared/i).first()).toBeVisible({ timeout: 5000 });
   await page.getByRole("button", { name: /make client/i }).first().click();
   await page.waitForURL(/\/admin\/clients\/.+/, { timeout: 15000 });
 

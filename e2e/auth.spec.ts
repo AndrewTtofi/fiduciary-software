@@ -8,8 +8,8 @@ test.beforeEach(async ({ request }) => {
 test("register new account → lands on /onboarding", async ({ page }) => {
   await page.goto("/login");
 
-  // Click the "Create Account" tab (second tab in the tab bar, not the submit button)
-  await page.locator(".flex.border-b button").nth(1).click();
+  // Click the "Create Account" tab (auth-tabs button, not the submit button)
+  await page.getByRole("button", { name: /create account/i }).click();
 
   // Fill in registration form using name attributes (labels are not associated via htmlFor)
   await page.locator("input[name='fullName']").fill("John Doe");
