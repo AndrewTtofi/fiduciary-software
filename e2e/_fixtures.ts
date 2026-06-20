@@ -16,8 +16,8 @@ export async function signInAsStaff(page: Page) {
 
 export async function registerProspect(page: Page, email: string) {
   await page.goto("/login");
-  // Switch to Create Account tab (the tab bar button, not the submit button)
-  await page.locator(".flex.border-b button").nth(1).click();
+  // Switch to Create Account tab (the auth-tabs button, not the submit button)
+  await page.getByRole("button", { name: /create account/i }).click();
   await page.locator("input[name='fullName']").fill("Test Prospect");
   await page.locator("input[name='email']").fill(email);
   await page.locator("input[name='phoneNumber']").fill("99123456");
