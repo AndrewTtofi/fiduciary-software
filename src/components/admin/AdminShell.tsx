@@ -3,9 +3,11 @@ import { signOut } from "@/lib/auth";
 import { getBranding, tierAtLeast } from "@/lib/services/branding";
 import { currentIsSuperAdmin } from "@/lib/auth/guards";
 
-type AdminTab = "submissions" | "bookings" | "clients" | "leads" | "users" | "compliance" | "compliance-calendar" | "aml" | "analytics" | "content" | "settings";
+type AdminTab = "dashboard" | "submissions" | "bookings" | "clients" | "leads" | "messages" | "users" | "compliance-calendar" | "aml" | "analytics" | "content" | "settings";
 
 const I = {
+  dashboard: <svg className="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="9" rx="1" /><rect x="14" y="3" width="7" height="5" rx="1" /><rect x="14" y="12" width="7" height="9" rx="1" /><rect x="3" y="16" width="7" height="5" rx="1" /></svg>,
+  message: <svg className="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>,
   submissions: <svg className="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><path d="M14 2v6h6M9 13h6M9 17h6" /></svg>,
   bookings: <svg className="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" /><path d="M16 2v4M8 2v4M3 10h18" /></svg>,
   clients: <svg className="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" /></svg>,
@@ -20,8 +22,9 @@ const I = {
 };
 
 const TITLES: Record<AdminTab, string> = {
-  submissions: "Submissions", bookings: "Bookings", clients: "Clients", leads: "Leads / CRM", users: "Users",
-  compliance: "Compliance", "compliance-calendar": "Compliance calendar", aml: "AML screening",
+  dashboard: "Dashboard", submissions: "Submissions", bookings: "Bookings", clients: "Clients", leads: "Leads / CRM",
+  messages: "Messages", users: "Users",
+  "compliance-calendar": "Compliance calendar", aml: "AML screening",
   analytics: "Analytics", content: "Content", settings: "Settings",
 };
 
@@ -62,18 +65,22 @@ export async function AdminShell({
             </>
           ) : (
             <>
-              <div className="sb-group">Pipeline</div>
+              <div className="sb-group">Overview</div>
+              <Item id="dashboard" href="/admin" icon={I.dashboard} label="Dashboard" />
               <Item id="submissions" href="/admin/submissions" icon={I.submissions} label="Submissions" />
+              <div className="sb-group">Relationships</div>
               <Item id="leads" href="/admin/crm" icon={I.users} label="Leads / CRM" />
-              <Item id="bookings" href="/admin/bookings" icon={I.bookings} label="Bookings" />
-              <div className="sb-group">Engagements</div>
               <Item id="clients" href="/admin/clients" icon={I.clients} label="Clients" />
-              <Item id="compliance" href="/admin/compliance/tasks" icon={I.compliance} label="Compliance" />
+              <Item id="messages" href="/admin/messages" icon={I.message} label="Messages" />
+              <Item id="bookings" href="/admin/bookings" icon={I.bookings} label="Bookings" />
               {tierAtLeast(planTier, "professional") && (
-                <Item id="compliance-calendar" href="/admin/compliance/calendar" icon={I.bookings} label="Compliance calendar" />
-              )}
-              {tierAtLeast(planTier, "scale") && (
-                <Item id="aml" href="/admin/compliance/aml" icon={I.compliance} label="AML screening" />
+                <>
+                  <div className="sb-group">Compliance</div>
+                  <Item id="compliance-calendar" href="/admin/compliance/calendar" icon={I.bookings} label="Compliance calendar" />
+                  {tierAtLeast(planTier, "scale") && (
+                    <Item id="aml" href="/admin/compliance/aml" icon={I.compliance} label="AML screening" />
+                  )}
+                </>
               )}
               <div className="sb-group">Firm</div>
               <Item id="users" href="/admin/users" icon={I.users} label="Users" />

@@ -5,6 +5,9 @@ import { requireRole } from "@/lib/auth/guards";
 import { SubmissionActions } from "./SubmissionActions";
 import { CompletenessChip } from "@/components/admin/CompletenessChip";
 import { computeCompleteness, generateBrief, detailsToMap, type Completeness } from "@/lib/services/prospect-intel";
+import { getBranding, tierAtLeast } from "@/lib/services/branding";
+import { amlResult } from "@/lib/services/aml";
+import { RegenerateBriefButton } from "./RegenerateBriefButton";
 import { Role } from "@prisma/client";
 
 export const metadata = { title: "Submission" };
@@ -36,6 +39,11 @@ export default async function SubmissionDetailPage({ params }: { params: Promise
   const effectiveCompleteness = (prospect.completenessOverride as Completeness | null) ?? autoCompleteness;
   const brief = generateBrief({ fullName: map.fullLegalName ?? prospect.user.fullName, services, answers, docCount });
 
+  // AML screening (Scale-gated) shown inline on the file.
+  const { planTier } = await getBranding();
+  const amlEnabled = tierAtLeast(planTier, "scale");
+  const aml = amlEnabled ? amlResult(prospect.referenceNumber) : null;
+
   const activity = await prisma.activityLog.findMany({
     where: { entityType: "prospect", entityId: prospect.id },
     orderBy: { createdAt: "desc" },
@@ -66,13 +74,43 @@ export default async function SubmissionDetailPage({ params }: { params: Promise
                 <svg className="ic" viewBox="0 0 24 24" fill="none" stroke="var(--brand)" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3l1.8 4.6L18.5 9l-4.7 1.4L12 15l-1.8-4.6L5.5 9l4.7-1.4z" /></svg>
                 <h2 className="text-lg font-bold">AI-generated internal brief</h2>
               </div>
-              <CompletenessChip value={effectiveCompleteness} />
+              <div className="flex items-center gap-3">
+                <CompletenessChip value={effectiveCompleteness} />
+                <RegenerateBriefButton />
+              </div>
             </div>
             <p style={{ fontSize: "0.9375rem", lineHeight: 1.6 }}>{brief}</p>
             <hr className="hairline" style={{ margin: "16px 0" }} />
             <p className="text-[12px] text-admin-muted">
               Auto-drafted from the applicant&apos;s intake answers and documents on file. Adjust the brief-completeness score in the sidebar to reprioritise prep.
             </p>
+          </section>
+
+          {/* ── AML / KYC screening (Scale plan) ──────────────────────── */}
+          <section className="bg-admin-surface border border-admin-border rounded-elem p-8">
+            <div className="flex items-center justify-between mb-4 gap-4">
+              <div className="flex items-center gap-3">
+                <svg className="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
+                <h2 className="text-lg font-bold">AML / KYC screening</h2>
+              </div>
+              {aml && <span className={`badge ${aml.risk === "low" ? "badge-approved" : aml.risk === "medium" ? "badge-pending" : "badge-danger"}`}>{aml.risk} risk</span>}
+            </div>
+            {aml ? (
+              <div className="grid gap-4 sm:grid-cols-3">
+                {([["Sanctions", aml.sanctions], ["PEP", aml.pep], ["Adverse media", aml.adverse]] as const).map(([label, v]) => (
+                  <div key={label} className="rounded-inner p-4" style={{ border: "1px solid var(--admin-border)" }}>
+                    <div className="text-[11px] uppercase tracking-widest text-admin-muted mb-2">{label}</div>
+                    <span className={`badge ${v === "clear" ? "badge-approved" : v === "match" ? "badge-pending" : "badge-danger"}`}>
+                      {v === "clear" ? "Clear" : v === "match" ? "PEP match" : "Adverse"}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-[13px] text-admin-muted">
+                Sanctions, PEP and adverse-media screening is a <strong>Scale</strong>-plan feature. Ask your platform admin to enable it.
+              </p>
+            )}
           </section>
 
           <Card title="Personal Information">

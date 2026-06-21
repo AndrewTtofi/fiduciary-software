@@ -10,6 +10,14 @@ This project follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) lo
 
 ## Unreleased
 
+### Added / Changed — Align admin to the platform prototype
+- New **admin Dashboard** landing (`/admin`) with KPI tiles, a recent-submissions table and a recent-activity feed (was a redirect to the submissions queue).
+- New **unified Messages inbox** (`/admin/messages`): a 2-pane thread list + conversation (reuses the client-detail `ConversationView`, replies via the existing messages API).
+- **AML / KYC screening panel inline** on the submission detail (Scale-gated; shows a locked note below Scale), plus a **Regenerate** control on the AI brief.
+- **Client-facing brief-completeness meter** in the onboarding header, computed live from the draft.
+- Reorganised the admin sidebar (Overview / Relationships / Compliance / Firm) and **removed the Compliance *tasks* queue** UI section (`/admin/compliance/tasks`); the ReviewTask model, API route and worker jobs are unchanged.
+- Note: the prototype's pricing monthly/annual toggle was intentionally not ported — the public pricing page reflects the firm's setup-fee + retainer model, where a billing-period toggle doesn't apply.
+
 ### Added — Two admin personas (platform admin vs staff admin)
 - Split the admin surface into two personas, both on the `staff` DB role, distinguished by the `SUPER_ADMIN_EMAILS` env allowlist (set by the platform operator at deploy time):
   - **Platform admin** (super admin, the code owner) sees **only** the Settings area (`/admin/settings/*` — branding, plan, services, team, flags).
