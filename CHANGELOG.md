@@ -10,6 +10,19 @@ This project follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) lo
 
 ## Unreleased
 
+### Added — Compliance suite (new prototype)
+- New **Compliance hub** (`/admin/compliance`): KPI tiles (active onboardings, KYC pending, AML flags, UBOs), a suite grid linking the eight tools, a "cases needing attention" table and a compliance-posture summary (applicants screened, raw vendor hits, true matches, structures mapped, overdue obligations). Wired to live prospects.
+- Six new compliance tools, each built on deterministic intelligence derived from real prospects (`src/lib/services/compliance-intel.ts`) and gated by plan tier:
+  - **KYC / ID verification** (`/admin/compliance/kyc`) — document + biometric liveness/face-match results per applicant (Scale).
+  - **KYB verification** (`/admin/compliance/kyb`) — registry records for corporate applicants: legal status, type, directors, filings, with a link to the ownership map (Scale).
+  - **AI screening** (`/admin/compliance/ai-screening`) — collapses raw sanctions/PEP/adverse-media hits into true matches, showing the noise-reduction (Scale).
+  - **Ownership map** (`/admin/compliance/ownership`) — recursive UBO tree with effective-ownership math (multiplied down the tree) and ≥25% UBO flagging (Scale).
+  - **Client risk** (`/admin/compliance/risk`) — 0–100 risk scoring across the portfolio with driver breakdown (Scale).
+  - **AML reporting** (`/admin/compliance/reporting`) — SAR/STR, periodic-review and UBO-confirmation report templates plus a recent-reports log (Scale).
+- New **Documents & e-sign** (`/admin/documents`, Professional): firm-wide document library with version history, expiry tracking, e-signature templates and a dropzone. New **Connect & API** (`/admin/integrations`, Scale): connected-services grid, webhooks table and branded API keys.
+- Provider-side actions that require live third-party wiring (generate report, refresh from registry, connect/regenerate keys, send for signature, upload) are labelled **coming soon**; the UI mirrors the prototype exactly.
+- Rebuilt the admin sidebar to the full prototype IA (Overview / Compliance / Relationships / Engagement / Firm / Configure), persona- and tier-aware.
+
 ### Added — AI Advisor (new prototype)
 - `/advisor`: a conversational AI advisor (free, no sign-up) that matches a free-text need to a recommendation. Keyword intent tree (`src/lib/data/advisor.ts`) with clarify chips and branch routing; renders a recommendation card (service(s) + primary jurisdiction with corp/VAT/formation stats + "also strong" alternatives) and CTAs (Start application, See matching providers, Compare jurisdictions). Added "Advisor" (AI badge) to the public nav.
 - Shared `Icon` component (`src/components/Icon.tsx`, full prototype icon set) and `services` data module for reuse across the new features.

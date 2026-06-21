@@ -2,8 +2,14 @@ import Link from "next/link";
 import { signOut } from "@/lib/auth";
 import { getBranding, tierAtLeast } from "@/lib/services/branding";
 import { currentIsSuperAdmin } from "@/lib/auth/guards";
+import { Icon } from "@/components/Icon";
 
-type AdminTab = "dashboard" | "submissions" | "bookings" | "clients" | "leads" | "messages" | "users" | "compliance-calendar" | "aml" | "analytics" | "content" | "settings";
+type AdminTab =
+  | "dashboard" | "submissions" | "compliance-hub"
+  | "kyc" | "aml" | "kyb" | "ai-screening" | "ownership-map" | "client-risk" | "aml-reporting" | "compliance-calendar"
+  | "leads" | "clients" | "messages"
+  | "documents" | "bookings" | "users" | "analytics" | "content"
+  | "integrations" | "settings";
 
 const I = {
   dashboard: <svg className="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="9" rx="1" /><rect x="14" y="3" width="7" height="5" rx="1" /><rect x="14" y="12" width="7" height="9" rx="1" /><rect x="3" y="16" width="7" height="5" rx="1" /></svg>,
@@ -22,10 +28,12 @@ const I = {
 };
 
 const TITLES: Record<AdminTab, string> = {
-  dashboard: "Dashboard", submissions: "Submissions", bookings: "Bookings", clients: "Clients", leads: "Leads / CRM",
-  messages: "Messages", users: "Users",
-  "compliance-calendar": "Compliance calendar", aml: "AML screening",
-  analytics: "Analytics", content: "Content", settings: "Settings",
+  dashboard: "Dashboard", submissions: "Submissions", "compliance-hub": "Compliance hub",
+  kyc: "KYC / ID verification", aml: "AML screening", kyb: "KYB verification", "ai-screening": "AI screening",
+  "ownership-map": "Ownership map", "client-risk": "Client risk", "aml-reporting": "AML reporting", "compliance-calendar": "Compliance calendar",
+  leads: "Leads / CRM", clients: "Clients", messages: "Messages",
+  documents: "Documents & e-sign", bookings: "Bookings", users: "Users", analytics: "Analytics", content: "Content",
+  integrations: "Connect & API", settings: "Settings",
 };
 
 export async function AdminShell({
@@ -68,24 +76,43 @@ export async function AdminShell({
               <div className="sb-group">Overview</div>
               <Item id="dashboard" href="/admin" icon={I.dashboard} label="Dashboard" />
               <Item id="submissions" href="/admin/submissions" icon={I.submissions} label="Submissions" />
+              <Item id="compliance-hub" href="/admin/compliance" icon={<Icon name="shield" />} label="Compliance hub" />
+              {tierAtLeast(planTier, "professional") && (
+                <>
+                  <div className="sb-group">Compliance</div>
+                  {tierAtLeast(planTier, "scale") && (
+                    <>
+                      <Item id="kyc" href="/admin/compliance/kyc" icon={<Icon name="passport" />} label="KYC / ID verification" />
+                      <Item id="aml" href="/admin/compliance/aml" icon={<Icon name="shield" />} label="AML screening" />
+                      <Item id="kyb" href="/admin/compliance/kyb" icon={<Icon name="building" />} label="KYB verification" />
+                      <Item id="ai-screening" href="/admin/compliance/ai-screening" icon={<Icon name="sparkles" />} label="AI screening" />
+                      <Item id="ownership-map" href="/admin/compliance/ownership" icon={<Icon name="sitemap" />} label="Ownership map" />
+                      <Item id="client-risk" href="/admin/compliance/risk" icon={<Icon name="scale" />} label="Client risk" />
+                      <Item id="aml-reporting" href="/admin/compliance/reporting" icon={<Icon name="documents" />} label="AML reporting" />
+                    </>
+                  )}
+                  <Item id="compliance-calendar" href="/admin/compliance/calendar" icon={<Icon name="calendar" />} label="Compliance calendar" />
+                </>
+              )}
               <div className="sb-group">Relationships</div>
               <Item id="leads" href="/admin/crm" icon={I.users} label="Leads / CRM" />
               <Item id="clients" href="/admin/clients" icon={I.clients} label="Clients" />
               <Item id="messages" href="/admin/messages" icon={I.message} label="Messages" />
-              <Item id="bookings" href="/admin/bookings" icon={I.bookings} label="Bookings" />
+              <div className="sb-group">Engagement</div>
               {tierAtLeast(planTier, "professional") && (
-                <>
-                  <div className="sb-group">Compliance</div>
-                  <Item id="compliance-calendar" href="/admin/compliance/calendar" icon={I.bookings} label="Compliance calendar" />
-                  {tierAtLeast(planTier, "scale") && (
-                    <Item id="aml" href="/admin/compliance/aml" icon={I.compliance} label="AML screening" />
-                  )}
-                </>
+                <Item id="documents" href="/admin/documents" icon={<Icon name="pen" />} label="Documents & e-sign" />
               )}
+              <Item id="bookings" href="/admin/bookings" icon={I.bookings} label="Bookings" />
               <div className="sb-group">Firm</div>
               <Item id="users" href="/admin/users" icon={I.users} label="Users" />
               <Item id="analytics" href="/admin/analytics" icon={I.analytics} label="Analytics" />
               <Item id="content" href="/admin/content" icon={I.content} label="Content" />
+              {tierAtLeast(planTier, "scale") && (
+                <>
+                  <div className="sb-group">Configure</div>
+                  <Item id="integrations" href="/admin/integrations" icon={<Icon name="plug" />} label="Connect & API" />
+                </>
+              )}
             </>
           )}
         </nav>

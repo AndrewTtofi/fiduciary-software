@@ -1,7 +1,7 @@
 /* Deterministic mock AML screening result, keyed by reference. In production
    this wraps a third-party screening API (sanctions / PEP / adverse media). */
 export type AmlResult = {
-  sanctions: "clear";
+  sanctions: "clear" | "match";
   pep: "clear" | "match";
   adverse: "clear" | "flag";
   risk: "low" | "medium" | "high";

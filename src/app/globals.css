@@ -615,3 +615,16 @@
 .advisor-rec { border-color: var(--brand); max-width: 520px; width: 100%; }
 .rec-svc { display: flex; gap: 12px; align-items: flex-start; padding: 10px 0; border-bottom: 1px solid var(--border-color); }
 .rec-jur { border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 12px; background: var(--surface-2); }
+
+/* =====================================================================
+   Compliance suite (ownership tree, AI match cards, dropzone)
+   ===================================================================== */
+.onode-ic { width: 32px; height: 32px; border-radius: var(--radius-sm); display: grid; place-items: center; flex: none; }
+.onode-ic.person { background: var(--brand-50); color: var(--brand); }
+.onode-ic.entity { background: var(--surface-2); color: var(--text-muted); }
+.owner-children { display: flex; flex-direction: column; gap: var(--space-3); margin-top: var(--space-3); }
+.owner-node > .owner-children { margin-left: var(--space-6); padding-left: var(--space-4); border-left: 2px solid var(--border-color); }
+.owner-card { display: flex; gap: 12px; align-items: center; padding: 12px 14px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); background: var(--surface); }
+.ai-score { font-size: 1.953rem; font-weight: 700; line-height: 1; color: var(--brand); }
+.dropzone { border: 2px dashed var(--border-strong-color); border-radius: var(--radius-md); padding: var(--space-8); text-align: center; background: var(--surface-2); }
+.dropzone .dz-ic { width: 48px; height: 48px; border-radius: 50%; background: var(--brand-50); color: var(--brand); display: grid; place-items: center; margin: 0 auto var(--space-3); }
