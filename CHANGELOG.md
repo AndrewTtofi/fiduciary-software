@@ -10,9 +10,9 @@ This project follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) lo
 
 ## Unreleased
 
-### Changed — Pricing page (new prototype)
-- Rebuilt `/pricing` to match the new prototype: the white-label **platform** pricing with three plans (Starter €550/mo, Professional €1,100/mo, Scale €1,800/mo), feature checklists with available/unavailable markers, and a "Most popular" highlight on Professional. The plan names line up with the app's `starter`/`professional`/`scale` tiers.
-- Added a working **monthly/annual billing toggle** (`PricingTool` client component): annual bills at 2 months free (×0.83×12, "save 17%"). Replaces the earlier static setup-fee + retainer layout. The value-estimate footer now links to the tax calculator.
+### Changed — Pricing page
+- Refreshed `/pricing` styling to the prototype's card layout (responsive `price-grid`, available/unavailable feature markers, "Most popular" highlight) while keeping the **firm's own service pricing** (Essentials / Standard / Full service, setup-fee + monthly retainer).
+- Note: the new prototype's pricing page sells the white-label *platform* to firms with a monthly/annual SaaS toggle. That model is intentionally **not** used in tenant builds — each deployment is white-labelled for one firm and must show that firm's service pricing to its clients, not the platform's subscription tiers. The platform toggle was therefore dropped from the app.
 
 ### Added — Compliance suite (new prototype)
 - New **Compliance hub** (`/admin/compliance`): KPI tiles (active onboardings, KYC pending, AML flags, UBOs), a suite grid linking the eight tools, a "cases needing attention" table and a compliance-posture summary (applicants screened, raw vendor hits, true matches, structures mapped, overdue obligations). Wired to live prospects.
