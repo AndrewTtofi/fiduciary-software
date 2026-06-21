@@ -10,6 +10,10 @@ This project follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) lo
 
 ## Unreleased
 
+### Changed — Pricing page (new prototype)
+- Rebuilt `/pricing` to match the new prototype: the white-label **platform** pricing with three plans (Starter €550/mo, Professional €1,100/mo, Scale €1,800/mo), feature checklists with available/unavailable markers, and a "Most popular" highlight on Professional. The plan names line up with the app's `starter`/`professional`/`scale` tiers.
+- Added a working **monthly/annual billing toggle** (`PricingTool` client component): annual bills at 2 months free (×0.83×12, "save 17%"). Replaces the earlier static setup-fee + retainer layout. The value-estimate footer now links to the tax calculator.
+
 ### Added — Compliance suite (new prototype)
 - New **Compliance hub** (`/admin/compliance`): KPI tiles (active onboardings, KYC pending, AML flags, UBOs), a suite grid linking the eight tools, a "cases needing attention" table and a compliance-posture summary (applicants screened, raw vendor hits, true matches, structures mapped, overdue obligations). Wired to live prospects.
 - Six new compliance tools, each built on deterministic intelligence derived from real prospects (`src/lib/services/compliance-intel.ts`) and gated by plan tier:

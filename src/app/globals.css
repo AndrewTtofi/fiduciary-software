@@ -405,6 +405,10 @@
   .price-card ul { list-style: none; padding: 0; margin: 24px 0; }
   .price-card li { display: flex; gap: 10px; align-items: flex-start; font-size: 0.875rem; padding: 7px 0; color: var(--fg); }
   .price-card li svg { color: var(--success); margin-top: 2px; flex: none; width: 18px; height: 18px; }
+  .price-card li.off { color: var(--muted); }
+  .price-card li.off svg { color: var(--border-strong-color); }
+  .price-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; align-items: start; }
+  @media (max-width: 900px) { .price-grid { grid-template-columns: 1fr; } }
 
   .acc { border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface); overflow: hidden; }
   .acc-item { border-bottom: 1px solid var(--border); }
