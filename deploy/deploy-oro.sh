@@ -51,6 +51,20 @@ else
   echo "[deploy] reused existing .env"
 fi
 
+# 1b) sync managed config from GitHub-secret-backed env into .env (idempotent).
+#     Delete-then-append avoids sed escaping issues with arbitrary values.
+upsert_env() {
+  local key="$1" val="$2"
+  [ -z "$val" ] && return 0
+  grep -v "^${key}=" .env > .env.tmp 2>/dev/null || true
+  mv .env.tmp .env
+  printf '%s=%s\n' "$key" "$val" >> .env
+  chmod 600 .env
+  echo "[deploy] set $key in .env (from secret)"
+}
+upsert_env SUPER_ADMIN_EMAILS "${SUPER_ADMIN_EMAILS:-}"
+upsert_env SUPER_ADMIN_PASSWORD "${SUPER_ADMIN_PASSWORD:-}"
+
 # 2) self-signed cert (once) with the public IP in its SAN
 mkdir -p deploy/certs
 if [ ! -f deploy/certs/oro.crt ]; then
@@ -122,6 +136,14 @@ for i in $(seq 1 20); do
   fi
   sleep 3
 done
+
+# 5c) provision the platform super-admin account(s) from the secret-backed env
+#     (idempotent). Passed via -e so it works even before web is recreated.
+echo "[deploy] ensuring super-admin account(s)…"
+docker compose exec -T \
+  -e SUPER_ADMIN_EMAILS="${SUPER_ADMIN_EMAILS:-}" \
+  -e SUPER_ADMIN_PASSWORD="${SUPER_ADMIN_PASSWORD:-}" \
+  web node ./dist-worker/worker/ensure-super-admin.js || echo "[deploy] super-admin provisioning skipped/failed (non-fatal)"
 
 # 6) recreating web changes its container IP — bounce the proxy so Caddy
 #    re-resolves the upstream (otherwise it 503s on a stale IP).

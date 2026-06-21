@@ -10,6 +10,12 @@ This project follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) lo
 
 ## Unreleased
 
+### Added — Super-admin provisioning via GitHub secrets → .env
+- The platform super-admin is now configured entirely through GitHub secrets and injected into the prod box at deploy time (no hand-editing the box):
+  - `SUPER_ADMIN_EMAILS` and `SUPER_ADMIN_PASSWORD` are passed from secrets through `deploy.yml` (over SSH) and written into `/opt/oro/.env` by `deploy/deploy-oro.sh` (idempotent `upsert_env`).
+  - New idempotent `src/worker/ensure-super-admin.ts` (compiled to `dist-worker`) runs every deploy and upserts each `SUPER_ADMIN_EMAILS` entry as a verified `staff` user (password from `SUPER_ADMIN_PASSWORD` on first create; existing accounts promoted to staff without password reset).
+- Configured `ttofisandreas@gmail.com` as the production super admin.
+
 ### Added / Changed — Align admin to the platform prototype
 - New **admin Dashboard** landing (`/admin`) with KPI tiles, a recent-submissions table and a recent-activity feed (was a redirect to the submissions queue).
 - New **unified Messages inbox** (`/admin/messages`): a 2-pane thread list + conversation (reuses the client-detail `ConversationView`, replies via the existing messages API).
