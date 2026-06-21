@@ -13,8 +13,8 @@ export async function TopNav() {
         </Link>
         <div className="pubnav-links">
           <Link href="/services">Services</Link>
-          <Link href="/#how">How it works</Link>
           <Link href="/pricing">Pricing</Link>
+          <Link href="/marketplace">Partner network</Link>
           <Link href="/tools/compare">Compare</Link>
           <Link href="/tools/calculator">Tax calculator</Link>
           <Link href="/faq">FAQ</Link>

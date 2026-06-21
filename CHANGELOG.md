@@ -10,6 +10,12 @@ This project follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) lo
 
 ## Unreleased
 
+### Added — Partner-network marketplace (new prototype)
+- Marketplace of 20 vetted partners (banks/EMIs, corporate services, advisory, licensing) for visitors and clients: category tabs, search, jurisdiction/industry/speed filters, remote toggle, sort, grid/list views, provider detail modal, compare (up to 3) modal, and concierge. `/marketplace` (public) + `/app/marketplace` (client).
+- "Get started" applies to a partner (persisted via new `Application` model + `POST /api/applications`); clients track them under **My applications** (`/app/applications`). Reuses the verified KYC profile messaging.
+- Nav: "Partner network" in the public nav; "Network" group (Partner network + My applications) in the client sidebar.
+
+
 ### Added — Super-admin provisioning via GitHub secrets → .env
 - The platform super-admin is now configured entirely through GitHub secrets and injected into the prod box at deploy time (no hand-editing the box):
   - `SUPER_ADMIN_EMAILS` and `SUPER_ADMIN_PASSWORD` are passed from secrets through `deploy.yml` (over SSH) and written into `/opt/oro/.env` by `deploy/deploy-oro.sh` (idempotent `upsert_env`).

@@ -560,3 +560,35 @@
 
 /* misc spacing helpers used by ported markup (Tailwind covers most mt-/mb-/gap-) */
 .mono { font-variant-numeric: tabular-nums; }
+
+/* =====================================================================
+   Marketplace + modals (prototype (1) additions)
+   ===================================================================== */
+.dl { display: grid; grid-template-columns: auto 1fr; gap: 8px 16px; font-size: 0.875rem; }
+.dl dt { color: var(--text-muted); }
+.dl dd { margin: 0; font-weight: 500; }
+
+.avatar-sq { border-radius: var(--radius-sm); }
+
+.toggle-group { display: inline-flex; border: 1px solid var(--border-strong-color); border-radius: var(--radius-sm); overflow: hidden; }
+.toggle-group button { background: var(--surface); border: 0; border-right: 1px solid var(--border-strong-color); padding: 9px 14px; font-size: 0.875rem; font-weight: 500; color: var(--text-muted); cursor: pointer; transition: var(--transition-colors); }
+.toggle-group button:last-child { border-right: 0; }
+.toggle-group button:hover { color: var(--text); background: var(--surface-2); }
+.toggle-group button.active { background: var(--brand); color: #fff; }
+.mkt-cats { flex-wrap: wrap; max-width: 100%; }
+
+.mkt-card { display: flex; flex-direction: column; height: 100%; }
+.mkt-grid { align-items: stretch; }
+
+.compare-bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 120; background: var(--surface); border-top: 1px solid var(--border-color); box-shadow: 0 -4px 16px rgba(16,24,40,.08); padding: var(--space-4) 0; }
+
+/* modal */
+.scrim { position: fixed; inset: 0; background: var(--overlay-scrim); backdrop-filter: blur(2px); z-index: 1200; display: grid; place-items: center; padding: var(--space-6); animation: fade var(--dur-base); }
+@keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+.modal { background: var(--surface); border-radius: var(--radius-lg); box-shadow: var(--shadow-xl); max-width: 560px; width: 100%; max-height: 90vh; overflow: auto; animation: modalin var(--dur-slow) var(--ease-out); }
+@keyframes modalin { from { opacity: 0; transform: translateY(8px) scale(.98); } to { opacity: 1; transform: none; } }
+.modal-head { display: flex; align-items: center; justify-content: space-between; padding: var(--space-6); border-bottom: 1px solid var(--border-color); }
+.modal-head h3 { font-size: 1.25rem; font-weight: 600; letter-spacing: -.01em; }
+.modal-body { padding: var(--space-6); }
+.modal-foot { display: flex; justify-content: flex-end; gap: 12px; padding: var(--space-5) var(--space-6); border-top: 1px solid var(--border-color); }
+.flabel { display: block; font-size: 0.75rem; font-weight: 500; color: var(--text); margin-bottom: 6px; }
