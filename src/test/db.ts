@@ -15,7 +15,7 @@ export async function getTestPrisma(): Promise<PrismaClient> {
   if (prismaClient) return prismaClient;
   container = await new PostgreSqlContainer("postgres:16-alpine").start();
   const url = container.getConnectionUri();
-  execSync("npx prisma db push --skip-generate --accept-data-loss --schema=./prisma/schema.prisma", {
+  execSync("npx prisma db push --accept-data-loss --schema=./prisma/schema.prisma", {
     env: { ...process.env, DATABASE_URL: url },
     stdio: "inherit",
   });
