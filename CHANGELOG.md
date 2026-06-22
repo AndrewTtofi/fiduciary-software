@@ -12,6 +12,151 @@ auto-generated; sections at and below it are the curated history.
 
 ---
 
+## [1.1.0](https://github.com/AndrewTtofi/fiduciary-software/compare/oro-v1.0.0...oro-v1.1.0) (2026-06-22)
+
+
+### ✨ Features
+
+* **activity:** add client-page mutation actions + new entity types ([0d87492](https://github.com/AndrewTtofi/fiduciary-software/commit/0d874920d939a0e280ee4a354c88a15f2a5797d8))
+* **activity:** add client.self_profile_updated action ([a656132](https://github.com/AndrewTtofi/fiduciary-software/commit/a6561320c7fe639a9969c7e6c8a65161c5122ccd))
+* **admin:** compliance suite + documents/e-sign + connect & API (new prototype) ([321d9b2](https://github.com/AndrewTtofi/fiduciary-software/commit/321d9b24fc39895cbe2192986a491547fca16663))
+* AI Advisor chat + shared Icon/services modules (new prototype) ([9bec570](https://github.com/AndrewTtofi/fiduciary-software/commit/9bec570e2d1668b3841fbea9b9339cfcb282a715))
+* align admin to prototype (dashboard, messages inbox, AML inline) ([3607b75](https://github.com/AndrewTtofi/fiduciary-software/commit/3607b75303c2b67f93f144d4e5e575d50b7c5803))
+* **api:** client PATCH accepts profile fields + primary staff ([b6cda24](https://github.com/AndrewTtofi/fiduciary-software/commit/b6cda24b58eba9a6f854e9649782d04d5c627fb9))
+* **api:** client services POST/PATCH/DELETE ([ccbf260](https://github.com/AndrewTtofi/fiduciary-software/commit/ccbf2604e18e4f6c93a231ea14a2a826047b24a2))
+* **api:** extend /api/account/profile with address + taxResidency ([82e1270](https://github.com/AndrewTtofi/fiduciary-software/commit/82e1270378a93998d06e17e7dc594ed1090c5b26))
+* **api:** key-date PATCH/DELETE ([38fe2d2](https://github.com/AndrewTtofi/fiduciary-software/commit/38fe2d212cbe24d6bc2e8d29885b239fa0c29a2c))
+* **api:** POST /api/account/documents (client upload with ownership check) ([af65421](https://github.com/AndrewTtofi/fiduciary-software/commit/af6542109dc41a37874a571f35506eeb8db7e20e))
+* **api:** POST /api/account/messages ([e4f3aac](https://github.com/AndrewTtofi/fiduciary-software/commit/e4f3aace4bc0b85d9bdacc9136cb2f0820d69c5e))
+* **api:** staff document upload + status + delete ([fb1f598](https://github.com/AndrewTtofi/fiduciary-software/commit/fb1f59876e663a470731ed6b9c22b394489fb2fb))
+* client detail page — full functionality + messaging + doc requests ([64fdb7a](https://github.com/AndrewTtofi/fiduciary-software/commit/64fdb7a2b3e0d7e2fc13c55ccad7f653eeb74dca))
+* client portal v1 + CHANGELOG enforcement ([7c5b97d](https://github.com/AndrewTtofi/fiduciary-software/commit/7c5b97d969449a6ee5b5cf68924374c085c574b0))
+* **client-portal:** add uploadClientDocument (ownership-checked) ([0f52bb6](https://github.com/AndrewTtofi/fiduciary-software/commit/0f52bb654b9d8562897ef752de152fbaaee87e70))
+* **client-portal:** messaging + unified read + self-profile services (TDD) ([64ec381](https://github.com/AndrewTtofi/fiduciary-software/commit/64ec3813c8928826e0a3aed4a87879d1b1a1a153))
+* **client-services:** add CRUD service ([7bcad4e](https://github.com/AndrewTtofi/fiduciary-software/commit/7bcad4e69193ec04344ee232b59f4974c73f4957))
+* **clients:** add updateClientProfile + updatePrimaryStaff + updateClientStatus services ([682dc81](https://github.com/AndrewTtofi/fiduciary-software/commit/682dc81e18d6d1543eeb8879e4e2d0a0d4f39210))
+* **compliance:** add computeRisk scoring function ([b4b25aa](https://github.com/AndrewTtofi/fiduciary-software/commit/b4b25aa548465fd8fae4645aa7023941675bf88a))
+* **compliance:** add country-risk lookup table ([17a429c](https://github.com/AndrewTtofi/fiduciary-software/commit/17a429cc605cf2199391721f600d81885a098ec3))
+* **compliance:** add hit-dedup helper ([e7dd262](https://github.com/AndrewTtofi/fiduciary-software/commit/e7dd2627c26bc13fb30fd16224a1d340aeeca2db))
+* **compliance:** add industry-risk lookup ([3b32deb](https://github.com/AndrewTtofi/fiduciary-software/commit/3b32deb5f33975df71aec947f6f62de954d3d5a8))
+* **compliance:** add runScreening service ([b218237](https://github.com/AndrewTtofi/fiduciary-software/commit/b21823729b95fe868755f4874964966e703bb682))
+* **compliance:** create ComplianceFile + main_contact on submission ([ef3a1ff](https://github.com/AndrewTtofi/fiduciary-software/commit/ef3a1ff5cbc7487575a7b18f8aa5765b0c5626ee))
+* **compliance:** file-scoped API routes (GET, sign-off, risk) ([717d0ae](https://github.com/AndrewTtofi/fiduciary-software/commit/717d0ae16b85cff5300101fb0259e8ce0d9c8f8f))
+* **compliance:** hit + review-task API routes ([2355e17](https://github.com/AndrewTtofi/fiduciary-software/commit/2355e1708e9809893c5faf174e00c0bc15a2c93d))
+* **compliance:** hit review (auto-block on sanctions) + risk persist/override ([4b33963](https://github.com/AndrewTtofi/fiduciary-software/commit/4b3396353aacb3f95e589d3f190442f222fb81ab))
+* **compliance:** party + KYC + screening + document API routes ([ae5d06d](https://github.com/AndrewTtofi/fiduciary-software/commit/ae5d06d463318b9c217d0a049d9913f14f40574d))
+* **compliance:** party CRUD + KYC update services + activity actions ([783860f](https://github.com/AndrewTtofi/fiduciary-software/commit/783860f86ffcf28201246cb536d2e0cc1ac2c210))
+* **compliance:** sign-off service + conversion gate ([c35ac28](https://github.com/AndrewTtofi/fiduciary-software/commit/c35ac28e78ad8d884b19689b9d09fe06da2621c8))
+* **deploy:** self-hosted CI/CD pipeline for ORO ([5fa5256](https://github.com/AndrewTtofi/fiduciary-software/commit/5fa5256fdb76618f74458783bcf65b388e6f9c26))
+* **doc-requests:** API + admin page + form ([870397d](https://github.com/AndrewTtofi/fiduciary-software/commit/870397da180b7f818d5a233c49faf807cb350e14))
+* **documents:** add bucketDocument helper ([c7054bc](https://github.com/AndrewTtofi/fiduciary-software/commit/c7054bc30bd89e7e97c1082284c39dd6864e0818))
+* **documents:** add status/delete services + DocumentRequest fulfillment seam ([15fe2d5](https://github.com/AndrewTtofi/fiduciary-software/commit/15fe2d5963b52e9f02d90f44fa073e7832782d13))
+* **key-dates:** add update + delete services ([966731b](https://github.com/AndrewTtofi/fiduciary-software/commit/966731bd75ce14174fffde35227b6f048b59cede))
+* KYC/AML compliance subsystem ([0d874b7](https://github.com/AndrewTtofi/fiduciary-software/commit/0d874b7cca06206081c430f50cfb283c37e5da92))
+* **messages:** add sendMessage + listThread (with email side-effect) ([461c858](https://github.com/AndrewTtofi/fiduciary-software/commit/461c8586e62206f5ccd7c99b9e6fea55d789f5f9))
+* **messages:** API + admin thread page + composer ([1976ab7](https://github.com/AndrewTtofi/fiduciary-software/commit/1976ab7027fa706e1335beb72ed8aaef88b8cba7))
+* **notify:** delta-only Discord deploy notes + forum tags + white-label copy ([a1d7a57](https://github.com/AndrewTtofi/fiduciary-software/commit/a1d7a573c62c149127aad9d4d176ab6833608d02))
+* **notify:** delta-only Discord deploy notes + forum tags + white-label copy ([9200928](https://github.com/AndrewTtofi/fiduciary-software/commit/92009288974e7c9939475b6dfa65de3b907045e5))
+* **notify:** white-label COMPANY_NAME variable for deploy notifications ([3457c50](https://github.com/AndrewTtofi/fiduciary-software/commit/3457c502c9be5f21311e7dbfdaaf61fc5ca66eca))
+* partner-network marketplace + client applications (new prototype) ([2583954](https://github.com/AndrewTtofi/fiduciary-software/commit/25839548067e7f77a198b43a6bbe971e34d1b96d))
+* **portal:** application page notice for converted clients ([f5ccbb1](https://github.com/AndrewTtofi/fiduciary-software/commit/f5ccbb1ea601620bbaf67efd2a1beba3ec0b1016))
+* **portal:** per-folder documents + request fulfillment + arbitrary upload ([6794dde](https://github.com/AndrewTtofi/fiduciary-software/commit/6794ddea1a9b7f95731127b94f7acd0b8e9c6882))
+* **portal:** role-aware dashboard (ClientDashboard for converted clients) ([c73c633](https://github.com/AndrewTtofi/fiduciary-software/commit/c73c633bf06cfecc16405ff0c9886260963b4cd4))
+* **portal:** settings form gains Company section for clients ([7af37e9](https://github.com/AndrewTtofi/fiduciary-software/commit/7af37e93a49d53b711aaa272dc70b1a69cc095bb))
+* **portal:** unified messages read + new /api/account/messages composer ([f752cf7](https://github.com/AndrewTtofi/fiduciary-software/commit/f752cf7109e662987b361633ca6a4bcc012f92f1))
+* **pricing:** platform pricing with working monthly/annual toggle (new prototype) ([7db0d13](https://github.com/AndrewTtofi/fiduciary-software/commit/7db0d136f3a05ab04a765e8db3007121a9361a37))
+* provision super-admin from GitHub secrets, injected into prod .env ([3b25ce0](https://github.com/AndrewTtofi/fiduciary-software/commit/3b25ce08b5ec4ed22d1aa30e9fa9a61e3654c6fe))
+* realign partner portal to the light prototype shell ([685b3a9](https://github.com/AndrewTtofi/fiduciary-software/commit/685b3a91e4f985a92b9e6f3858222dc732c3642e))
+* **schema:** add KYC/AML compliance models ([9a01202](https://github.com/AndrewTtofi/fiduciary-software/commit/9a0120219a70e6a5066749d2808cef1365662b2c))
+* **schema:** extend Client + Document, add DocumentRequest ([18bfc5d](https://github.com/AndrewTtofi/fiduciary-software/commit/18bfc5db79161d96dcce9d995b1e82ffb326e913))
+* **screening:** add ScreeningProvider interface + env wiring ([3dafe13](https://github.com/AndrewTtofi/fiduciary-software/commit/3dafe13ec3d00d848850cb514bb98c62f08bef08))
+* **screening:** implement OpenSanctionsProvider with retry + threshold ([7ef44fe](https://github.com/AndrewTtofi/fiduciary-software/commit/7ef44fe550e52bf488a3bab38912547f2702809f))
+* split admin into platform-admin (settings) vs staff-admin (ops) ([a4ba35e](https://github.com/AndrewTtofi/fiduciary-software/commit/a4ba35e3f672cfdc62f85f7027741fbf47ea3c0c))
+* super-admin-only plan tier control ([337439c](https://github.com/AndrewTtofi/fiduciary-software/commit/337439c76ede82a8aba06311138978a8b460fcce))
+* super-admin-only plan tier control ([9e30f1d](https://github.com/AndrewTtofi/fiduciary-software/commit/9e30f1d501a3ca42368b24f1b132873d7a6e8638))
+* **ui:** add Compliance to admin nav ([d6f7c02](https://github.com/AndrewTtofi/fiduciary-software/commit/d6f7c0203f5d4f515b24828c4fd8879b77e90fd1))
+* **ui:** compliance pages (file, party, submissions, tasks) ([bdaa487](https://github.com/AndrewTtofi/fiduciary-software/commit/bdaa487a2828231892fdfa6f89d097d6b6641545))
+* **ui:** ComplianceBar (status + risk + link to /compliance) ([5a1b4ef](https://github.com/AndrewTtofi/fiduciary-software/commit/5a1b4ef3e56e2fa1a5bf2db266b35c06ce864fa4))
+* **ui:** ComplianceDashboard + RiskPanel + PartiesTable + AddParty + SignOff components ([92ce505](https://github.com/AndrewTtofi/fiduciary-software/commit/92ce505f8c1aad8cad901eaf0cc9ae848e81a9ce))
+* **ui:** convert modal shows compliance status + gates conversion ([5525df3](https://github.com/AndrewTtofi/fiduciary-software/commit/5525df39118cfbaea594641f35e59fe2e9d39455))
+* **ui:** EditableClientHeader (inline edit for profile fields) ([b47e716](https://github.com/AndrewTtofi/fiduciary-software/commit/b47e7165635e53f53e6c2496074babcf9924a1f5))
+* **ui:** KeyDatesSection + KeyDateRowClient (edit/complete/delete/filter) ([a5f144e](https://github.com/AndrewTtofi/fiduciary-software/commit/a5f144e9c987e0289b95fb9ab7914106fe8ffe68))
+* **ui:** luxe pass — Mediterranean private-bank aesthetic + Client tabs ([fead205](https://github.com/AndrewTtofi/fiduciary-software/commit/fead205e1da4a52921c9cd9267262ed6eb7f86b4))
+* **ui:** per-folder Documents UI + DocumentRow + UploadButton ([011f677](https://github.com/AndrewTtofi/fiduciary-software/commit/011f677c06486f482f69c56b9dc611fa14f8cb5c))
+* **ui:** Quiet Authority redesign — foundation (tokens, type, components) ([4024581](https://github.com/AndrewTtofi/fiduciary-software/commit/40245817c699ce4642ba5bae4cd63e1ff312923c))
+* **ui:** ReassignModal replaces alert() in ClientStatusPanel ([4b68987](https://github.com/AndrewTtofi/fiduciary-software/commit/4b68987d7765de34d6395092484abde7cf73e275))
+* **ui:** rewire client page to new editable components ([87c50cb](https://github.com/AndrewTtofi/fiduciary-software/commit/87c50cb2a2ce2ac3eb738c40dbdead15ed6b0a88))
+* **ui:** ServicesEngagedList + inline edit + AddServiceModal ([7afe9f0](https://github.com/AndrewTtofi/fiduciary-software/commit/7afe9f07021654df7a6ec644054cb65e5da9d64f))
+* **worker:** backfill on boot + register compliance cron jobs ([07325d5](https://github.com/AndrewTtofi/fiduciary-software/commit/07325d5a7ca0bb663676181935f736712ab78f88))
+* **worker:** daily periodic-review reminder job ([fa07961](https://github.com/AndrewTtofi/fiduciary-software/commit/fa07961f5703ded86238f9e0742db20c3019c5d6))
+* **worker:** hourly auto re-screening job ([72f05c7](https://github.com/AndrewTtofi/fiduciary-software/commit/72f05c78a6b9904cc5a9eba5de3ec1f13812a77a))
+
+
+### 🐛 Bug Fixes
+
+* **auth:** key middleware cookie security to AUTH_URL scheme, not NODE_ENV ([55b5027](https://github.com/AndrewTtofi/fiduciary-software/commit/55b5027e1622e8f4fd84a8152f03953f7e822a30))
+* **build:** make tsconfig.worker.json TypeScript 6 compatible ([8475d37](https://github.com/AndrewTtofi/fiduciary-software/commit/8475d37847b584241050a1d08e977236268f5c5a))
+* **build:** restore Docker build/deploy broken by TS6 (worker tsconfig) ([9185170](https://github.com/AndrewTtofi/fiduciary-software/commit/91851702b7013059c86f794513d63cdd11d1ef5b))
+* **ci:** make lint + typecheck pass ([ce1a829](https://github.com/AndrewTtofi/fiduciary-software/commit/ce1a829b76ab15aadb5f35b2618a1be4f2486360))
+* **client-page:** final-review findings ([f1bcc61](https://github.com/AndrewTtofi/fiduciary-software/commit/f1bcc61d617a5f669dedefec959c472db7958e0d))
+* **compliance:** final-review findings ([6e58cc9](https://github.com/AndrewTtofi/fiduciary-software/commit/6e58cc9cf740ce3092a3a74c5a54d554972e9d2e))
+* **deploy:** db push in deploy-oro.sh (repo ships no migrations) ([f9f094e](https://github.com/AndrewTtofi/fiduciary-software/commit/f9f094e4d33b3ad5a58f95355b8712605eb6f74b))
+* **deps:** bump nodemailer to ^7 to satisfy @auth/core peer dep ([6ba1cd5](https://github.com/AndrewTtofi/fiduciary-software/commit/6ba1cd59adc94f329c776b438901ad365e2458b4))
+* **docker:** build-time env placeholders + public/ dir ([978f9b2](https://github.com/AndrewTtofi/fiduciary-software/commit/978f9b2a3616b4c7c37e75c6d019be61e283f6b0))
+* **docker:** npm ci with --legacy-peer-deps in prod image ([e87a7ce](https://github.com/AndrewTtofi/fiduciary-software/commit/e87a7cefbe6ca48133fdb9f42149551216ad5b07))
+* **e2e:** complete auth-tab selector fix + deterministic messaging convert ([816f8be](https://github.com/AndrewTtofi/fiduciary-software/commit/816f8be51ad12b86a725f603470f6c4c3cbc3f85))
+* **e2e:** messaging test used client composer selectors on staff page ([f77dae6](https://github.com/AndrewTtofi/fiduciary-software/commit/f77dae672230a72a219a78fd5c6de4e0f7f49e10))
+* **e2e:** update auth-tab fixture selector to .auth-tabs; parallelize CI ([ddbc752](https://github.com/AndrewTtofi/fiduciary-software/commit/ddbc75214e2ec61809d9bc7285128d89da88bef5))
+* **next16:** bump next-auth to beta.31 (Next 16 peer) + dev image deps ([c1ce6fa](https://github.com/AndrewTtofi/fiduciary-software/commit/c1ce6fa2c2d0583b7aeb8cf0c1b760e1cae984fa))
+* **pricing:** show firm service pricing in tenant builds, drop platform toggle ([6f5235d](https://github.com/AndrewTtofi/fiduciary-software/commit/6f5235d50f7430002c6ad10a60c493769b403927))
+* **prisma:** drop --skip-generate from db push (removed in Prisma 7) ([553cba2](https://github.com/AndrewTtofi/fiduciary-software/commit/553cba24b92d82c9d8e33a2b09463a4154c9ea1e))
+* quote runner-smoke docker step (YAML colon parse error) ([16a1d52](https://github.com/AndrewTtofi/fiduciary-software/commit/16a1d52b35adfd64e19d8b4bc0b2a3a5ecbc10f5))
+* **schema:** enforce 1:1 latestScreeningRun via unique FK ([8de07da](https://github.com/AndrewTtofi/fiduciary-software/commit/8de07da5a529970b52a79ec11155b28537f3d356))
+* **ts:** make tsconfig TypeScript 6 compatible ([23d5e82](https://github.com/AndrewTtofi/fiduciary-software/commit/23d5e82d284fd06e4f4845d76a445f16f28142a9))
+
+
+### 📦 Dependencies
+
+* **deps:** bump the prod-minor-patch group across 1 directory with 5 updates ([7a97bd7](https://github.com/AndrewTtofi/fiduciary-software/commit/7a97bd7e816d6ac9d44051443668a2ccf841daa1))
+* **deps:** bump the react group across 1 directory with 3 updates ([6e62a50](https://github.com/AndrewTtofi/fiduciary-software/commit/6e62a50577b9f9f9629c19f07eb91e12927c0f80))
+
+
+### 🛠️ Refactors
+
+* **admin:** unify all admin pages onto the prototype design system ([1d56879](https://github.com/AndrewTtofi/fiduciary-software/commit/1d56879759cf9992eaa1f3ad99c18d7f90fca3c8))
+
+
+### 📚 Documentation
+
+* add CLAUDE.md LLM guide + switch Discord tags to inline labels ([84d9a8b](https://github.com/AndrewTtofi/fiduciary-software/commit/84d9a8bcf89f84e30a4b0765e39e82e53cffe27c))
+* add CLAUDE.md LLM guide; switch Discord tags to inline labels ([8da4f16](https://github.com/AndrewTtofi/fiduciary-software/commit/8da4f1621009118418cc1aa6e811f93a395d7dfc))
+* add client portal v1 design spec ([f08f998](https://github.com/AndrewTtofi/fiduciary-software/commit/f08f998f7c5e633d4f768f2c77330d8e704bb894))
+* add client portal v1 implementation plan ([3fcee9d](https://github.com/AndrewTtofi/fiduciary-software/commit/3fcee9d4c5c491e3000b38e1af79d3dcf58ea6f8))
+* add client-page functional design spec ([156a25d](https://github.com/AndrewTtofi/fiduciary-software/commit/156a25d90a0c25d3be2b28bfb82848c804237d2c))
+* add client-page functional implementation plan ([73a4145](https://github.com/AndrewTtofi/fiduciary-software/commit/73a4145af9672be6b259c4675ffca541f988dfdd))
+* add KYC/AML compliance design spec ([e29a65e](https://github.com/AndrewTtofi/fiduciary-software/commit/e29a65e8afab8701bbf7e5bd416d83af65228ef1))
+* add KYC/AML compliance implementation plan ([ba96de0](https://github.com/AndrewTtofi/fiduciary-software/commit/ba96de03ef8d3340662f9741b554472db69a9a38))
+* link wiki from README ([7bff88d](https://github.com/AndrewTtofi/fiduciary-software/commit/7bff88df76048f1605e8faf07dfdd93952acdcd0))
+* **spec:** tighten risk bands to 0-2/3-5/6+ to match factor weights ([7ce465e](https://github.com/AndrewTtofi/fiduciary-software/commit/7ce465e44d08b1f5c38fdc8cd6fab980a163852f))
+* **wiki:** complete ORO reference (18 chapters + index) ([d524e25](https://github.com/AndrewTtofi/fiduciary-software/commit/d524e256c7edc4fc28a3eeec731c00a4f892c528))
+
+
+### 🤖 CI/CD
+
+* add on-demand seed-oro workflow (idempotent prod DB seed) ([1cd92af](https://github.com/AndrewTtofi/fiduciary-software/commit/1cd92afd9d88e09e41339cd7d3fcf23b53023c42))
+* add one-off diag-login workflow (read-only prod auth diagnostic) ([ad946d3](https://github.com/AndrewTtofi/fiduciary-software/commit/ad946d3135ce0548e3c94692b49a941f5620887f))
+* bump Node 20 -&gt; 26 to support undici 8 from testcontainers bump ([704ef49](https://github.com/AndrewTtofi/fiduciary-software/commit/704ef49403b91a0ff92fb5347c0ef578d2dbc1a4))
+* bump the actions group across 1 directory with 6 updates ([782928c](https://github.com/AndrewTtofi/fiduciary-software/commit/782928cf06536c0c58b7c93ef2956c187bc7cf96))
+* bump the actions group across 1 directory with 6 updates ([2dbd288](https://github.com/AndrewTtofi/fiduciary-software/commit/2dbd288126f5f623b2d7245a4988f3ec953a570b))
+* establish semantic versioning via release-please (v1.0.0 baseline) ([6a3d3b4](https://github.com/AndrewTtofi/fiduciary-software/commit/6a3d3b4bf59baf934552ae16ebe32915e6593bbd))
+* establish semantic versioning via release-please (v1.0.0 baseline) ([ee2d1bc](https://github.com/AndrewTtofi/fiduciary-software/commit/ee2d1bc5345bf6350260efa1dcf609dd98dd5ab1))
+* exempt Dependabot from the changelog gate ([510a723](https://github.com/AndrewTtofi/fiduciary-software/commit/510a7238584187fd1e60231931fc5298cf8edd1f))
+* exempt Dependabot from the changelog gate ([71558e9](https://github.com/AndrewTtofi/fiduciary-software/commit/71558e967c4bcb18b23159a0ea8c7fe297a29ddf))
+* fix diag-login module resolution (run in web workdir) ([9a21169](https://github.com/AndrewTtofi/fiduciary-software/commit/9a21169274e4d53d2d04cc10d7523dc9ebdae832))
+* keep nodemailer at v6, pass --legacy-peer-deps to npm ci ([08493d9](https://github.com/AndrewTtofi/fiduciary-software/commit/08493d98950d9c9d2c7b9f25a292db7920671bf4))
+* pass --legacy-peer-deps to npm ci (the actual fix) ([c9621fc](https://github.com/AndrewTtofi/fiduciary-software/commit/c9621fcd90a71fc9f8486ea69c23e9a385f800b8))
+* provide dummy DATABASE_URL to prisma validate step ([c377262](https://github.com/AndrewTtofi/fiduciary-software/commit/c377262b9d56c0a3ad2c07ed7fd54e260f4c144c))
+
 ## [1.0.0] - 2026-06-22
 
 First production release — the platform on Node 26 / Next.js 16 / Prisma 7 /
