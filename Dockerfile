@@ -6,7 +6,7 @@
 # ────────────────────────────────────────────────────────────────────────
 
 # 1) deps — install only production dependencies
-FROM node:20-alpine AS deps
+FROM node:26-alpine AS deps
 RUN apk add --no-cache libc6-compat python3 make g++ openssl
 WORKDIR /app
 COPY package.json package-lock.json* ./
@@ -14,7 +14,7 @@ COPY prisma ./prisma
 RUN npm ci --no-audit --no-fund --legacy-peer-deps
 
 # 2) build — compile Next.js (standalone) + worker TS
-FROM node:20-alpine AS builder
+FROM node:26-alpine AS builder
 RUN apk add --no-cache libc6-compat openssl
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
@@ -32,7 +32,7 @@ RUN npm run build
 RUN npm run worker:build
 
 # 3) runner — minimal runtime, non-root
-FROM node:20-alpine AS runner
+FROM node:26-alpine AS runner
 RUN apk add --no-cache openssl tini curl \
  && addgroup -S oro && adduser -S oro -G oro
 WORKDIR /app
