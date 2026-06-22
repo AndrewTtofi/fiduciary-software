@@ -12,6 +12,7 @@ This project follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) lo
 
 ### Changed — Upgrade to Next.js 16 + ESLint flat config
 - Bumped `next` and `eslint-config-next` 15.5 → 16.2.9. Next 16 removed `next lint`, so migrated to the ESLint CLI: replaced `.eslintrc.json` with `eslint.config.mjs` (flat config spreading `eslint-config-next/core-web-vitals`) and changed the `lint` script to `eslint .`.
+- Bumped `next-auth` 5.0.0-beta.25 → beta.31, the first beta whose `next` peer range includes 16. Also added `--legacy-peer-deps` to `Dockerfile.dev`'s `npm install` (matching the prod Dockerfile and CI) so the dev image build resolves cleanly.
 - `eslint-config-next` 16 enables the new React Compiler ruleset (`react-hooks` v6). The rules that flag existing call sites — `static-components`, `set-state-in-effect`, `purity` — are set to `warn` so the framework upgrade doesn't bundle a large behavioural cleanup; resolving them is follow-up work.
 - ESLint stays on 9.x: the latest `eslint-plugin-react` (7.37.5, pulled by `eslint-config-next`) caps its ESLint peer at `^9.7` and crashes on ESLint 10's removed `context.getFilename()` API. ESLint 10 (Dependabot #17) is therefore blocked upstream until `eslint-plugin-react` ships ESLint 10 support.
 
