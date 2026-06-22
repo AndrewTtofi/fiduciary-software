@@ -1,0 +1,28 @@
+name: release-please
+
+# Semantic versioning, automated. On every push to main, release-please reads
+# the Conventional Commits since the last release (feat → minor, fix → patch,
+# `!`/BREAKING CHANGE → major) and maintains a "release PR" that bumps the
+# version in package.json and updates CHANGELOG.md. Merging that release PR
+# tags vX.Y.Z and cuts a GitHub release; the tag triggers the CI workflow to
+# build a versioned Docker image (ghcr …:vX.Y.Z).
+#
+# Requires the repo setting: Settings → Actions → General →
+# "Allow GitHub Actions to create and approve pull requests".
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release-please:
+    name: Maintain release PR + tags
+    runs-on: ubuntu-latest
+    steps:
+      - uses: googleapis/release-please-action@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}

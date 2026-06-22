@@ -118,15 +118,17 @@ build-image       only on push to main / tags — builds + pushes the prod
                   image to GHCR
 ```
 
-`unit`, `integration`, `e2e`, and `changelog` all run on PRs.
+`unit`, `integration`, and `e2e` all run on PRs.
 `build-image` runs only after merge.
 
-### Changelog gate
+### Versioning & changelog (release-please)
 
-`.github/pull_request_template.md` includes a CHANGELOG line. CI fails
-if `CHANGELOG.md` isn't part of the PR diff. This forces every PR to
-document what it ships under the **Unreleased** section. When a release
-cuts, the Unreleased block becomes a dated section.
+Versioning is semantic and automated — there is **no** manual changelog gate.
+`.github/workflows/release-please.yml` reads [Conventional Commits](https://www.conventionalcommits.org/)
+on `main` (`feat:` → minor, `fix:` → patch, `feat!:` → major) and maintains a
+**release PR** that bumps `package.json` + `CHANGELOG.md`. Merging it tags
+`vX.Y.Z` and the tag triggers CI to build a `…:vX.Y.Z` image. Do not hand-edit
+`CHANGELOG.md`. Baseline is v1.0.0.
 
 ## Deployment
 
@@ -176,10 +178,12 @@ Migrations are *additive* — never re-applied if already at the head.
 
 ## Release process
 
-1. PR with changes → CHANGELOG.md updated under "Unreleased" → CI green → merge.
-2. After merge, `build-image` job tags and pushes a new image to GHCR.
-3. (Manual today) `docker compose pull && docker compose up -d` on the
-   target host runs migrations and brings up the new image.
+1. PR with Conventional-Commit title/commits → CI green → merge to `main`
+   (auto-deploys; every merge ships).
+2. release-please opens/updates a **release PR** accumulating the version bump +
+   changelog. Merge it when you want to cut a version → it tags `vX.Y.Z`.
+3. The `vX.Y.Z` tag triggers `build-image` to push a versioned image to GHCR
+   (`…:vX.Y.Z`), alongside the `:latest` from each `main` deploy.
 
 A proper rollout would gate on the readiness probe and use a blue/green
 strategy — not in scope for the MVP host setup.

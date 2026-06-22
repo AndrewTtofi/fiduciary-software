@@ -95,20 +95,26 @@ This repo runs Prisma 7 in **driver-adapter** mode — different from typical se
   script + dev compose). `prisma.config.ts` **must** be in the runtime image —
   the prod `Dockerfile` copies it. `prisma generate` works without it.
 
-## Changelog gate (every human PR)
+## Versioning & changelog (release-please + Conventional Commits)
 
-CI job `Changelog updated` **fails any PR** (that changes non-docs files) which
-doesn't touch `CHANGELOG.md`. Add an entry under `## Unreleased`:
+Versioning is **semantic** and **automated** — there is no manual changelog gate
+and you must **not hand-edit `CHANGELOG.md`** (release-please owns it).
 
-```md
-### <Added|Changed|Fixed> — <Short title>
-- What changed and why.
-```
-
-Dependabot is exempt (`github.actor != 'dependabot[bot]'`). Docs-only PRs
-(`docs/`, `CHANGELOG.md`, the PR template) are waived. Note: **`CLAUDE.md` and
-`README.md` are NOT under `docs/`**, so editing them still requires a CHANGELOG
-entry.
+- Write [**Conventional Commits**](https://www.conventionalcommits.org/):
+  `feat:` → minor, `fix:` → patch, `feat!:` / `BREAKING CHANGE:` → major. Also
+  used: `deps:`, `ci:`, `build:`, `docs:`, `perf:`, `refactor:`, `chore:`. Scope
+  is encouraged (`feat(notify): …`). **The PR title must also be a Conventional
+  Commit** — squash-merge uses it as the commit subject.
+- `.github/workflows/release-please.yml` runs on push to `main`, reads the
+  commits since the last release, and maintains a **release PR** that bumps
+  `package.json` + `CHANGELOG.md`. Merging that release PR tags `vX.Y.Z` and
+  cuts a GitHub release; the tag triggers CI to build a `…:vX.Y.Z` Docker image.
+- Config: `release-please-config.json` (changelog sections) +
+  `.release-please-manifest.json` (current version). Baseline is **v1.0.0**.
+- One-time repo setting required: **Settings → Actions → General → "Allow GitHub
+  Actions to create and approve pull requests."**
+- The deploy notifier (`scripts/notify-deploy.mjs`) reads `package.json`'s
+  version, so deploy posts show the released version.
 
 ## Deploy & white-label
 

@@ -14,12 +14,11 @@
 - [ ] security
 - [ ] breaking change
 
-## Changelog updated
+## Versioning & changelog
 
-- [ ] I updated `CHANGELOG.md` in the **Unreleased** section with a user-visible entry for this PR.
+- [ ] My commits follow [Conventional Commits](https://www.conventionalcommits.org/) (`feat:`, `fix:`, `feat!:`/`BREAKING CHANGE:` for major, plus `deps:`/`ci:`/`docs:`/`chore:`).
 
-> CI enforces this — the `Changelog updated` check will fail if `CHANGELOG.md` is not in the diff.
-> Docs-only changes to files under `docs/` are exempt; the CI check skips changelog enforcement when the only changed files are docs.
+> Do **not** hand-edit `CHANGELOG.md` — [release-please](https://github.com/googleapis/release-please) generates it and bumps the version from your commit messages on merge to `main`. The PR title should also be a Conventional Commit (squash-merge uses it).
 
 ## Test plan
 
