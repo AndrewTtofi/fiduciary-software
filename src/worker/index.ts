@@ -81,7 +81,6 @@ async function flipOverdueKeyDates() {
 }
 
 function start() {
-  // eslint-disable-next-line no-console
   console.log("[worker] starting reminders + key_date scheduler");
 
   backfillCompliance().catch((e) => console.error("[backfill-compliance] failed:", e));
@@ -101,7 +100,6 @@ function start() {
 start();
 
 process.on("SIGTERM", async () => {
-  // eslint-disable-next-line no-console
   console.log("[worker] SIGTERM — shutting down");
   await prisma.$disconnect();
   process.exit(0);
