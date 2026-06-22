@@ -13,6 +13,10 @@ This project follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) lo
 ### Changed — Upgrade TypeScript to 6.0
 - Bumped `typescript` 5.9 → 6.0.3. Removed the deprecated `baseUrl` from `tsconfig.json` (TS 6 deprecates it, TS 7 removes it); the `@/*` path mapping resolves fine without it since all source imports are either `@/*` or real packages. Added `src/types/assets.d.ts` declaring `*.css` to satisfy TS 6's stricter side-effect-import checking (TS2882) for `import "./globals.css"`.
 
+### Changed — Bump dev tooling group + CI Node 20 → 26
+- Bumped the dev-minor-patch group (`@playwright/test`, `@testcontainers/postgresql`, `@vitest/coverage-v8`, `tsx`).
+- Bumped CI `node-version` from 20 to 26 across the unit, integration and e2e jobs. The new `@testcontainers/postgresql` pulls `undici@8`, which requires Node ≥ 22.19 (`worker_threads.markAsUncloneable`); on Node 20 every integration suite crashed at import with `webidl.util.markAsUncloneable is not a function`. CI now matches the production runtime image (`node:26-alpine`).
+
 ### Changed — CI: exempt Dependabot from the changelog gate
 - The `Changelog updated` check now skips Dependabot PRs (`github.actor != 'dependabot[bot]'`). Dependency bumps only touch manifests/lockfiles and never edit `CHANGELOG.md`, so the gate was failing every Dependabot PR. Human PRs still require a changelog entry.
 
