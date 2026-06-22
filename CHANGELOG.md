@@ -10,6 +10,12 @@ This project follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) lo
 
 ## Unreleased
 
+### Fixed — Lint quick wins
+- Removed 8 unused `eslint-disable` directives (`no-console`/`no-var`, neither rule is enforced under the flat config) across `src/worker/*`, `src/lib/db.ts`, `src/lib/providers/email.ts`, `prisma/seed.ts`.
+- Named the anonymous default export in `postcss.config.mjs` (`import/no-anonymous-default-export`).
+- Bumped `engines.node` `>=20` → `>=22` to match the actual requirement (undici 8 needs ≥22.19; CI/runtime are on Node 26).
+- Lint is now down to the 37 React Compiler warnings (`react-hooks` static-components / set-state-in-effect / purity) deferred during the Next 16 upgrade.
+
 ### Changed — Discord deploy notifications: delta-only + change-type labels + white-label wording
 - Each deploy now posts **only that deploy's changes** (the CHANGELOG.md additions diffed between the previously-deployed commit and the current one) instead of re-posting the whole accumulated Unreleased section. Falls back to the full section when the previous deploy commit is unknown.
 - Prefixes each post with **inline change-type labels** (text, e.g. `📦 Dependencies · 🐛 Fix`) derived from each entry's heading: ✨New / 🛠️Improvement / 🐛Fix / 📦Dependencies / 🔒Security / 🔧Internal. Plain text — no Discord forum tags, tag IDs, or bot token required.

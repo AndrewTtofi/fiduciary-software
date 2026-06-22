@@ -88,7 +88,6 @@ class ResendProvider implements EmailProvider {
 class ConsoleProvider implements EmailProvider {
   async send(args: SendArgs) {
     // Used in tests + when EMAIL_DRIVER=console; never silently swallow in prod.
-    // eslint-disable-next-line no-console
     console.log("[email:console]", { to: args.to, subject: args.subject });
     return { messageId: `console-${Date.now()}` };
   }
