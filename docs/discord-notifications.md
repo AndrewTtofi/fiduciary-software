@@ -10,9 +10,9 @@ plain-language "what changed" summary to Discord. It is written for non-engineer
   `scripts/notify-deploy.mjs`.
 - The script posts **only that deploy's changes** — it diffs `CHANGELOG.md`
   between the previously-deployed commit (`PREV_DEPLOY_SHA`) and the current one,
-  and shows just the entries added in this deploy (not the whole Unreleased
-  list). On the very first run, or if the range is unknown, it falls back to the
-  full top `## Unreleased` section.
+  and shows just the entries added in this deploy. On the very first run, or if
+  the range is unknown, it falls back to the top `## <version>` section of the
+  changelog (release-please-managed).
 - Entries are grouped into **✨ New / 🛠️ Improvements / 🐛 Fixes** in the body.
 - The post is prefixed with **inline change-type labels** — plain text such as
   `📦 Dependencies · 🐛 Fix` — derived from each entry's heading. These need **no

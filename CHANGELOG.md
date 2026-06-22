@@ -1,14 +1,23 @@
 # Changelog
 
-All notable changes to the ORO platform that ship to `main` are recorded here.
+All notable changes to this platform are recorded here.
 
-This project follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) loosely and uses date-stamped sections rather than semver until the first production tag.
-
-> **PR requirement:** every pull request that targets `main` must update this file before merge. The CI `Changelog updated` check verifies the diff touches `CHANGELOG.md`. See [`.github/pull_request_template.md`](./.github/pull_request_template.md).
+Versioning is **[semantic](https://semver.org/)**. From v1.0.0 onward this file
+is maintained by [release-please](https://github.com/googleapis/release-please)
+from [Conventional Commits](https://www.conventionalcommits.org/) — **do not edit
+it by hand.** Write good commit messages (`feat:` → minor, `fix:` → patch,
+`feat!:` / `BREAKING CHANGE:` → major) and release-please updates the versions
+and sections below via its release PR. Sections above `## [1.0.0]` are
+auto-generated; sections at and below it are the curated history.
 
 ---
 
-## Unreleased
+## [1.0.0] - 2026-06-22
+
+First production release — the platform on Node 26 / Next.js 16 / Prisma 7 /
+TypeScript 6, with the dependency-upgrade and white-label deploy-notification
+work below. Everything previously tracked under "Unreleased" is rolled into this
+baseline.
 
 ### Fixed — Lint quick wins
 - Removed 8 unused `eslint-disable` directives (`no-console`/`no-var`, neither rule is enforced under the flat config) across `src/worker/*`, `src/lib/db.ts`, `src/lib/providers/email.ts`, `prisma/seed.ts`.
