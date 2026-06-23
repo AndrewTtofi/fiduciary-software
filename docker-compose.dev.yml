@@ -32,6 +32,11 @@ services:
         exec npm run dev -- --hostname 0.0.0.0 --port 3000
     environment:
       NODE_ENV: development
+      # Pin the DB to the compose `db` service so the stack works regardless of
+      # what the bind-mounted host .env sets DATABASE_URL to. A host .env often
+      # points at localhost:5432 for host-side tooling, which is wrong inside
+      # the container (the DB is reachable as `db`, not localhost).
+      DATABASE_URL: postgresql://oro:oro@db:5432/oro?schema=public
       SEED_ON_BOOT: "true"
       EMAIL_DRIVER: smtp
       SMTP_HOST: mail
@@ -70,6 +75,7 @@ services:
     command: ["npm", "run", "worker:dev"]
     environment:
       NODE_ENV: development
+      DATABASE_URL: postgresql://oro:oro@db:5432/oro?schema=public
       CHOKIDAR_USEPOLLING: "true"
     volumes:
       - ./:/app
