@@ -5,25 +5,39 @@ const prisma = new PrismaClient({ adapter: pgAdapter() });
 
 /**
  * Idempotent white-label brand provisioning from env. Runs on every deploy.
- * The firm name is configured ONCE as the `COMPANY_NAME` GitHub Actions
- * variable (the same one the deploy notifier uses) and injected into the box
- * .env by the deploy script — never hard-coded in the app.
+ * The firm identity is configured ONCE as GitHub Actions variables (the same
+ * COMPANY_NAME the deploy notifier uses) and injected into the box .env by the
+ * deploy script — never hard-coded in the app.
  *
- * Sets the singleton OrgSettings.brandName to COMPANY_NAME so the whole app
- * (emails, calendar, UI, reference prefixes, legal pages) renders under the
- * firm's name. No-op when COMPANY_NAME is unset, so existing/UI-customised
- * branding is preserved.
+ * - COMPANY_NAME        → OrgSettings.brandName (required for any seeding)
+ * - COMPANY_LEGAL_NAME  → OrgSettings.legalName (emails, legal pages, footer ©)
+ * - COMPANY_EMAIL       → OrgSettings.contactEmail
+ * - COMPANY_ADDRESS     → OrgSettings.address
+ *
+ * Each optional field is only written when its env var is set, so existing /
+ * UI-customised branding is preserved. No-op when COMPANY_NAME is unset.
+ * (Marketing-site contact details — phone/WhatsApp — are site content, edited
+ * under Admin → Content; they are not env-provisioned.)
  */
 export async function ensureBranding() {
   const name = process.env.COMPANY_NAME?.trim();
   if (!name) { console.log("[branding] COMPANY_NAME not set — leaving branding as-is."); return; }
 
+  const optional: { legalName?: string; contactEmail?: string; address?: string } = {};
+  const legalName = process.env.COMPANY_LEGAL_NAME?.trim();
+  const contactEmail = process.env.COMPANY_EMAIL?.trim();
+  const address = process.env.COMPANY_ADDRESS?.trim();
+  if (legalName) optional.legalName = legalName;
+  if (contactEmail) optional.contactEmail = contactEmail;
+  if (address) optional.address = address;
+
   const row = await prisma.orgSettings.upsert({
     where: { id: "singleton" },
-    update: { brandName: name },
-    create: { id: "singleton", brandName: name },
+    update: { brandName: name, ...optional },
+    create: { id: "singleton", brandName: name, ...optional },
   });
-  console.log(`[branding] set brandName="${row.brandName}".`);
+  const extras = Object.keys(optional).length ? ` (+ ${Object.keys(optional).join(", ")})` : "";
+  console.log(`[branding] set brandName="${row.brandName}"${extras}.`);
 }
 
 if (require.main === module) {

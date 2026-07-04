@@ -54,6 +54,42 @@ function keyOf(d: Date): string {
   return d.toISOString();
 }
 
+/** Aggregate availability for the public contact form: the next few slot times
+ *  where at least one staff expert is still free. Deliberately anonymous — no
+ *  expert identity, no per-expert matrix — so it is safe to render publicly.
+ *  Actual booking still happens post-approval; the form only records preference. */
+export async function listPublicSlots(limit = 6): Promise<Date[]> {
+  const experts = await prisma.user.count({ where: { role: Role.staff } });
+  if (experts === 0) return [];
+
+  const now = new Date();
+  const horizonEnd = new Date(Date.now() + 14 * 24 * 60 * 60_000);
+  const taken = await prisma.booking.groupBy({
+    by: ["startsAt"],
+    where: {
+      status: { in: [BookingStatus.confirmed, BookingStatus.completed] },
+      startsAt: { gte: now, lte: horizonEnd },
+    },
+    _count: { _all: true },
+  });
+  const takenBySlot = new Map(taken.map((t) => [keyOf(t.startsAt), t._count._all]));
+
+  const out: Date[] = [];
+  for (let dayIdx = 0; dayIdx < 14 && out.length < limit; dayIdx++) {
+    const d = new Date(now.getTime() + dayIdx * 24 * 60 * 60_000);
+    if (d.getUTCDay() === 0 || d.getUTCDay() === 6) continue; // weekdays only
+    for (const h of SLOT_HOURS) {
+      const slot = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), h, 0, 0));
+      if (slot < now) continue;
+      if ((takenBySlot.get(keyOf(slot)) ?? 0) < experts) {
+        out.push(slot);
+        if (out.length >= limit) break;
+      }
+    }
+  }
+  return out;
+}
+
 export interface CreateBookingInput {
   userId: string;
   expertId: string;

@@ -9,8 +9,15 @@ const str = (max = 600) => z.string().max(max);
 
 const schema = z.object({
   hero: z.object({
-    eyebrow: str(120), headline: str(200), lead: str(1000),
+    eyebrow: str(120), headline: str(300), lead: str(1000),
     primaryCta: str(60), secondaryCta: str(60),
+  }),
+  about: z.object({
+    kicker: str(120), heading: str(200), body1: str(1200), body2: str(1200), cta: str(60),
+  }),
+  why: z.object({
+    kicker: str(120), heading: str(300),
+    features: z.array(z.object({ t: str(120), d: str(600) })).max(8),
   }),
   steps: z.array(z.object({ t: str(80), d: str(600) })).max(8),
   servicesIntro: z.object({ eyebrow: str(120), heading: str(200), body: str(600) }),
@@ -18,6 +25,13 @@ const schema = z.object({
   testimonialsIntro: z.object({ eyebrow: str(120), heading: str(200) }),
   testimonials: z.array(z.object({ q: str(800), n: str(120), r: str(160) })).max(24),
   cta: z.object({ heading: str(200), body: str(800), button: str(60) }),
+  insights: z.object({
+    kicker: str(120), heading: str(300), rhHeading: str(200), rhBody: str(800),
+    posts: z.array(z.object({ tag: str(60), title: str(200), img: str(300) })).max(12),
+  }),
+  contact: z.object({
+    address: str(200), phone: str(40), whatsapp: str(40), email: str(200),
+  }),
   faq: z.array(z.object({ q: str(300), a: str(2000) })).max(40),
 });
 

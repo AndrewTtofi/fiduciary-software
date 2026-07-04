@@ -18,7 +18,7 @@ export function ForgotForm() {
 
   if (sent) {
     return (
-      <div className="rounded-elem p-4 text-meta" style={{ background: "rgba(200,164,90,0.08)", color: "var(--fg)" }}>
+      <div className="note">
         If an account exists for that email, we&apos;ve sent a reset link. Check your inbox.
       </div>
     );
@@ -30,10 +30,10 @@ export function ForgotForm() {
       onSubmit={(e) => { e.preventDefault(); onSubmit(new FormData(e.currentTarget)); }}
     >
       <div className="flex flex-col gap-2">
-        <label className="text-meta font-medium text-muted">Email Address</label>
+        <label className="flabel" style={{ marginBottom: 0 }}>Email Address</label>
         <input name="email" type="email" required autoComplete="email" className="input" />
       </div>
-      <button type="submit" disabled={pending} className="btn btn-primary px-7 py-3.5 disabled:opacity-50">
+      <button type="submit" disabled={pending} className="btn btn-primary btn-block disabled:opacity-50">
         {pending ? "Sending…" : "Send reset link"}
       </button>
     </form>

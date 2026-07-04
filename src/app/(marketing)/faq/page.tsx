@@ -1,47 +1,35 @@
-import Link from "next/link";
-import { TopNav } from "@/components/marketing/TopNav";
-import { Footer } from "@/components/marketing/Footer";
 import { getSiteContent } from "@/lib/services/content";
+import { CtaBand } from "@/components/marketing/CtaBand";
+import { ChevronIc } from "@/components/marketing/mk";
 
 export const metadata = { title: "FAQ" };
-
-const Chevron = () => (
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-    <path d="M6 9l6 6 6-6" />
-  </svg>
-);
 
 export default async function FaqPage() {
   const { faq } = await getSiteContent();
   return (
-    <div className="shell-marketing">
-      <TopNav />
-      <main>
-        <section className="section">
-          <div className="mx-auto max-w-[760px]">
-            <div className="sec-head">
-              <div className="eyebrow">QUESTIONS</div>
-              <h2>Frequently asked.</h2>
-            </div>
+    <main>
+      <section className="phero grid-bg">
+        <div className="mk-container">
+          <span className="kicker">&mdash; Questions</span>
+          <h1>Frequently <span className="gold">Asked</span></h1>
+          <p className="sub">Straight answers on structuring, timelines, banking and compliance — before you commit to anything.</p>
+        </div>
+      </section>
 
-            <div className="acc">
-              {faq.map((item, i) => (
-                <details key={i} className="acc-item">
-                  <summary className="acc-q">{item.q}<Chevron /></summary>
-                  <div className="acc-a">{item.a}</div>
-                </details>
-              ))}
-            </div>
-
-            <div className="card mt-8 text-center" style={{ background: "var(--brand-50)", borderColor: "transparent" }}>
-              <h3 style={{ fontWeight: 600, fontSize: "1.25rem" }}>Still have questions?</h3>
-              <p className="text-muted mt-2">Start an application — you can save and exit at any point.</p>
-              <Link href="/login" className="btn btn-primary mt-4">Start your application</Link>
-            </div>
+      <section className="ivory sec" style={{ paddingTop: 90 }}>
+        <div className="mk-container" style={{ maxWidth: 820 }}>
+          <div className="acc reveal">
+            {faq.map((item, i) => (
+              <details key={i} className="acc-item">
+                <summary className="acc-q">{item.q}{ChevronIc}</summary>
+                <div className="acc-a">{item.a}</div>
+              </details>
+            ))}
           </div>
-        </section>
-      </main>
-      <Footer />
-    </div>
+        </div>
+      </section>
+
+      <CtaBand heading="Still Have *Questions?*" body="Start an application — you can save and exit at any point — or book a call and we'll walk you through it." />
+    </main>
   );
 }

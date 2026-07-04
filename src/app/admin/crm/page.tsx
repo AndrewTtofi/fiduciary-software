@@ -39,6 +39,13 @@ export default async function CrmPage({ searchParams }: { searchParams: Promise<
   const records: Record_[] = [];
   if (tab === "all" || tab === "leads") {
     for (const l of leads) {
+      const meta = (l.meta ?? {}) as Record<string, string>;
+      const bits = [
+        l.note ?? (l.source === "contact" ? "Contact form" : l.source),
+        l.phone && `☎ ${l.phone}`,
+        meta.country && `From ${meta.country}`,
+        meta.preferredSlotLabel && `Prefers ${meta.preferredSlotLabel}`,
+      ].filter(Boolean);
       records.push({
         key: `lead-${l.id}`,
         name: l.name ?? "(anonymous lead)",
@@ -46,7 +53,7 @@ export default async function CrmPage({ searchParams }: { searchParams: Promise<
         service: pretty(l.serviceKey),
         type: "Lead",
         stage: "Lead",
-        detail: l.note ?? l.source,
+        detail: bits.join(" · "),
       });
     }
   }

@@ -12,9 +12,13 @@ export function ContentEditor({ initial }: { initial: SiteContent }) {
 
   // Generic immutable updaters.
   const setHero = (k: keyof SiteContent["hero"], v: string) => setC((p) => ({ ...p, hero: { ...p.hero, [k]: v } }));
+  const setAbout = (k: keyof SiteContent["about"], v: string) => setC((p) => ({ ...p, about: { ...p.about, [k]: v } }));
+  const setWhy = (k: "kicker" | "heading", v: string) => setC((p) => ({ ...p, why: { ...p.why, [k]: v } }));
   const setIntro = (k: keyof SiteContent["servicesIntro"], v: string) => setC((p) => ({ ...p, servicesIntro: { ...p.servicesIntro, [k]: v } }));
   const setTIntro = (k: keyof SiteContent["testimonialsIntro"], v: string) => setC((p) => ({ ...p, testimonialsIntro: { ...p.testimonialsIntro, [k]: v } }));
   const setCta = (k: keyof SiteContent["cta"], v: string) => setC((p) => ({ ...p, cta: { ...p.cta, [k]: v } }));
+  const setInsights = (k: "kicker" | "heading" | "rhHeading" | "rhBody", v: string) => setC((p) => ({ ...p, insights: { ...p.insights, [k]: v } }));
+  const setContact = (k: keyof SiteContent["contact"], v: string) => setC((p) => ({ ...p, contact: { ...p.contact, [k]: v } }));
 
   function listSet<K extends "steps" | "stats" | "testimonials" | "faq">(key: K, i: number, field: string, v: string) {
     setC((p) => {
@@ -29,6 +33,24 @@ export function ContentEditor({ initial }: { initial: SiteContent }) {
   function listRemove<K extends "steps" | "stats" | "testimonials" | "faq">(key: K, i: number) {
     setC((p) => ({ ...p, [key]: (p[key] as unknown[]).filter((_, j) => j !== i) }));
   }
+
+  // Nested lists (why.features, insights.posts).
+  function featSet(i: number, field: "t" | "d", v: string) {
+    setC((p) => {
+      const features = p.why.features.map((f, j) => (j === i ? { ...f, [field]: v } : f));
+      return { ...p, why: { ...p.why, features } };
+    });
+  }
+  function featAdd() { setC((p) => ({ ...p, why: { ...p.why, features: [...p.why.features, { t: "", d: "" }] } })); }
+  function featRemove(i: number) { setC((p) => ({ ...p, why: { ...p.why, features: p.why.features.filter((_, j) => j !== i) } })); }
+  function postSet(i: number, field: "tag" | "title" | "img", v: string) {
+    setC((p) => {
+      const posts = p.insights.posts.map((x, j) => (j === i ? { ...x, [field]: v } : x));
+      return { ...p, insights: { ...p.insights, posts } };
+    });
+  }
+  function postAdd() { setC((p) => ({ ...p, insights: { ...p.insights, posts: [...p.insights.posts, { tag: "", title: "", img: "" }] } })); }
+  function postRemove(i: number) { setC((p) => ({ ...p, insights: { ...p.insights, posts: p.insights.posts.filter((_, j) => j !== i) } })); }
 
   function save() {
     setMsg(null);
@@ -55,6 +77,29 @@ export function ContentEditor({ initial }: { initial: SiteContent }) {
           <Field label="Primary button"><input className="input" value={c.hero.primaryCta} onChange={(e) => setHero("primaryCta", e.target.value)} /></Field>
           <Field label="Secondary button"><input className="input" value={c.hero.secondaryCta} onChange={(e) => setHero("secondaryCta", e.target.value)} /></Field>
         </div>
+        <p className="help">Headlines: new lines split the kinetic heading; text between *asterisks* renders gold italic. Body copy: **double asterisks** render bold.</p>
+      </Card>
+
+      {/* About / who we are */}
+      <Card title="About / who we are">
+        <Field label="Kicker"><input className="input" value={c.about.kicker} onChange={(e) => setAbout("kicker", e.target.value)} /></Field>
+        <Field label="Heading"><input className="input" value={c.about.heading} onChange={(e) => setAbout("heading", e.target.value)} /></Field>
+        <Field label="Body (home + about page)"><textarea className="input" rows={3} value={c.about.body1} onChange={(e) => setAbout("body1", e.target.value)} /></Field>
+        <Field label="Second paragraph (about page)"><textarea className="input" rows={2} value={c.about.body2} onChange={(e) => setAbout("body2", e.target.value)} /></Field>
+        <Field label="Button"><input className="input" value={c.about.cta} onChange={(e) => setAbout("cta", e.target.value)} /></Field>
+      </Card>
+
+      {/* Why choose us */}
+      <Card title="Why choose us" onAdd={featAdd} addLabel="Add feature">
+        <Field label="Kicker"><input className="input" value={c.why.kicker} onChange={(e) => setWhy("kicker", e.target.value)} /></Field>
+        <Field label="Heading"><textarea className="input" rows={2} value={c.why.heading} onChange={(e) => setWhy("heading", e.target.value)} /></Field>
+        <hr className="hairline" style={{ margin: "8px 0" }} />
+        {c.why.features.map((f, i) => (
+          <ListItem key={i} onRemove={() => featRemove(i)} index={i + 1}>
+            <Field label="Title"><input className="input" value={f.t} onChange={(e) => featSet(i, "t", e.target.value)} /></Field>
+            <Field label="Description"><textarea className="input" rows={2} value={f.d} onChange={(e) => featSet(i, "d", e.target.value)} /></Field>
+          </ListItem>
+        ))}
       </Card>
 
       {/* Steps */}
@@ -108,6 +153,36 @@ export function ContentEditor({ initial }: { initial: SiteContent }) {
         <Field label="Heading"><input className="input" value={c.cta.heading} onChange={(e) => setCta("heading", e.target.value)} /></Field>
         <Field label="Body"><textarea className="input" rows={2} value={c.cta.body} onChange={(e) => setCta("body", e.target.value)} /></Field>
         <Field label="Button"><input className="input" value={c.cta.button} onChange={(e) => setCta("button", e.target.value)} /></Field>
+        <p className="help">Phone numbers shown in the band come from the Contact details below.</p>
+      </Card>
+
+      {/* Insights */}
+      <Card title="Insights" onAdd={postAdd} addLabel="Add post">
+        <Field label="Kicker"><input className="input" value={c.insights.kicker} onChange={(e) => setInsights("kicker", e.target.value)} /></Field>
+        <Field label="Heading"><textarea className="input" rows={2} value={c.insights.heading} onChange={(e) => setInsights("heading", e.target.value)} /></Field>
+        <Field label="Right-hand heading"><input className="input" value={c.insights.rhHeading} onChange={(e) => setInsights("rhHeading", e.target.value)} /></Field>
+        <Field label="Right-hand body"><textarea className="input" rows={2} value={c.insights.rhBody} onChange={(e) => setInsights("rhBody", e.target.value)} /></Field>
+        <hr className="hairline" style={{ margin: "8px 0" }} />
+        {c.insights.posts.map((p, i) => (
+          <ListItem key={i} onRemove={() => postRemove(i)} index={i + 1}>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <Field label="Tag"><input className="input" value={p.tag} onChange={(e) => postSet(i, "tag", e.target.value)} /></Field>
+              <Field label="Image URL"><input className="input" value={p.img} onChange={(e) => postSet(i, "img", e.target.value)} /></Field>
+            </div>
+            <Field label="Title"><input className="input" value={p.title} onChange={(e) => postSet(i, "title", e.target.value)} /></Field>
+          </ListItem>
+        ))}
+      </Card>
+
+      {/* Contact details */}
+      <Card title="Contact details">
+        <div className="grid gap-3 sm:grid-cols-2">
+          <Field label="Office address"><input className="input" value={c.contact.address} onChange={(e) => setContact("address", e.target.value)} /></Field>
+          <Field label="Email"><input className="input" value={c.contact.email} onChange={(e) => setContact("email", e.target.value)} /></Field>
+          <Field label="Phone"><input className="input" value={c.contact.phone} onChange={(e) => setContact("phone", e.target.value)} /></Field>
+          <Field label="WhatsApp"><input className="input" value={c.contact.whatsapp} onChange={(e) => setContact("whatsapp", e.target.value)} /></Field>
+        </div>
+        <p className="help">Shown on the contact page, the footer and the phone band across the public site.</p>
       </Card>
 
       {/* FAQ */}

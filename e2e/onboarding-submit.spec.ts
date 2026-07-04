@@ -10,8 +10,8 @@ test("complete 3-step onboarding wizard → success page with reference number",
 
   // ── Step 1: Select service ────────────────────────────────────────────────
   await page.waitForURL(/\/onboarding$/, { timeout: 15000 });
-  // Click the Company Formation service card (aria-pressed button with that text)
-  await page.getByRole("button", { name: /company formation/i }).click();
+  // Click the Corporate Services (company-formation) card (aria-pressed button with that text)
+  await page.getByRole("button", { name: /corporate services/i }).click();
   // The "Continue" button at the bottom of the service picker
   await page.getByRole("button", { name: /^continue$/i }).click();
 

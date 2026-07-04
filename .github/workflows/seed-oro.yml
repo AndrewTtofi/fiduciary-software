@@ -5,7 +5,9 @@ name: Seed database
 # safe to run repeatedly. Manual trigger only.
 #
 # Reuses the same access path as deploy-oro: the runner SSHes to the ORO box
-# with ORO_DEPLOY_KEY and runs the compiled seed inside the web container.
+# (ORO_HOST/ORO_SSH_PORT/ORO_SSH_USER repo variables; ORO_DEPLOY_KEY secret or
+# the runner's own SSH identity) and runs the compiled seed inside the web
+# container.
 
 on:
   workflow_dispatch:
@@ -16,22 +18,27 @@ concurrency:
 
 jobs:
   seed:
-    name: Seed ORO DB (self-hosted → 10.50.40.100)
+    name: Seed ORO DB (self-hosted runner)
     runs-on: [self-hosted, oro-ci]
     steps:
       - name: Seed over the private network
         env:
           ORO_DEPLOY_KEY: ${{ secrets.ORO_DEPLOY_KEY }}
-          ORO_HOST: 10.50.40.100
+          ORO_HOST: ${{ vars.ORO_HOST || '10.50.40.100' }}
+          ORO_SSH_PORT: ${{ vars.ORO_SSH_PORT || '22' }}
+          ORO_SSH_USER: ${{ vars.ORO_SSH_USER || 'ubuntu' }}
         run: |
           set -euo pipefail
-          install -m 700 -d "$HOME/.ssh"
-          printf '%s\n' "$ORO_DEPLOY_KEY" > "$HOME/.ssh/oro_deploy"
-          chmod 600 "$HOME/.ssh/oro_deploy"
-          trap 'rm -f "$HOME/.ssh/oro_deploy"' EXIT
+          SSH_OPTS=(-o BatchMode=yes -o StrictHostKeyChecking=accept-new -p "$ORO_SSH_PORT")
+          if [ -n "$ORO_DEPLOY_KEY" ]; then
+            install -m 700 -d "$HOME/.ssh"
+            printf '%s\n' "$ORO_DEPLOY_KEY" > "$HOME/.ssh/oro_deploy"
+            chmod 600 "$HOME/.ssh/oro_deploy"
+            trap 'rm -f "$HOME/.ssh/oro_deploy"' EXIT
+            SSH_OPTS+=(-i "$HOME/.ssh/oro_deploy")
+          fi
 
-          ssh -i "$HOME/.ssh/oro_deploy" -o BatchMode=yes -o StrictHostKeyChecking=accept-new \
-              ubuntu@"$ORO_HOST" '
+          ssh "${SSH_OPTS[@]}" "$ORO_SSH_USER@$ORO_HOST" '
             set -euo pipefail
             cd /opt/oro
             echo "[seed] user count BEFORE:"

@@ -30,15 +30,24 @@ export function ResetForm({ token }: { token: string }) {
       onSubmit={(e) => { e.preventDefault(); onSubmit(new FormData(e.currentTarget)); }}
     >
       {error && (
-        <div className="rounded-elem p-3 text-meta" style={{ background: "rgba(220,38,38,0.08)", color: "#DC2626" }}>
+        <div
+          className="px-4 py-3"
+          style={{
+            background: "var(--danger-tint)",
+            color: "var(--danger)",
+            borderRadius: "var(--radius-sm)",
+            fontSize: "0.8125rem",
+          }}
+          role="alert"
+        >
           {error}
         </div>
       )}
       <div className="flex flex-col gap-2">
-        <label className="text-meta font-medium text-muted">New password</label>
+        <label className="flabel" style={{ marginBottom: 0 }}>New password</label>
         <input name="password" type="password" required minLength={8} autoComplete="new-password" className="input" />
       </div>
-      <button type="submit" disabled={pending} className="btn btn-primary px-7 py-3.5 disabled:opacity-50">
+      <button type="submit" disabled={pending} className="btn btn-primary btn-block disabled:opacity-50">
         {pending ? "Saving…" : "Save new password"}
       </button>
     </form>

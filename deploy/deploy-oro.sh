@@ -12,10 +12,14 @@
 set -euo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")/.."   # repo root
 
-IMAGE="${ORO_IMAGE:-ghcr.io/andrewttofi/fiduciary-software:latest}"
+# Default image follows this repo's name (CI publishes ghcr.io/<owner>/<repo>).
+IMAGE="${ORO_IMAGE:-ghcr.io/andrewttofi/oro-corp:latest}"
 PUBIP="${ORO_PUBLIC_IP:-185.106.101.11}"
+# Public base URL of the app (may include a port, e.g. behind an LB mapping
+# :8081 → box :80). Drives APP_URL/AUTH_URL in the box .env.
+PUBLIC_URL="${ORO_PUBLIC_URL:-http://$PUBIP}"
 
-echo "[deploy] image=$IMAGE pubip=$PUBIP"
+echo "[deploy] image=$IMAGE pubip=$PUBIP public_url=$PUBLIC_URL"
 
 # 1) .env — generate ONCE (persist secrets so encrypted docs survive), then
 #    only refresh ORO_IMAGE on subsequent deploys.
@@ -26,8 +30,8 @@ NODE_ENV=production
 ORO_IMAGE=$IMAGE
 COMPOSE_PROJECT_NAME=oro
 ORO_DOMAIN=$PUBIP
-APP_URL=http://$PUBIP
-AUTH_URL=http://$PUBIP
+APP_URL=$PUBLIC_URL
+AUTH_URL=$PUBLIC_URL
 AUTH_TRUST_HOST=true
 AUTH_SECRET=$(openssl rand -base64 48)
 ENCRYPTION_KEY_B64=$(openssl rand -base64 32)
@@ -65,6 +69,14 @@ upsert_env() {
 upsert_env SUPER_ADMIN_EMAILS "${SUPER_ADMIN_EMAILS:-}"
 upsert_env SUPER_ADMIN_PASSWORD "${SUPER_ADMIN_PASSWORD:-}"
 upsert_env COMPANY_NAME "${COMPANY_NAME:-}"
+upsert_env COMPANY_LEGAL_NAME "${COMPANY_LEGAL_NAME:-}"
+upsert_env COMPANY_EMAIL "${COMPANY_EMAIL:-}"
+upsert_env COMPANY_ADDRESS "${COMPANY_ADDRESS:-}"
+# Keep APP_URL/AUTH_URL in sync when the public URL is managed via repo vars.
+if [ -n "${ORO_PUBLIC_URL:-}" ]; then
+  upsert_env APP_URL "$ORO_PUBLIC_URL"
+  upsert_env AUTH_URL "$ORO_PUBLIC_URL"
+fi
 
 # 2) self-signed cert (once) with the public IP in its SAN
 mkdir -p deploy/certs
@@ -156,10 +168,13 @@ docker compose exec -T \
   -e SUPER_ADMIN_PASSWORD="${SUPER_ADMIN_PASSWORD:-}" \
   web node ./dist-worker/worker/ensure-super-admin.js || echo "[deploy] super-admin provisioning skipped/failed (non-fatal)"
 
-# 5d) apply white-label brand name from COMPANY_NAME (idempotent; no-op if unset).
+# 5d) apply white-label brand identity from COMPANY_* (idempotent; no-op if unset).
 echo "[deploy] applying white-label branding…"
 docker compose exec -T \
   -e COMPANY_NAME="${COMPANY_NAME:-}" \
+  -e COMPANY_LEGAL_NAME="${COMPANY_LEGAL_NAME:-}" \
+  -e COMPANY_EMAIL="${COMPANY_EMAIL:-}" \
+  -e COMPANY_ADDRESS="${COMPANY_ADDRESS:-}" \
   web node ./dist-worker/worker/ensure-branding.js || echo "[deploy] branding provisioning skipped/failed (non-fatal)"
 
 # 6) recreating web changes its container IP — bounce the proxy so Caddy

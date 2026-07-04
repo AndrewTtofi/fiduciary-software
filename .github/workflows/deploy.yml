@@ -8,8 +8,15 @@ name: Deploy to production
 #   • after CI succeeds on main (deploys the freshly built image)
 #   • manual (Actions → Deploy to production → Run workflow)
 #
-# Required repo secret:
-#   ORO_DEPLOY_KEY  — private SSH key authorized on the production box (ubuntu@10.50.40.100)
+# Server access — configured via repo variables (falls back to the legacy box):
+#   ORO_HOST       — private IP/host of the production box
+#   ORO_SSH_PORT   — SSH port on the box (default 22)
+#   ORO_SSH_USER   — SSH user (default ubuntu)
+#   ORO_PUBLIC_URL — public base URL of the app (e.g. http://185.106.101.11:8081);
+#                    written into the box .env as APP_URL/AUTH_URL
+# Optional repo secret:
+#   ORO_DEPLOY_KEY — private SSH key authorized on the box. When unset, the
+#                    runner's own default SSH identity is used instead.
 
 on:
   workflow_run:
@@ -24,7 +31,7 @@ concurrency:
 
 jobs:
   deploy:
-    name: Deploy to production (self-hosted → 10.50.40.100)
+    name: Deploy to production (self-hosted runner)
     runs-on: [self-hosted, oro-ci]
     if: >-
       github.event_name == 'workflow_dispatch' ||
@@ -33,25 +40,37 @@ jobs:
       - name: Deploy over the private network
         env:
           ORO_DEPLOY_KEY: ${{ secrets.ORO_DEPLOY_KEY }}
-          ORO_HOST: 10.50.40.100
+          ORO_HOST: ${{ vars.ORO_HOST || '10.50.40.100' }}
+          ORO_SSH_PORT: ${{ vars.ORO_SSH_PORT || '22' }}
+          ORO_SSH_USER: ${{ vars.ORO_SSH_USER || 'ubuntu' }}
+          ORO_PUBLIC_URL: ${{ vars.ORO_PUBLIC_URL }}
           # Managed config injected into the box .env by deploy-oro.sh.
           SUPER_ADMIN_EMAILS: ${{ secrets.SUPER_ADMIN_EMAILS }}
           SUPER_ADMIN_PASSWORD: ${{ secrets.SUPER_ADMIN_PASSWORD }}
-          # White-label firm name → applied to the app's branding (single source
-          # of truth; also used by the deploy notifier). Empty → neutral wording.
+          # White-label firm identity → applied to the app's branding (single
+          # source of truth; COMPANY_NAME is also used by the deploy notifier).
+          # Empty → neutral wording / existing branding preserved.
           COMPANY_NAME: ${{ vars.COMPANY_NAME }}
+          COMPANY_LEGAL_NAME: ${{ vars.COMPANY_LEGAL_NAME }}
+          COMPANY_EMAIL: ${{ vars.COMPANY_EMAIL }}
+          COMPANY_ADDRESS: ${{ vars.COMPANY_ADDRESS }}
         run: |
           set -euo pipefail
-          install -m 700 -d "$HOME/.ssh"
-          printf '%s\n' "$ORO_DEPLOY_KEY" > "$HOME/.ssh/oro_deploy"
-          chmod 600 "$HOME/.ssh/oro_deploy"
-          trap 'rm -f "$HOME/.ssh/oro_deploy"' EXIT
+          SSH_OPTS=(-o BatchMode=yes -o StrictHostKeyChecking=accept-new -p "$ORO_SSH_PORT")
+          # Prefer the ORO_DEPLOY_KEY secret; fall back to the runner's own SSH
+          # identity when the key already lives on the runner machine.
+          if [ -n "$ORO_DEPLOY_KEY" ]; then
+            install -m 700 -d "$HOME/.ssh"
+            printf '%s\n' "$ORO_DEPLOY_KEY" > "$HOME/.ssh/oro_deploy"
+            chmod 600 "$HOME/.ssh/oro_deploy"
+            trap 'rm -f "$HOME/.ssh/oro_deploy"' EXIT
+            SSH_OPTS+=(-i "$HOME/.ssh/oro_deploy")
+          fi
 
           # Pass secret-backed config to the remote shell; deploy-oro.sh reads
           # them from env and writes them into /opt/oro/.env. GitHub masks values.
-          ssh -i "$HOME/.ssh/oro_deploy" -o BatchMode=yes -o StrictHostKeyChecking=accept-new \
-              ubuntu@"$ORO_HOST" \
-              "SUPER_ADMIN_EMAILS='${SUPER_ADMIN_EMAILS}' SUPER_ADMIN_PASSWORD='${SUPER_ADMIN_PASSWORD}' COMPANY_NAME='${COMPANY_NAME}' bash -s" <<'REMOTE'
+          ssh "${SSH_OPTS[@]}" "$ORO_SSH_USER@$ORO_HOST" \
+              "SUPER_ADMIN_EMAILS='${SUPER_ADMIN_EMAILS}' SUPER_ADMIN_PASSWORD='${SUPER_ADMIN_PASSWORD}' COMPANY_NAME='${COMPANY_NAME}' COMPANY_LEGAL_NAME='${COMPANY_LEGAL_NAME}' COMPANY_EMAIL='${COMPANY_EMAIL}' COMPANY_ADDRESS='${COMPANY_ADDRESS}' ORO_PUBLIC_URL='${ORO_PUBLIC_URL}' bash -s" <<'REMOTE'
           set -euo pipefail
           cd /opt/oro
           git fetch --depth=1 origin main

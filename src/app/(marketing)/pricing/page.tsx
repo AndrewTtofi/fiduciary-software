@@ -1,7 +1,6 @@
 import Link from "next/link";
-import { TopNav } from "@/components/marketing/TopNav";
-import { Footer } from "@/components/marketing/Footer";
 import { Icon } from "@/components/Icon";
+import { CtaBand } from "@/components/marketing/CtaBand";
 
 export const metadata = { title: "Pricing" };
 
@@ -61,45 +60,45 @@ const PLANS: Plan[] = [
 
 export default function PricingPage() {
   return (
-    <div className="shell-marketing">
-      <TopNav />
-      <main>
-        <section className="section">
-          <div className="mx-auto max-w-[1200px]">
-            <div className="sec-head text-center mx-auto" style={{ maxWidth: "62ch", margin: "0 auto var(--space-10)" }}>
-              <div className="eyebrow">PRICING</div>
-              <h2>One firm. Priced to replace four.</h2>
-              <p>Every engagement is delivered fully managed, with a dedicated advisor and complete visibility. No setup headaches.</p>
-            </div>
+    <main>
+      <section className="phero grid-bg">
+        <div className="mk-container">
+          <span className="kicker">&mdash; Pricing</span>
+          <h1>One Firm. Priced to <span className="gold">Replace Four</span></h1>
+          <p className="sub">Every engagement is delivered fully managed, with a dedicated advisor and complete visibility. No setup headaches.</p>
+        </div>
+      </section>
 
-            <div className="price-grid">
-              {PLANS.map((p) => (
-                <div key={p.tier} className={`price-card${p.feat ? " feat" : ""}`}>
-                  <div className="tier">{p.tier}</div>
-                  <div className="amt mono">{p.amount} <span>{p.unit}</span></div>
-                  <ul>
-                    {p.features.map(([on, label]) => (
-                      <li key={label} className={on ? undefined : "off"}>
-                        <Icon name={on ? "check" : "x"} className="ic-16" />
-                        <span>{label}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  <Link href="/login" className={`btn btn-block ${p.feat ? "btn-primary" : "btn-secondary"}`}>
-                    Choose {p.tier}
-                  </Link>
-                </div>
-              ))}
-            </div>
-
-            <p className="text-center text-muted mt-8" style={{ fontSize: "0.875rem" }}>
-              Indicative pricing — your exact quote depends on jurisdiction and scope.{" "}
-              <Link href="/login" className="text-brand">Start an application →</Link>
-            </p>
+      <section className="ivory sec" style={{ paddingTop: 90 }}>
+        <div className="mk-container">
+          <div className="price-grid">
+            {PLANS.map((p) => (
+              <div key={p.tier} className={`price-card reveal${p.feat ? " feat" : ""}`}>
+                <div className="tier">{p.tier}</div>
+                <div className="amt mono">{p.amount} <span>{p.unit}</span></div>
+                <ul>
+                  {p.features.map(([on, label]) => (
+                    <li key={label} className={on ? undefined : "off"}>
+                      <Icon name={on ? "check" : "x"} className="ic-16" />
+                      <span>{label}</span>
+                    </li>
+                  ))}
+                </ul>
+                <Link href="/login" className={`btn btn-block ${p.feat ? "btn-primary" : "btn-secondary"}`}>
+                  Choose {p.tier}
+                </Link>
+              </div>
+            ))}
           </div>
-        </section>
-      </main>
-      <Footer />
-    </div>
+
+          <p className="text-center text-muted mt-8" style={{ fontSize: "0.875rem" }}>
+            Indicative pricing — your exact quote depends on jurisdiction and scope.{" "}
+            <Link href="/login" className="link-gold">Start an application →</Link>
+          </p>
+        </div>
+      </section>
+
+      <CtaBand />
+    </main>
   );
 }

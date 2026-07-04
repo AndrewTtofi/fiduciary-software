@@ -1,5 +1,3 @@
-import { TopNav } from "@/components/marketing/TopNav";
-import { Footer } from "@/components/marketing/Footer";
 import { CalculatorTool } from "./CalculatorTool";
 
 export const metadata = {
@@ -9,19 +7,20 @@ export const metadata = {
 
 export default async function CalculatorPage() {
   return (
-    <>
-      <TopNav />
-      <section className="section">
-        <div className="container">
-          <div className="sec-head">
-            <div className="eyebrow">FREE TOOL · LEAD MAGNET</div>
-            <h2>Estimate your tax savings.</h2>
-            <p>A rough, illustrative comparison of corporate tax on your profit. Enter your email to reveal the full breakdown.</p>
-          </div>
+    <main>
+      <section className="phero grid-bg">
+        <div className="mk-container">
+          <span className="kicker">&mdash; Free Tool</span>
+          <h1>Estimate Your <span className="gold">Tax Savings</span></h1>
+          <p className="sub">A rough, illustrative comparison of corporate tax on your profit. Enter your email to reveal the full breakdown.</p>
+        </div>
+      </section>
+
+      <section className="ivory sec" style={{ paddingTop: 90 }}>
+        <div className="mk-container">
           <CalculatorTool />
         </div>
       </section>
-      <Footer />
-    </>
+    </main>
   );
 }

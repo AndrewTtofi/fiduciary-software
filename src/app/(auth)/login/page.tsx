@@ -10,7 +10,7 @@ export default async function LoginPage({
 }) {
   const { brandName, brandMark, logo } = await getBranding();
   return (
-    <main className="shell-marketing auth-wrap">
+    <main className="auth-wrap">
       <div className="w-full max-w-[440px]">
         <Link href="/" className="wordmark justify-center mb-8" style={{ justifyContent: "center" }}>
           <span className="seal" />

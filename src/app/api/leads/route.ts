@@ -8,12 +8,16 @@ export const runtime = "nodejs";
 const schema = z.object({
   email: z.string().email(),
   name: z.string().max(150).optional().nullable(),
+  phone: z.string().max(40).optional().nullable(),
   serviceKey: z.string().max(60).optional().nullable(),
-  source: z.enum(["calculator", "intake", "manual"]).default("calculator"),
+  source: z.enum(["calculator", "intake", "manual", "contact"]).default("calculator"),
   note: z.string().max(300).optional().nullable(),
+  // extra contact-form fields (country, nationality, preferred slot, referral)
+  meta: z.record(z.string(), z.string().max(200)).optional().nullable(),
 });
 
-/** Public lead capture — tax-calculator reveals and other front-funnel forms. */
+/** Public lead capture — tax-calculator reveals, the contact/booking form and
+ *  other front-funnel forms. */
 export async function POST(req: Request) {
   const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "anon";
   const rl = await rateLimit({ bucket: "lead", key: ip, limit: 20, windowSec: 3600 });

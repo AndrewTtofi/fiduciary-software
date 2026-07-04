@@ -1,5 +1,3 @@
-import { TopNav } from "@/components/marketing/TopNav";
-import { Footer } from "@/components/marketing/Footer";
 import { CompareTool } from "./CompareTool";
 import { RATES_REVIEWED } from "@/lib/data/jurisdictions";
 
@@ -10,15 +8,17 @@ export const metadata = {
 
 export default async function ComparePage() {
   return (
-    <>
-      <TopNav />
-      <section className="section">
-        <div className="container">
-          <div className="sec-head">
-            <div className="eyebrow">FREE TOOL</div>
-            <h2>Compare jurisdictions side by side.</h2>
-            <p>Select the jurisdictions you are weighing up. Best value in each column is highlighted.</p>
-          </div>
+    <main>
+      <section className="phero grid-bg">
+        <div className="mk-container">
+          <span className="kicker">&mdash; Free Tool</span>
+          <h1>Compare Jurisdictions <span className="gold">Side by Side</span></h1>
+          <p className="sub">Select the jurisdictions you are weighing up. Best value in each column is highlighted.</p>
+        </div>
+      </section>
+
+      <section className="ivory sec" style={{ paddingTop: 90 }}>
+        <div className="mk-container">
           <CompareTool />
           <p className="muted mt-6" style={{ fontSize: "var(--fs-xs)", maxWidth: "80ch" }}>
             Corporate income tax and VAT/GST figures verified against{" "}
@@ -29,7 +29,6 @@ export default async function ComparePage() {
           </p>
         </div>
       </section>
-      <Footer />
-    </>
+    </main>
   );
 }

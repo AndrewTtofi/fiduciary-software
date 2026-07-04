@@ -35,10 +35,12 @@ Thumbs.db
 # Test
 coverage/
 test-results/
+playwright-report/
 
 # Worktree-local
 .claude/
 .gstack/
 
-# Design reference artifact (kept locally, not in the repo)
+# Design reference artifacts (kept locally, not in the repo)
 (C) Platform Prototype*.html
+(C) ORO Website Concept*.html

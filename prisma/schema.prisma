@@ -436,15 +436,18 @@ model OrgSettings {
 }
 
 /// CRM lead — anonymous/early-funnel contacts captured before a full
-/// application exists (tax-calculator reveals, abandoned intake "save & exit").
+/// application exists (tax-calculator reveals, abandoned intake "save & exit",
+/// public contact/booking form).
 model Lead {
   id             String   @id @default(uuid())
   name           String?
   email          String
+  phone          String?  // phone/WhatsApp as given on the contact form
   serviceKey     String?
-  source         String   // calculator | intake | manual
+  source         String   // calculator | intake | manual | contact
   stage          String   @default("lead")
   note           String?  // free-text context (e.g. "Tax calc: Cyprus", "Abandoned intake")
+  meta           Json?    // extra form fields (country, nationality, preferred slot, …)
   createdAt      DateTime @default(now())
   lastActivityAt DateTime @default(now())
 

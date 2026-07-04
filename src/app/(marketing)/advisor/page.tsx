@@ -1,4 +1,3 @@
-import { TopNav } from "@/components/marketing/TopNav";
 import { AdvisorChat } from "@/components/advisor/AdvisorChat";
 import { getBranding } from "@/lib/services/branding";
 
@@ -10,11 +9,19 @@ export const metadata = {
 export default async function AdvisorPage() {
   const { brandName } = await getBranding();
   return (
-    <>
-      <TopNav />
-      <div className="advisor-page">
-        <AdvisorChat brand={brandName} />
-      </div>
-    </>
+    <main>
+      <section className="phero grid-bg" style={{ paddingBottom: 30 }}>
+        <div className="mk-container">
+          <span className="kicker">&mdash; AI Advisor</span>
+          <h1>Tell Us What You&apos;re <span className="gold">Trying to Do</span></h1>
+        </div>
+      </section>
+
+      <section className="ivory sec-tight sec" style={{ paddingTop: 50 }}>
+        <div className="mk-container" style={{ maxWidth: 820 }}>
+          <AdvisorChat brand={brandName} />
+        </div>
+      </section>
+    </main>
   );
 }

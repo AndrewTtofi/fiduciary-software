@@ -1,42 +1,37 @@
 import Link from "next/link";
-import { TopNav } from "@/components/marketing/TopNav";
-import { Footer } from "@/components/marketing/Footer";
+import { getSiteContent } from "@/lib/services/content";
 import { ServiceIcons, SERVICES } from "@/components/marketing/ServiceIcons";
-import { getBranding } from "@/lib/services/branding";
+import { CtaBand } from "@/components/marketing/CtaBand";
+import { ArrowIc } from "@/components/marketing/mk";
 
-export const metadata = { title: "Services" };
+export const metadata = { title: "Our Services" };
 
 export default async function ServicesMarketingPage() {
-  const { brandName } = await getBranding();
+  const { servicesIntro } = await getSiteContent();
   return (
-    <div className="shell-marketing">
-      <TopNav />
-      <main>
-        <section className="section">
-          <div className="mx-auto max-w-[1200px]">
-            <div className="sec-head">
-              <div className="eyebrow">OUR EXPERTISE</div>
-              <h2>Comprehensive solutions for international founders.</h2>
-              <p>From your first company to ongoing tax and compliance, {brandName} delivers the full stack of fiduciary services under one roof.</p>
-            </div>
-
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {SERVICES.map((s) => (
-                <div key={s.key} className="svc-card">
-                  <div className="svc-ic">{ServiceIcons[s.key]}</div>
-                  <h3>{s.title}</h3>
-                  <p>{s.longBlurb}</p>
-                </div>
-              ))}
-            </div>
-
-            <div className="mt-12 flex justify-center">
-              <Link href="/login" className="btn btn-primary btn-lg">Begin your application →</Link>
-            </div>
+    <main>
+      <section className="phero grid-bg">
+        <div className="mk-container">
+          <span className="kicker">&mdash; {servicesIntro.eyebrow}</span>
+          <h1>Everything Your Structure Needs, <span className="gold">Under One Roof</span></h1>
+          <p className="sub">{servicesIntro.body}</p>
+        </div>
+      </section>
+      <section className="ivory sec" style={{ paddingTop: 90 }}>
+        <div className="mk-container">
+          <div className="svc-grid" style={{ marginTop: 0 }}>
+            {SERVICES.map((s) => (
+              <Link key={s.key} href={`/services/${s.key}`} className="svc-card reveal">
+                <div className="sic">{ServiceIcons[s.key]}</div>
+                <h3>{s.title}</h3>
+                <p>{s.longBlurb}</p>
+                <span className="lm">Learn more {ArrowIc}</span>
+              </Link>
+            ))}
           </div>
-        </section>
-      </main>
-      <Footer />
-    </div>
+        </div>
+      </section>
+      <CtaBand />
+    </main>
   );
 }
