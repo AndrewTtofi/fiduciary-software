@@ -33,6 +33,11 @@ jobs:
   deploy:
     name: Deploy to production (self-hosted runner)
     runs-on: [self-hosted, oro-ci]
+    # The job token is forwarded to the box for the private-repo git fetch and
+    # the GHCR image pull — no long-lived credentials live on the box.
+    permissions:
+      contents: read
+      packages: read
     if: >-
       github.event_name == 'workflow_dispatch' ||
       github.event.workflow_run.conclusion == 'success'
@@ -40,6 +45,7 @@ jobs:
       - name: Deploy over the private network
         env:
           ORO_DEPLOY_KEY: ${{ secrets.ORO_DEPLOY_KEY }}
+          GH_ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ORO_HOST: ${{ vars.ORO_HOST || '10.50.40.100' }}
           ORO_SSH_PORT: ${{ vars.ORO_SSH_PORT || '22' }}
           ORO_SSH_USER: ${{ vars.ORO_SSH_USER || 'ubuntu' }}
@@ -70,10 +76,17 @@ jobs:
           # Pass secret-backed config to the remote shell; deploy-oro.sh reads
           # them from env and writes them into /opt/oro/.env. GitHub masks values.
           ssh "${SSH_OPTS[@]}" "$ORO_SSH_USER@$ORO_HOST" \
-              "SUPER_ADMIN_EMAILS='${SUPER_ADMIN_EMAILS}' SUPER_ADMIN_PASSWORD='${SUPER_ADMIN_PASSWORD}' COMPANY_NAME='${COMPANY_NAME}' COMPANY_LEGAL_NAME='${COMPANY_LEGAL_NAME}' COMPANY_EMAIL='${COMPANY_EMAIL}' COMPANY_ADDRESS='${COMPANY_ADDRESS}' ORO_PUBLIC_URL='${ORO_PUBLIC_URL}' bash -s" <<'REMOTE'
+              "SUPER_ADMIN_EMAILS='${SUPER_ADMIN_EMAILS}' SUPER_ADMIN_PASSWORD='${SUPER_ADMIN_PASSWORD}' COMPANY_NAME='${COMPANY_NAME}' COMPANY_LEGAL_NAME='${COMPANY_LEGAL_NAME}' COMPANY_EMAIL='${COMPANY_EMAIL}' COMPANY_ADDRESS='${COMPANY_ADDRESS}' ORO_PUBLIC_URL='${ORO_PUBLIC_URL}' GH_ACCESS_TOKEN='${GH_ACCESS_TOKEN}' bash -s" <<'REMOTE'
           set -euo pipefail
           cd /opt/oro
-          git fetch --depth=1 origin main
+          # Private repo + private GHCR package: authenticate both with the
+          # short-lived job token (never persisted to the origin remote).
+          auth_header="AUTHORIZATION: basic $(printf 'x-access-token:%s' "$GH_ACCESS_TOKEN" | base64 -w0)"
+          git -c http.extraheader="$auth_header" fetch --depth=1 origin main
           git reset --hard origin/main
-          bash deploy/deploy-oro.sh
+          printf '%s' "$GH_ACCESS_TOKEN" | docker login ghcr.io -u x-access-token --password-stdin
+          deploy_rc=0
+          bash deploy/deploy-oro.sh || deploy_rc=$?
+          docker logout ghcr.io || true
+          exit "$deploy_rc"
           REMOTE
