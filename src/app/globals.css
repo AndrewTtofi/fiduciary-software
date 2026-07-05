@@ -327,7 +327,9 @@
   .link-gold:hover { color: var(--brand); }
 
   /* ─── Page entry animation ─────────────────────────────────────── */
-  .page-enter > * { animation: fade-rise 320ms var(--ease-out) both; }
+  /* `backwards` (not `both`): a retained end-state transform would make each
+     child a containing block for position:fixed, trapping modals/scrims. */
+  .page-enter > * { animation: fade-rise 320ms var(--ease-out) backwards; }
   .page-enter > *:nth-child(2) { animation-delay: 40ms; }
   .page-enter > *:nth-child(3) { animation-delay: 80ms; }
   .page-enter > *:nth-child(4) { animation-delay: 120ms; }
