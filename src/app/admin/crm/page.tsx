@@ -3,26 +3,25 @@ import { AdminShell } from "@/components/admin/AdminShell";
 import { requireRole } from "@/lib/auth/guards";
 import { prisma } from "@/lib/db";
 import { listLeads } from "@/lib/services/leads";
+import { CrmTable, type CrmRecord } from "./CrmTable";
 
 export const metadata = { title: "Leads / CRM" };
 export const dynamic = "force-dynamic";
 
 type Tab = "all" | "leads" | "applicants" | "clients";
 
-type Record_ = {
-  key: string;
-  name: string;
-  email: string;
-  service: string;
-  type: "Lead" | "Applicant" | "Client";
-  stage: string;
-  detail: string;
-  href?: string;
-};
-
 function pretty(s: string | null | undefined) {
   if (!s) return "—";
   return s.split("_").map((w) => w[0].toUpperCase() + w.slice(1)).join(" ");
+}
+
+function prettyLabel(s: string) {
+  // camelCase / snake_case meta keys → "Camel Case" labels
+  return pretty(s.replace(/([a-z0-9])([A-Z])/g, "$1_$2").toLowerCase());
+}
+
+function fmtDate(d: Date) {
+  return d.toLocaleString("en-GB", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
 }
 
 export default async function CrmPage({ searchParams }: { searchParams: Promise<{ tab?: string }> }) {
@@ -32,11 +31,11 @@ export default async function CrmPage({ searchParams }: { searchParams: Promise<
   const [leads, prospects] = await Promise.all([
     tab === "all" || tab === "leads" ? listLeads() : Promise.resolve([]),
     tab === "all" || tab === "applicants" || tab === "clients"
-      ? prisma.prospect.findMany({ include: { user: true }, orderBy: { createdAt: "desc" }, take: 200 })
+      ? prisma.prospect.findMany({ include: { user: true, details: true }, orderBy: { createdAt: "desc" }, take: 200 })
       : Promise.resolve([]),
   ]);
 
-  const records: Record_[] = [];
+  const records: CrmRecord[] = [];
   if (tab === "all" || tab === "leads") {
     for (const l of leads) {
       const meta = (l.meta ?? {}) as Record<string, string>;
@@ -46,14 +45,28 @@ export default async function CrmPage({ searchParams }: { searchParams: Promise<
         meta.country && `From ${meta.country}`,
         meta.preferredSlotLabel && `Prefers ${meta.preferredSlotLabel}`,
       ].filter(Boolean);
+      const info: CrmRecord["info"] = [
+        { label: "Email", value: l.email },
+        ...(l.phone ? [{ label: "Phone", value: l.phone }] : []),
+        { label: "Service", value: pretty(l.serviceKey) },
+        { label: "Source", value: pretty(l.source) },
+        ...(l.note ? [{ label: "Note", value: l.note }] : []),
+        ...Object.entries(meta)
+          .filter(([k]) => k !== "preferredSlot")
+          .map(([k, v]) => ({ label: prettyLabel(k), value: String(v) })),
+        { label: "Created", value: fmtDate(l.createdAt) },
+        { label: "Last activity", value: fmtDate(l.lastActivityAt) },
+      ];
       records.push({
         key: `lead-${l.id}`,
         name: l.name ?? "(anonymous lead)",
         email: l.email,
         service: pretty(l.serviceKey),
         type: "Lead",
-        stage: "Lead",
+        stage: l.stage === "converted" ? "Converted" : "Lead",
         detail: bits.join(" · "),
+        leadId: l.id,
+        info,
       });
     }
   }
@@ -61,10 +74,19 @@ export default async function CrmPage({ searchParams }: { searchParams: Promise<
     const services = Array.isArray(p.servicesSelected) ? (p.servicesSelected as string[]) : [];
     const svc = services.length ? pretty(services[0]) : "—";
     const isClient = p.status === "approved";
+    const info: CrmRecord["info"] = [
+      { label: "Email", value: p.user.email },
+      ...(p.user.phone ? [{ label: "Phone", value: p.user.phone }] : []),
+      { label: "Reference", value: p.referenceNumber },
+      { label: "Status", value: pretty(p.status) },
+      { label: "Services", value: services.length ? services.map(pretty).join(", ") : "—" },
+      ...p.details.map((d) => ({ label: prettyLabel(d.fieldName), value: d.fieldValue })),
+      { label: "Created", value: fmtDate(p.createdAt) },
+    ];
     if (isClient && (tab === "all" || tab === "clients")) {
-      records.push({ key: `c-${p.id}`, name: p.user.fullName, email: p.user.email, service: svc, type: "Client", stage: "Client", detail: "", href: `/admin/submissions/${p.referenceNumber}` });
+      records.push({ key: `c-${p.id}`, name: p.user.fullName, email: p.user.email, service: svc, type: "Client", stage: "Client", detail: "", href: `/admin/submissions/${p.referenceNumber}`, info });
     } else if (!isClient && (tab === "all" || tab === "applicants")) {
-      records.push({ key: `a-${p.id}`, name: p.user.fullName, email: p.user.email, service: svc, type: "Applicant", stage: p.status, detail: p.referenceNumber, href: `/admin/submissions/${p.referenceNumber}` });
+      records.push({ key: `a-${p.id}`, name: p.user.fullName, email: p.user.email, service: svc, type: "Applicant", stage: p.status, detail: p.referenceNumber, href: `/admin/submissions/${p.referenceNumber}`, info });
     }
   }
 
@@ -80,7 +102,8 @@ export default async function CrmPage({ searchParams }: { searchParams: Promise<
         <h2 style={{ fontSize: "1.563rem", fontWeight: 700, letterSpacing: "-0.02em" }}>Leads / CRM</h2>
         <p className="mt-2 max-w-[60ch] text-muted" style={{ fontSize: "0.9375rem", lineHeight: 1.6 }}>
           One pipeline across the whole funnel — anonymous leads from the public tools,
-          live applicants in review, and converted clients.
+          live applicants in review, and converted clients. Click a record for the full
+          picture; leads can be turned into client accounts directly.
         </p>
       </div>
 
@@ -92,55 +115,7 @@ export default async function CrmPage({ searchParams }: { searchParams: Promise<
         ))}
       </div>
 
-      <div className="tbl-wrap">
-        <div className="tbl-toolbar">
-          <strong>Pipeline</strong>
-          <span className="muted right" style={{ fontSize: "var(--fs-xs)" }}>{records.length} records</span>
-        </div>
-        <table className="tbl">
-          <thead>
-            <tr><th>Name</th><th>Service</th><th>Type</th><th>Stage</th><th>Detail</th></tr>
-          </thead>
-          <tbody>
-            {records.length === 0 ? (
-              <tr><td colSpan={5}><div className="empty"><h3>No records</h3><p>Nothing matches this filter yet.</p></div></td></tr>
-            ) : records.map((r) => {
-              const initials = r.name === "(anonymous lead)" ? "?" : r.name.split(" ").map((w) => w[0]).join("").slice(0, 2);
-              const inner = (
-                <>
-                  <td>
-                    <div className="cell-entity">
-                      <div className="avatar" style={{ width: 28, height: 28, fontSize: 11 }}>{initials}</div>
-                      <div><div style={{ fontWeight: 500 }}>{r.name}</div><div className="sub">{r.email}</div></div>
-                    </div>
-                  </td>
-                  <td>{r.service}</td>
-                  <td><span className="tag">{r.type}</span></td>
-                  <td><span className={`badge ${stageClass(r.stage)}`}>{stageLabel(r.stage)}</span></td>
-                  <td className="muted">{r.detail}</td>
-                </>
-              );
-              return r.href
-                ? <tr key={r.key} style={{ cursor: "pointer" }} className="crm-row" data-href={r.href}>{inner}</tr>
-                : <tr key={r.key} style={{ cursor: "default" }}>{inner}</tr>;
-            })}
-          </tbody>
-        </table>
-      </div>
-      {/* Row click-through for linked records */}
-      <script dangerouslySetInnerHTML={{ __html: "document.querySelectorAll('tr.crm-row').forEach(function(r){r.addEventListener('click',function(){location.href=r.getAttribute('data-href')})})" }} />
+      <CrmTable records={records} />
     </AdminShell>
   );
-}
-
-function stageLabel(s: string) {
-  return s === "Lead" ? "Lead" : s === "Client" ? "Client" : s.replace("_", " ");
-}
-function stageClass(s: string) {
-  return s === "Client" ? "badge-approved"
-    : s === "approved" ? "badge-approved"
-    : s === "needs_info" ? "badge-info"
-    : s === "rejected" ? "badge-danger"
-    : s === "pending" ? "badge-pending"
-    : "badge-neutral";
 }
