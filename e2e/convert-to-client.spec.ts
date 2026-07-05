@@ -79,9 +79,11 @@ test("prospect → staff approves + compliance cleared → staff converts → cl
   await page.getByRole("button", { name: /convert from prospect/i }).click();
   await page.waitForSelector("text=Convert from Prospect", { timeout: 5000 });
 
-  // Should now show "✓ Cleared" badge and a "Make Client" button
-  await expect(page.getByText(/cleared/i).first()).toBeVisible({ timeout: 5000 });
-  await page.getByRole("button", { name: /make client/i }).first().click();
+  // Should now show "✓ Cleared" badge and a "Make Client" button — scoped to
+  // THIS prospect's row so another cleared candidate can't be converted instead.
+  const candidateRow = page.locator("li").filter({ hasText: "Convert Prospect" });
+  await expect(candidateRow.getByText(/cleared/i)).toBeVisible({ timeout: 5000 });
+  await candidateRow.getByRole("button", { name: /make client/i }).click();
   await page.waitForURL(/\/admin\/clients\/.+/, { timeout: 15000 });
 
   // ── 7. Log in as the converted client ─────────────────────────────────────

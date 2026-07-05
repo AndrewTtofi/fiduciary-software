@@ -67,10 +67,11 @@ test("staff sends a message → client sees it in /app/messages", async ({ page,
   await page.goto("/admin/clients");
   await page.getByRole("button", { name: /convert from prospect/i }).click();
   await page.waitForSelector("text=Convert from Prospect", { timeout: 5000 });
-  // Wait for the cleared candidate to render before converting — otherwise
-  // `.first()` can race and convert a different approved prospect (e.g. the seed's).
-  await expect(page.getByText(/cleared/i).first()).toBeVisible({ timeout: 5000 });
-  await page.getByRole("button", { name: /make client/i }).first().click();
+  // Scope to THIS prospect's candidate row — the modal can list other cleared
+  // prospects (e.g. the seed's), and a bare .first() converts the wrong one.
+  const candidateRow = page.locator("li").filter({ hasText: "Messaging Client" });
+  await expect(candidateRow.getByText(/cleared/i)).toBeVisible({ timeout: 5000 });
+  await candidateRow.getByRole("button", { name: /make client/i }).click();
   await page.waitForURL(/\/admin\/clients\/.+/, { timeout: 15000 });
 
   const clientId = page.url().split("/admin/clients/")[1];
@@ -78,9 +79,15 @@ test("staff sends a message → client sees it in /app/messages", async ({ page,
 
   // ── 4. Staff sends a message ──────────────────────────────────────────────
   await page.goto(`/admin/clients/${clientId}/messages`);
-  await page.locator("textarea[placeholder='Address the client. Be precise.']").fill("Hello from ORO team — please check your documents.");
+  const composer = page.locator("textarea[placeholder='Address the client. Be precise.']");
+  await composer.fill("Hello from ORO team — please check your documents.");
   await page.getByRole("button", { name: /^send/i }).click();
-  // Wait for the message to appear in the thread
+  // Wait for the composer to clear — it only empties after the API confirms
+  // the send. Asserting on the message text alone is not enough: React mirrors
+  // the textarea value into a DOM text node, so getByText matches the filled
+  // composer itself and passes before the POST resolves; navigating away then
+  // aborts the in-flight request and the message is never persisted.
+  await expect(composer).toHaveValue("", { timeout: 10000 });
   await expect(page.getByText("Hello from ORO team — please check your documents.")).toBeVisible({ timeout: 10000 });
 
   // ── 5. Client signs in and sees the message ───────────────────────────────

@@ -66,7 +66,11 @@ test("staff requests a document → client sees it in /app/documents", async ({ 
   await page.goto("/admin/clients");
   await page.getByRole("button", { name: /convert from prospect/i }).click();
   await page.waitForSelector("text=Convert from Prospect", { timeout: 5000 });
-  await page.getByRole("button", { name: /make client/i }).first().click();
+  // Scoped to THIS prospect's row so another cleared candidate can't be
+  // converted instead (the modal can also list the seed's cleared prospect).
+  const candidateRow = page.locator("li").filter({ hasText: "DocRequest Client" });
+  await expect(candidateRow.getByText(/cleared/i)).toBeVisible({ timeout: 5000 });
+  await candidateRow.getByRole("button", { name: /make client/i }).click();
   await page.waitForURL(/\/admin\/clients\/.+/, { timeout: 15000 });
 
   const clientId = page.url().split("/admin/clients/")[1];
