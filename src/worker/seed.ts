@@ -1,4 +1,4 @@
-import { PrismaClient, Role, ProspectStatus, DocType, DocStatus, ClientStatus, SvcStatus, KeyDateStatus, BookingStatus } from "@prisma/client";
+import { PrismaClient, Role, ProspectStatus, DocType, DocStatus, ClientStatus, SvcStatus, KeyDateStatus, BookingStatus, ComplianceStatus, RiskRating, PartyType } from "@prisma/client";
 import argon2 from "argon2";
 import { pgAdapter } from "@/lib/prisma-adapter";
 
@@ -76,10 +76,27 @@ export async function runSeed() {
     update: {},
     create: { email: "elena.p@limassol.cy", passwordHash: password, fullName: "Elena Papadopoulos", role: Role.prospect, emailVerified: new Date() },
   });
-  await prisma.prospect.upsert({
+  const approvedProspect = await prisma.prospect.upsert({
     where: { userId: approvedUser.id },
     update: {},
     create: { userId: approvedUser.id, referenceNumber: "ORO-2026-00141", status: ProspectStatus.approved, servicesSelected: ["tax_residency"], reviewedAt: new Date(), reviewedById: staff.id },
+  });
+  // Cleared compliance file so the "Convert from Prospect" flow works on the
+  // seeded data (onboarding normally creates the file; the seed bypasses it).
+  const approvedFile = await prisma.complianceFile.upsert({
+    where: { prospectId: approvedProspect.id },
+    update: { status: ComplianceStatus.cleared },
+    create: { prospectId: approvedProspect.id, status: ComplianceStatus.cleared, riskRating: RiskRating.low, signedOffById: staff.id, signedOffAt: new Date() },
+  });
+  const approvedParty =
+    (await prisma.party.findFirst({ where: { complianceFileId: approvedFile.id, role: "main_contact" } })) ??
+    (await prisma.party.create({
+      data: { complianceFileId: approvedFile.id, type: PartyType.individual, role: "main_contact", fullName: approvedUser.fullName },
+    }));
+  await prisma.kycCase.upsert({
+    where: { partyId: approvedParty.id },
+    update: {},
+    create: { partyId: approvedParty.id },
   });
 
   // Converted client (origin of admin-client-profile.html demo data)

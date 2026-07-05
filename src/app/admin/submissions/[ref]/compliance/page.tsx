@@ -4,19 +4,30 @@ import { requireRole } from "@/lib/auth/guards";
 import { prisma } from "@/lib/db";
 import { ComplianceDashboard } from "@/components/compliance/ComplianceDashboard";
 import { recomputeAndStoreRisk } from "@/lib/services/compliance/risk-persist";
+import { createComplianceFileForProspect } from "@/lib/services/compliance/files";
 
 export const dynamic = "force-dynamic";
 
-export default async function SubmissionCompliancePage({ params }: { params: Promise<{ ref: string }> }) {
-  await requireRole("staff");
-  const { ref } = await params;
-  const prospect = await prisma.prospect.findFirst({
+async function loadProspect(ref: string) {
+  return prisma.prospect.findFirst({
     where: { OR: [{ id: ref }, { referenceNumber: ref }] },
     include: { complianceFile: { include: {
       parties: { include: { kycCase: { include: { latestScreeningRun: { include: { hits: true } } } } } },
       reviewTasks: { where: { state: "open" }, include: { assignedTo: true } },
     } } },
   });
+}
+
+export default async function SubmissionCompliancePage({ params }: { params: Promise<{ ref: string }> }) {
+  const me = await requireRole("staff");
+  const { ref } = await params;
+  let prospect = await loadProspect(ref);
+  // Prospects that skipped the onboarding submit (seeded/imported data) have no
+  // compliance file yet — create it on demand instead of dead-ending on a 404.
+  if (prospect && !prospect.complianceFile) {
+    await createComplianceFileForProspect(prospect.id, me.id);
+    prospect = await loadProspect(ref);
+  }
   if (!prospect?.complianceFile) notFound();
   if (!prospect.complianceFile.riskComputed) await recomputeAndStoreRisk(prospect.complianceFile.id, null);
   const file: any = prospect.complianceFile;
