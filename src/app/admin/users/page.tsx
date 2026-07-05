@@ -2,6 +2,7 @@ import { AdminShell } from "@/components/admin/AdminShell";
 import { requireRole } from "@/lib/auth/guards";
 import { prisma } from "@/lib/db";
 import { VerifyButton } from "./VerifyButton";
+import { CreateUserForm } from "./CreateUserForm";
 
 export const metadata = { title: "Users" };
 export const dynamic = "force-dynamic";
@@ -34,6 +35,8 @@ export default async function AdminUsersPage() {
             : "All accounts have verified emails."}
         </p>
       </div>
+
+      <CreateUserForm />
 
       <div className="tbl-wrap">
         <div className="tbl-toolbar"><strong>Users</strong><span className="muted right" style={{ fontSize: "var(--fs-xs)" }}>{users.length}</span></div>
