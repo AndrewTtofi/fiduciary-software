@@ -16,6 +16,7 @@ export default async function OrgSettingsPage() {
           org.documentsPhase === "optional" || org.documentsPhase === "off"
             ? org.documentsPhase
             : "mandatory",
+        clientLoginEnabled: org.clientLoginEnabled,
       }}
     />
   );

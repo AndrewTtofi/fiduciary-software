@@ -23,6 +23,14 @@ export async function getDocumentsPhase(): Promise<DocumentsPhase> {
   return v === "optional" || v === "off" ? v : "mandatory";
 }
 
+/** Whether clients/prospects may sign in to the portal. When disabled, the
+ *  public site hides client login/sign-up and only consultation booking is
+ *  offered; staff and partner sign-in is unaffected. */
+export async function getClientLoginEnabled(): Promise<boolean> {
+  const org = await getOrgSettings();
+  return org.clientLoginEnabled;
+}
+
 const DEFAULT_SERVICE_LABELS: Record<string, string> = {
   company_formation: "Company Formation",
   accounting: "Accounting",

@@ -12,13 +12,17 @@ const COUNTRY_CODES = ["+357", "+44", "+972", "+30", "+971", "+7", "+1"];
 export function AuthTabs({
   initial,
   searchParamsPromise,
+  allowSignup = true,
 }: {
   initial: Tab;
   searchParamsPromise: Promise<{ next?: string; error?: string }>;
+  allowSignup?: boolean;
 }) {
   const searchParams = use(searchParamsPromise);
-  const [tab, setTab] = useState<Tab>(initial);
-  const [error, setError] = useState<string | null>(searchParams.error ?? null);
+  const [tab, setTab] = useState<Tab>(allowSignup ? initial : "signin");
+  const [error, setError] = useState<string | null>(
+    searchParams.error ? friendlyAuthError(searchParams.error) : null,
+  );
   const [pending, start] = useTransition();
   const router = useRouter();
   const explicitNext = searchParams.next;
@@ -45,11 +49,9 @@ export function AuthTabs({
         redirect: false,
       });
       if (!res || res.error) {
-        setError(
-          res?.error === "EMAIL_NOT_VERIFIED"
-            ? "Please verify your email — check your inbox for the link."
-            : "Invalid email or password.",
-        );
+        // v5 surfaces the specific reason in `code` (CredentialsSignin
+        // subclasses); `error` is the generic error type.
+        setError(friendlyAuthError(res?.code ?? res?.error ?? ""));
         return;
       }
       router.push(await landingForRole());
@@ -94,10 +96,12 @@ export function AuthTabs({
 
   return (
     <>
-      <div className="auth-tabs">
-        <button type="button" onClick={() => setTab("signin")} className={tab === "signin" ? "active" : ""}>Sign in</button>
-        <button type="button" onClick={() => setTab("signup")} className={tab === "signup" ? "active" : ""}>Create account</button>
-      </div>
+      {allowSignup && (
+        <div className="auth-tabs">
+          <button type="button" onClick={() => setTab("signin")} className={tab === "signin" ? "active" : ""}>Sign in</button>
+          <button type="button" onClick={() => setTab("signup")} className={tab === "signup" ? "active" : ""}>Create account</button>
+        </div>
+      )}
 
       {error && (
         <div
@@ -163,6 +167,18 @@ export function AuthTabs({
       )}
     </>
   );
+}
+
+function friendlyAuthError(code: string): string {
+  switch (code) {
+    case "EMAIL_NOT_VERIFIED":
+      return "Please verify your email — check your inbox for the link.";
+    case "CLIENT_LOGIN_DISABLED":
+    case "AccessDenied":
+      return "Client sign-in is currently disabled — please book a consultation instead.";
+    default:
+      return "Invalid email or password.";
+  }
 }
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {

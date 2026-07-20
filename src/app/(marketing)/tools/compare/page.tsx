@@ -1,5 +1,6 @@
 import { CompareTool } from "./CompareTool";
 import { RATES_REVIEWED } from "@/lib/data/jurisdictions";
+import { getClientLoginEnabled } from "@/lib/services/settings";
 
 export const metadata = {
   title: "Compare jurisdictions",
@@ -7,6 +8,7 @@ export const metadata = {
 };
 
 export default async function ComparePage() {
+  const applyHref = (await getClientLoginEnabled()) ? "/login" : "/contact";
   return (
     <main>
       <section className="phero grid-bg">
@@ -19,7 +21,7 @@ export default async function ComparePage() {
 
       <section className="ivory sec" style={{ paddingTop: 90 }}>
         <div className="mk-container">
-          <CompareTool />
+          <CompareTool applyHref={applyHref} />
           <p className="muted mt-6" style={{ fontSize: "var(--fs-xs)", maxWidth: "80ch" }}>
             Corporate income tax and VAT/GST figures verified against{" "}
             <a href="https://taxsummaries.pwc.com" target="_blank" rel="noreferrer noopener" className="link-gold">PwC Worldwide Tax Summaries</a>

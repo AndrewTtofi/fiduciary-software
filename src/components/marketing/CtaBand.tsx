@@ -28,7 +28,7 @@ export async function CtaBand({
             </div>
           )}
           <p>{body ?? cta.body}</p>
-          <Link href="/contact#book" className="pill" style={{ marginTop: 30 }}>
+          <Link href="/contact" className="pill" style={{ marginTop: 30 }}>
             {cta.button} {ArrowIc}
           </Link>
         </div>

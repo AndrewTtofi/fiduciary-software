@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Icon } from "@/components/Icon";
 import { CtaBand } from "@/components/marketing/CtaBand";
+import { getClientLoginEnabled } from "@/lib/services/settings";
 
 export const metadata = { title: "Pricing" };
 
@@ -58,7 +59,9 @@ const PLANS: Plan[] = [
   },
 ];
 
-export default function PricingPage() {
+export default async function PricingPage() {
+  // With client login off there is no application flow — route intent to booking.
+  const applyHref = (await getClientLoginEnabled()) ? "/login" : "/contact";
   return (
     <main>
       <section className="phero grid-bg">
@@ -84,7 +87,7 @@ export default function PricingPage() {
                     </li>
                   ))}
                 </ul>
-                <Link href="/login" className={`btn btn-block ${p.feat ? "btn-primary" : "btn-secondary"}`}>
+                <Link href={applyHref} className={`btn btn-block ${p.feat ? "btn-primary" : "btn-secondary"}`}>
                   Choose {p.tier}
                 </Link>
               </div>
@@ -93,7 +96,7 @@ export default function PricingPage() {
 
           <p className="text-center text-muted mt-8" style={{ fontSize: "0.875rem" }}>
             Indicative pricing — your exact quote depends on jurisdiction and scope.{" "}
-            <Link href="/login" className="link-gold">Start an application →</Link>
+            <Link href={applyHref} className="link-gold">Start an application →</Link>
           </p>
         </div>
       </section>

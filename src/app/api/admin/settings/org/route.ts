@@ -13,6 +13,8 @@ const schema = z.object({
   address: z.string().max(1000).nullable().optional(),
   // Onboarding document-upload phase behaviour
   documentsPhase: z.enum(["mandatory", "optional", "off"]).optional(),
+  // Client portal login on/off (off = consultation booking only)
+  clientLoginEnabled: z.boolean().optional(),
   // White-label branding + plan tier
   brandName: z.string().max(150).nullable().optional(),
   brandMark: z.string().max(2).nullable().optional(),
@@ -48,6 +50,7 @@ export async function PATCH(req: Request) {
   if (p.contactEmail !== undefined) data.contactEmail = p.contactEmail || null;
   if (p.address !== undefined) data.address = p.address || null;
   if (p.documentsPhase !== undefined) data.documentsPhase = p.documentsPhase;
+  if (p.clientLoginEnabled !== undefined) data.clientLoginEnabled = p.clientLoginEnabled;
   if (p.brandName !== undefined) data.brandName = p.brandName || null;
   if (p.brandMark !== undefined) data.brandMark = p.brandMark ? p.brandMark.toUpperCase() : null;
   if (p.logo !== undefined) data.logo = p.logo || null;

@@ -457,6 +457,9 @@
 .shell-marketing .hero .ctas { display: flex; gap: 16px; margin-top: 38px; flex-wrap: wrap; opacity: 0; animation: mk-fadein 1s .7s var(--mk-ease) forwards; }
 .shell-marketing .hero-card { border-radius: 30px; overflow: hidden; min-height: 520px; background-size: cover; background-position: center; box-shadow: 0 40px 80px -30px rgba(0, 0, 0, .8); border: 1px solid rgba(255, 255, 255, .08); opacity: 0; animation: mk-fadein 1.1s .4s var(--mk-ease) forwards; }
 @media (max-width: 960px) { .shell-marketing .hero-card { min-height: 320px; } }
+/* hero calculator slot — same entrance as the old hero image card */
+.shell-marketing .hero-calc { opacity: 0; animation: mk-fadein 1.1s .4s var(--mk-ease) forwards; }
+.shell-marketing .hero-calc .card { box-shadow: 0 40px 80px -30px rgba(0, 0, 0, .8); }
 
 /* ── ivory sections ──────────────────────────────────────────────── */
 .shell-marketing .ivory {
@@ -768,17 +771,41 @@
 .jchip.on { background: var(--brand-50); border-color: var(--brand); color: var(--brand); font-weight: 500; }
 
 /* tax calculator */
-.calc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-8); }
+.calc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-8); align-items: start; }
 @media (max-width: 780px) { .calc-grid { grid-template-columns: 1fr; } }
-.calc-result { background: var(--brand); color: #fff; border-radius: var(--radius-lg); padding: var(--space-8); }
-.calc-result .big { font-family: var(--font-mono); font-size: 3.052rem; font-weight: 700; letter-spacing: -.02em; line-height: 1; }
-.calc-result .lbl { color: rgba(255,255,255,.75); font-size: 0.75rem; text-transform: uppercase; letter-spacing: .05em; }
-.calc-row { display: flex; justify-content: space-between; padding: 10px 0; border-top: 1px solid rgba(255,255,255,.18); font-size: 0.875rem; }
-.calc-row .num { color: #fff; }
-.gated { position: relative; }
-.gated.locked .blurme { filter: blur(7px); pointer-events: none; user-select: none; }
-.gate-over { position: absolute; inset: 0; display: grid; place-items: center; padding: var(--space-6); }
-.gate-card { background: var(--surface); border: 1px solid var(--border-color); border-radius: var(--radius-md); box-shadow: var(--shadow-lg); padding: var(--space-6); max-width: 340px; text-align: center; }
+
+/* effective-rate calculator card (marketing /tools/calculator) */
+/* Explicit ink text so the white card stays readable inside the dark
+   marketing hero (.shell-marketing sets color:#fff). */
+.taxcalc { display: flex; flex-direction: column; color: var(--ink); }
+.taxcalc-seg { position: relative; display: grid; grid-template-columns: 1fr 1fr; width: 100%; max-width: 240px; border: 1px solid var(--border-color); background: var(--surface-2); border-radius: var(--radius-pill); padding: 4px; }
+.taxcalc-seg button { position: relative; z-index: 1; border: 0; background: none; border-radius: var(--radius-pill); padding: 7px 12px; font-size: 0.8125rem; font-weight: 500; cursor: pointer; color: var(--text-muted); transition: var(--transition-colors); }
+.taxcalc-seg button.on { color: var(--text); }
+.taxcalc-seg-thumb { position: absolute; top: 4px; bottom: 4px; left: 4px; width: calc(50% - 4px); background: #fff; border-radius: var(--radius-pill); box-shadow: var(--shadow-sm); transition: transform .3s var(--ease-out); }
+.taxcalc-seg-thumb.right { transform: translateX(100%); }
+.taxcalc-title { margin-top: 20px; font-size: 1.125rem; font-weight: 700; letter-spacing: -.01em; }
+.taxcalc-rate { margin-top: 8px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.taxcalc-rate .mono { font-size: clamp(2.5rem, 6vw, 3.75rem); font-weight: 800; line-height: 1; letter-spacing: -.02em; color: var(--accent-deep); }
+.taxcalc-badge { background: var(--surface-2); border-radius: var(--radius-pill); padding: 4px 10px; font-size: 0.6875rem; font-weight: 500; color: var(--text-muted); }
+.taxcalc-input { margin-top: 20px; display: flex; flex-direction: column; gap: 8px; }
+.taxcalc-row { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; font-size: 0.875rem; }
+.taxcalc-row .lbl { color: var(--text-muted); }
+.taxcalc-row .num { font-weight: 500; }
+.taxcalc-row.total { font-weight: 600; }
+.taxcalc-row.total .num { font-weight: 700; }
+.taxcalc-note { font-size: 0.75rem; line-height: 1.5; color: var(--text-muted); }
+.taxcalc-lines { margin-top: 20px; border-top: 1px solid var(--border-color); padding-top: 16px; display: flex; flex-direction: column; gap: 10px; }
+.taxcalc-switch { position: relative; display: inline-flex; align-items: center; width: 36px; height: 20px; flex-shrink: 0; border: 0; border-radius: var(--radius-pill); background: var(--border-strong-color); cursor: pointer; transition: var(--transition-colors); }
+.taxcalc-switch.on { background: var(--accent-deep); }
+.taxcalc-switch span { display: inline-block; width: 16px; height: 16px; border-radius: 50%; background: #fff; box-shadow: var(--shadow-sm); transform: translateX(2px); transition: transform .2s var(--ease-out); }
+.taxcalc-switch.on span { transform: translateX(18px); }
+.taxcalc-slider { appearance: none; -webkit-appearance: none; cursor: pointer; background: none; height: 32px; display: block; width: 100%; }
+.taxcalc-slider:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; border-radius: var(--radius-pill); }
+.taxcalc-slider::-webkit-slider-runnable-track { background: linear-gradient(to right, var(--accent-deep) 0%, var(--accent-deep) var(--fill, 100%), var(--border-strong-color) var(--fill, 100%), var(--border-strong-color) 100%); border-radius: var(--radius-pill); height: 6px; }
+.taxcalc-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; background: var(--accent-deep); border: 2px solid #fff; border-radius: 50%; width: 22px; height: 22px; margin-top: -8px; box-shadow: 0 1px 4px rgba(26,26,26,.3); }
+.taxcalc-slider::-moz-range-track { background: linear-gradient(to right, var(--accent-deep) 0%, var(--accent-deep) var(--fill, 100%), var(--border-strong-color) var(--fill, 100%), var(--border-strong-color) 100%); border-radius: var(--radius-pill); height: 6px; }
+.taxcalc-slider::-moz-range-thumb { background: var(--accent-deep); border: 2px solid #fff; border-radius: 50%; width: 22px; height: 22px; box-shadow: 0 1px 4px rgba(26,26,26,.3); }
+.taxcalc-fine { margin-top: 10px; font-size: 0.6875rem; color: var(--text-muted); }
 
 /* empty state */
 .empty { max-width: 360px; margin: 0 auto; text-align: center; padding: var(--space-12) 0; }

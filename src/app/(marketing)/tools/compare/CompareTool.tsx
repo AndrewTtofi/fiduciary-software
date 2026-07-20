@@ -6,7 +6,7 @@ import { JURISDICTIONS, RATES_REVIEWED } from "@/lib/data/jurisdictions";
 
 type SortKey = "corpTax" | "vat" | "days" | "treaties";
 
-export function CompareTool() {
+export function CompareTool({ applyHref = "/login" }: { applyHref?: string }) {
   const [selected, setSelected] = useState<string[]>(["cy", "mt", "ee"]);
   const [sort, setSort] = useState<SortKey>("corpTax");
 
@@ -87,7 +87,7 @@ export function CompareTool() {
                       </a>
                     </td>
                     <td style={{ textAlign: "right" }}>
-                      <Link href="/login" className="btn btn-ghost btn-sm">Apply →</Link>
+                      <Link href={applyHref} className="btn btn-ghost btn-sm">Apply →</Link>
                     </td>
                   </tr>
                 );

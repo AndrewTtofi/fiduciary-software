@@ -18,7 +18,7 @@ const RESOURCES: { href: string; label: string }[] = [
 
 /** Desktop nav links + mobile hamburger panel. Client-side so the active link
  *  and the mobile toggle work; branding stays in the server-rendered header. */
-export function HeaderNav({ services }: { services: NavService[] }) {
+export function HeaderNav({ services, clientLogin }: { services: NavService[]; clientLogin: boolean }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const on = (href: string) => (href === "/" ? pathname === "/" : pathname.startsWith(href));
@@ -47,7 +47,7 @@ export function HeaderNav({ services }: { services: NavService[] }) {
         </span>
         <Link href="/insights" className={cls("/insights")}>Insights</Link>
         <Link href="/contact" className={cls("/contact")}>Contact us</Link>
-        <Link href="/login">Client Login</Link>
+        {clientLogin && <Link href="/login">Client Login</Link>}
       </nav>
       <button
         className="mnav-btn"
@@ -72,7 +72,7 @@ export function HeaderNav({ services }: { services: NavService[] }) {
           ))}
           <Link href="/insights">Insights</Link>
           <Link href="/contact">Contact us</Link>
-          <Link href="/login">Client Login</Link>
+          {clientLogin && <Link href="/login">Client Login</Link>}
         </div>
       )}
     </>

@@ -1,11 +1,16 @@
+import { redirect } from "next/navigation";
 import { Logo } from "@/components/marketing/Logo";
 import { requireUser } from "@/lib/auth/guards";
+import { getClientLoginEnabled } from "@/lib/services/settings";
 import { prisma } from "@/lib/db";
 import { computeCompleteness } from "@/lib/services/prospect-intel";
 import { CompletenessChip } from "@/components/admin/CompletenessChip";
 
 export default async function OnboardingLayout({ children }: { children: React.ReactNode }) {
   const user = await requireUser();
+  if ((user.role === "client" || user.role === "prospect") && !(await getClientLoginEnabled())) {
+    redirect("/contact");
+  }
 
   // Live "brief completeness" meter — mirrors what staff will see, so the
   // applicant knows how strong their application is as they fill it in.

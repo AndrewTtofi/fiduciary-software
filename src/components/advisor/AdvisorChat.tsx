@@ -12,7 +12,7 @@ type Rec = { serviceIds: string[]; jurIds: string[]; primaryJur: string; showPro
 type Msg = { role: "me" | "them"; text?: string; card?: Rec };
 type Stage = "await" | "typing" | "clarify" | "done";
 
-export function AdvisorChat({ brand }: { brand: string }) {
+export function AdvisorChat({ brand, applyHref = "/login" }: { brand: string; applyHref?: string }) {
   const [messages, setMessages] = useState<Msg[]>([{ role: "them", text: advisorGreeting(brand) }]);
   const [chips, setChips] = useState<string[] | null>(STARTER_CHIPS.slice());
   const [stage, setStage] = useState<Stage>("await");
@@ -92,7 +92,7 @@ export function AdvisorChat({ brand }: { brand: string }) {
         </div>
         <div className="note mt-4"><Icon name="sparkles" className="ic-16" /><div>Indicative — from {svcDef(ps).priceFrom} · live in ~{jr.days} days · {jr.corpTax}% on profits. Your specialist confirms before anything is filed.</div></div>
         <div className="row gap-2 mt-4 wrap">
-          <Link href="/login" className="btn btn-primary"><Icon name="arrow" className="ic-16" /> Start application</Link>
+          <Link href={applyHref} className="btn btn-primary"><Icon name="arrow" className="ic-16" /> Start application</Link>
           {card.showProviders && <Link href="/marketplace" className="btn btn-secondary"><Icon name="users" className="ic-16" /> See matching providers</Link>}
           <Link href="/tools/compare" className="btn btn-ghost"><Icon name="scale" className="ic-16" /> Compare jurisdictions</Link>
         </div>

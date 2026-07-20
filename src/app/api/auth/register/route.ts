@@ -1,11 +1,18 @@
 import { NextResponse } from "next/server";
 import { registerSchema } from "@/lib/schema/auth";
 import { registerProspect } from "@/lib/services/auth-flows";
+import { getClientLoginEnabled } from "@/lib/services/settings";
 import { rateLimit } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 
 export async function POST(req: Request) {
+  if (!(await getClientLoginEnabled())) {
+    return NextResponse.json(
+      { error: "New client sign-ups are currently disabled — please book a consultation instead." },
+      { status: 403 },
+    );
+  }
   const limited = await rateLimit({ bucket: "register", key: ipOf(req), limit: 5, windowSec: 600 });
   if (!limited.ok) return NextResponse.json({ error: "Too many attempts. Try again later." }, { status: 429 });
 

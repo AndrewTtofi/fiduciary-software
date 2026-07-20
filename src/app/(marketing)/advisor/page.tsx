@@ -1,5 +1,6 @@
 import { AdvisorChat } from "@/components/advisor/AdvisorChat";
 import { getBranding } from "@/lib/services/branding";
+import { getClientLoginEnabled } from "@/lib/services/settings";
 
 export const metadata = {
   title: "AI Advisor",
@@ -7,7 +8,7 @@ export const metadata = {
 };
 
 export default async function AdvisorPage() {
-  const { brandName } = await getBranding();
+  const [{ brandName }, clientLogin] = await Promise.all([getBranding(), getClientLoginEnabled()]);
   return (
     <main>
       <section className="phero grid-bg" style={{ paddingBottom: 30 }}>
@@ -19,7 +20,7 @@ export default async function AdvisorPage() {
 
       <section className="ivory sec-tight sec" style={{ paddingTop: 50 }}>
         <div className="mk-container" style={{ maxWidth: 820 }}>
-          <AdvisorChat brand={brandName} />
+          <AdvisorChat brand={brandName} applyHref={clientLogin ? "/login" : "/contact"} />
         </div>
       </section>
     </main>

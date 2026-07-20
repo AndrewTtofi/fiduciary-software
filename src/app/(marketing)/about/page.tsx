@@ -31,7 +31,7 @@ export default async function AboutPage() {
             <h2>Decades of Expertise, One Accountable Team</h2>
             <p className="body"><BoldText text={about.body1} /></p>
             <p className="body"><BoldText text={about.body2} /></p>
-            <Link href="/contact#book" className="pill" style={{ marginTop: 34 }}>
+            <Link href="/contact" className="pill" style={{ marginTop: 34 }}>
               Talk to us {ArrowIc}
             </Link>
           </div>

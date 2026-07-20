@@ -427,6 +427,10 @@ model OrgSettings {
   // submit), "optional" (step shown, submit allowed with no docs), or "off"
   // (step removed entirely — onboarding becomes 2 steps).
   documentsPhase String @default("mandatory")
+  // Whether clients/prospects can sign in to the portal at all. When off, the
+  // public site hides client login and sign-up and visitors can only book
+  // consultations; staff and partner sign-in keeps working.
+  clientLoginEnabled Boolean @default(true)
   // Per-section visibility overrides for the client dashboard, as a
   // { [sectionKey]: boolean } map. Absent keys fall back to the section's
   // code-defined default; plan-tier locking is enforced on top. See

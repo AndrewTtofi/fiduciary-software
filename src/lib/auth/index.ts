@@ -1,4 +1,4 @@
-import NextAuth, { type DefaultSession } from "next-auth";
+import NextAuth, { CredentialsSignin, type DefaultSession } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
 import LinkedIn from "next-auth/providers/linkedin";
@@ -7,6 +7,7 @@ import argon2 from "argon2";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { env, features } from "@/lib/env";
+import { getClientLoginEnabled } from "@/lib/services/settings";
 
 declare module "next-auth" {
   interface Session {
@@ -17,6 +18,12 @@ declare module "next-auth" {
       fullName: string;
     } & DefaultSession["user"];
   }
+}
+
+/** Typed sign-in failure so the client can show a specific message —
+ *  next-auth v5 only surfaces `code` from CredentialsSignin subclasses. */
+class ClientLoginDisabledError extends CredentialsSignin {
+  code = "CLIENT_LOGIN_DISABLED";
 }
 
 const credentialsSchema = z.object({
@@ -43,6 +50,11 @@ const providers = [
         // We deliberately don't leak the difference between "wrong password" and
         // "unverified" — callers should hit /api/auth/resend-verification.
         throw new Error("EMAIL_NOT_VERIFIED");
+      }
+      // Portal off-switch: when client login is disabled the deployment only
+      // offers consultation booking — staff/partner sign-in stays open.
+      if ((user.role === "client" || user.role === "prospect") && !(await getClientLoginEnabled())) {
+        throw new ClientLoginDisabledError();
       }
       return {
         id: user.id,
@@ -82,6 +94,14 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
     verifyRequest: "/verify-sent",
   },
   callbacks: {
+    async signIn({ user }) {
+      // Mirrors the credentials-provider check for OAuth sign-ins: block
+      // client/prospect accounts (and brand-new OAuth users, who would be
+      // created as prospects) while client login is disabled.
+      const role = (user as { role?: string }).role;
+      if (role === "staff" || role === "partner") return true;
+      return getClientLoginEnabled();
+    },
     async jwt({ token, user }) {
       if (user) {
         token.uid = (user as { id: string }).id;

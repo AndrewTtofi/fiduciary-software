@@ -11,6 +11,7 @@ export function OrgForm({
     contactEmail: string | null;
     address: string | null;
     documentsPhase: "mandatory" | "optional" | "off";
+    clientLoginEnabled: boolean;
   };
 }) {
   const [pending, start] = useTransition();
@@ -30,6 +31,7 @@ export function OrgForm({
           contactEmail: fd.get("contactEmail"),
           address: fd.get("address"),
           documentsPhase: fd.get("documentsPhase"),
+          clientLoginEnabled: fd.get("clientLoginEnabled") === "on",
         }),
       });
       const body = (await res.json().catch(() => ({}))) as { error?: string };
@@ -48,6 +50,17 @@ export function OrgForm({
       </Field>
       <Field label="Address">
         <textarea name="address" rows={3} defaultValue={initial.address ?? ""} className="input" placeholder="Street, City, Country" />
+      </Field>
+      <Field label="Client portal login">
+        <select name="clientLoginEnabled" defaultValue={initial.clientLoginEnabled ? "on" : "off"} className="select">
+          <option value="on">On — clients can sign in and use the portal</option>
+          <option value="off">Off — consultation booking only (client login &amp; sign-up hidden)</option>
+        </select>
+        <p className="text-meta text-admin-muted">
+          When off, the public site hides Client Login, new sign-ups are blocked and existing
+          clients can no longer sign in — visitors can only book a consultation. Staff and
+          partner sign-in keeps working.
+        </p>
       </Field>
       <Field label="Onboarding documents step">
         <select name="documentsPhase" defaultValue={initial.documentsPhase} className="select">

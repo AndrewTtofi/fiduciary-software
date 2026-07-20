@@ -1,16 +1,18 @@
 import Link from "next/link";
 import { getBranding } from "@/lib/services/branding";
 import { getSiteContent } from "@/lib/services/content";
+import { getClientLoginEnabled } from "@/lib/services/settings";
 import { getServerBranding } from "@/lib/services/branding-server";
 import { SERVICES } from "@/components/marketing/ServiceIcons";
 import { waLink } from "@/components/marketing/mk";
 
 /** Black/gold public-site footer: brand, quick links, services, contact. */
 export async function SiteFooter() {
-  const [{ brandName, brandMark, logo }, { legalName }, { contact }] = await Promise.all([
+  const [{ brandName, brandMark, logo }, { legalName }, { contact }, clientLogin] = await Promise.all([
     getBranding(),
     getServerBranding(),
     getSiteContent(),
+    getClientLoginEnabled(),
   ]);
   const email = contact.email;
   return (
@@ -50,7 +52,7 @@ export async function SiteFooter() {
             <Link href="/insights">Insights</Link>
             <Link href="/pricing">Pricing</Link>
             <Link href="/faq">FAQ</Link>
-            <Link href="/login">Client Login</Link>
+            {clientLogin && <Link href="/login">Client Login</Link>}
             <Link href="/privacy">Privacy Policy</Link>
             <Link href="/terms">Terms &amp; Conditions</Link>
           </div>

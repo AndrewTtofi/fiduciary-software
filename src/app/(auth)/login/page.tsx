@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { AuthTabs } from "./AuthTabs";
 import { getBranding } from "@/lib/services/branding";
+import { getClientLoginEnabled } from "@/lib/services/settings";
 import { BrandMark } from "@/components/BrandMark";
 
 export default async function LoginPage({
@@ -8,7 +9,10 @@ export default async function LoginPage({
 }: {
   searchParams: Promise<{ next?: string; error?: string }>;
 }) {
-  const { brandName, brandMark, logo } = await getBranding();
+  const [{ brandName, brandMark, logo }, clientLogin] = await Promise.all([
+    getBranding(),
+    getClientLoginEnabled(),
+  ]);
   return (
     <main className="auth-wrap">
       <div className="w-full max-w-[440px]">
@@ -22,11 +26,23 @@ export default async function LoginPage({
           <div className="mb-6">
             <h2 style={{ fontSize: "1.563rem", fontWeight: 700, letterSpacing: "-0.02em" }}>Welcome back</h2>
             <p className="text-muted mt-1" style={{ fontSize: "0.875rem" }}>
-              Sign in to access your engagements, documents and messages.
+              {clientLogin
+                ? "Sign in to access your engagements, documents and messages."
+                : "Team and partner sign-in."}
             </p>
           </div>
 
-          <AuthTabs initial="signin" searchParamsPromise={searchParams} />
+          {!clientLogin && (
+            <div
+              className="mb-5 px-4 py-3"
+              style={{ background: "var(--surface-2)", borderRadius: "var(--radius-sm)", fontSize: "0.8125rem" }}
+            >
+              Client accounts are currently disabled —{" "}
+              <Link href="/contact" className="text-brand">book a consultation</Link> instead.
+            </div>
+          )}
+
+          <AuthTabs initial="signin" searchParamsPromise={searchParams} allowSignup={clientLogin} />
 
           <div className="divider">Secure sign-in</div>
 

@@ -3,6 +3,7 @@ import { getBranding } from "@/lib/services/branding";
 import { getSiteContent } from "@/lib/services/content";
 import { SERVICES, ServiceIcons } from "@/components/marketing/ServiceIcons";
 import { CtaBand } from "@/components/marketing/CtaBand";
+import { TaxCalculator } from "@/components/marketing/TaxCalculator";
 import { ArrowIc, BoldText, GoldHeading, KineticHeading, parseStatValue } from "@/components/marketing/mk";
 
 const FEAT_ICONS = [
@@ -28,11 +29,13 @@ export default async function LandingPage() {
             <h1><KineticHeading text={hero.headline} /></h1>
             <p className="sub">{hero.lead}</p>
             <div className="ctas">
-              <Link href="/contact#book" className="pill">{hero.primaryCta} {ArrowIc}</Link>
+              <Link href="/contact" className="pill">{hero.primaryCta} {ArrowIc}</Link>
               <Link href="/services" className="pill ghost">{hero.secondaryCta}</Link>
             </div>
           </div>
-          <div className="hero-card" style={{ backgroundImage: "url(/marketing/hc-hero.jpg)" }} />
+          <div className="hero-calc">
+            <TaxCalculator />
+          </div>
         </div>
       </section>
 
