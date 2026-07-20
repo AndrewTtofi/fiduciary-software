@@ -25,7 +25,7 @@ jobs:
           # Full history so the script can diff CHANGELOG.md against the
           # previously-deployed commit (delta-only notifications).
           fetch-depth: 0
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         with:
           node-version: "20"
       - name: Resolve previous deploy commit
