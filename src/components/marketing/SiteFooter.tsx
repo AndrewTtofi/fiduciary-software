@@ -6,7 +6,7 @@ import { getServerBranding } from "@/lib/services/branding-server";
 import { SERVICES } from "@/components/marketing/ServiceIcons";
 import { waLink } from "@/components/marketing/mk";
 
-/** Black/gold public-site footer: brand, quick links, services, contact. */
+/** Navy public-site footer: brand, quick links, services, contact. */
 export async function SiteFooter() {
   const [{ brandName, brandMark, logo }, { legalName }, { contact }, clientLogin] = await Promise.all([
     getBranding(),
@@ -15,6 +15,7 @@ export async function SiteFooter() {
     getClientLoginEnabled(),
   ]);
   const email = contact.email;
+  const year = new Date().getFullYear();
   return (
     <footer className="mk-footer">
       <div className="mk-container">
@@ -32,32 +33,25 @@ export async function SiteFooter() {
               )}
             </div>
             <p className="f-about">
-              {brandName} is a corporate services firm — company incorporation, fiduciary
-              support, tax residency, immigration and banking for international entrepreneurs.
+              A modern Cyprus corporate and fiduciary services firm, helping international
+              founders relocate, structure and operate with confidence.
             </p>
-            <div className="socials">
-              <a aria-label="Facebook" href="#">
-                <svg className="ic ic-16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M14 8h3V5h-3a4 4 0 0 0-4 4v2H7v3h3v7h3v-7h3l1-3h-4V9a1 1 0 0 1 1-1z" /></svg>
-              </a>
-              <a aria-label="Instagram" href="#">
-                <svg className="ic ic-16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="5" /><circle cx="12" cy="12" r="4" /><path d="M17.5 6.5h.01" /></svg>
-              </a>
-            </div>
           </div>
           <div className="col">
-            <h4>Quick Links</h4>
+            <h4>Company</h4>
             <Link href="/">Home</Link>
             <Link href="/about">About Us</Link>
-            <Link href="/contact">Contact Us</Link>
+            <Link href="/services">Services</Link>
+            <Link href="/your-consultation">Who Takes Your Call</Link>
             <Link href="/insights">Insights</Link>
-            <Link href="/pricing">Pricing</Link>
+            <Link href="/pricing">Packages</Link>
             <Link href="/faq">FAQ</Link>
             {clientLogin && <Link href="/login">Client Login</Link>}
             <Link href="/privacy">Privacy Policy</Link>
-            <Link href="/terms">Terms &amp; Conditions</Link>
+            <Link href="/terms">Terms</Link>
           </div>
           <div className="col">
-            <h4>Our Services</h4>
+            <h4>Services</h4>
             {SERVICES.map((s) => (
               <Link key={s.key} href={`/services/${s.key}`}>{s.title}</Link>
             ))}
@@ -72,7 +66,7 @@ export async function SiteFooter() {
             )}
             {(contact.phone || contact.whatsapp) && (
               <div>
-                <b>Phone Number</b>
+                <b>Phone</b>
                 {contact.phone && <span className="g">{contact.phone}</span>}
                 {contact.phone && contact.whatsapp && <br />}
                 {contact.whatsapp && (
@@ -83,9 +77,12 @@ export async function SiteFooter() {
             {email && (
               <div><b>Email</b><a className="g" href={`mailto:${email}`}>{email}</a></div>
             )}
+            <Link href="/contact" className="pill sm" style={{ marginTop: 10 }}>
+              Book Your Free 30-Minute Consultation
+            </Link>
           </div>
         </div>
-        <div className="copy">All Copyrights &amp; Reserved By {legalName || brandName}</div>
+        <div className="copy">Copyright {year} {legalName || brandName}. All rights reserved.</div>
       </div>
     </footer>
   );

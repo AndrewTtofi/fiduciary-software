@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { upsertLead } from "@/lib/services/leads";
+import { sendConsultationEmails, upsertLead } from "@/lib/services/leads";
 import { rateLimit } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
@@ -28,5 +28,12 @@ export async function POST(req: Request) {
   if (!parsed.success) return NextResponse.json({ error: "Invalid input" }, { status: 422 });
 
   await upsertLead(parsed.data);
+  // Booking-form submissions also notify the firm and confirm to the visitor.
+  // Best-effort: the lead is already stored, so a mail outage never 500s the form.
+  if (parsed.data.source === "contact") {
+    sendConsultationEmails(parsed.data).catch((err) => {
+      console.error("[leads] consultation emails failed:", err);
+    });
+  }
   return NextResponse.json({ ok: true });
 }

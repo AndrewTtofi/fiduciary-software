@@ -9,7 +9,7 @@ type AdminTab =
   | "dashboard" | "submissions" | "compliance-hub"
   | "kyc" | "aml" | "kyb" | "ai-screening" | "ownership-map" | "client-risk" | "aml-reporting" | "compliance-calendar"
   | "leads" | "clients" | "messages"
-  | "documents" | "bookings" | "client-dashboard" | "branding" | "users" | "analytics" | "content"
+  | "documents" | "bookings" | "client-dashboard" | "branding" | "users" | "analytics" | "content" | "insights"
   | "integrations" | "settings";
 
 const I = {
@@ -22,6 +22,7 @@ const I = {
   users: <svg className="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>,
   analytics: <svg className="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3v18h18" /><path d="m19 9-5 5-4-4-3 3" /></svg>,
   content: <svg className="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" /><path d="M3 9h18M9 21V9" /></svg>,
+  insights: <svg className="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" /><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" /></svg>,
   settings: <svg className="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" /></svg>,
   logout: <svg className="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" /></svg>,
   search: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>,
@@ -34,7 +35,7 @@ const TITLES: Record<AdminTab, string> = {
   kyc: "KYC / ID verification", aml: "AML screening", kyb: "KYB verification", "ai-screening": "AI screening",
   "ownership-map": "Ownership map", "client-risk": "Client risk", "aml-reporting": "AML reporting", "compliance-calendar": "Compliance calendar",
   leads: "Leads / CRM", clients: "Clients", messages: "Messages",
-  documents: "Documents & e-sign", bookings: "Bookings", "client-dashboard": "Client dashboard", branding: "Branding", users: "Users", analytics: "Analytics", content: "Content",
+  documents: "Documents & e-sign", bookings: "Bookings", "client-dashboard": "Client dashboard", branding: "Branding", users: "Users", analytics: "Analytics", content: "Content", insights: "Insights articles",
   integrations: "Connect & API", settings: "Settings",
 };
 
@@ -111,6 +112,7 @@ export async function AdminShell({
               <Item id="users" href="/admin/users" icon={I.users} label="Users" />
               <Item id="analytics" href="/admin/analytics" icon={I.analytics} label="Analytics" />
               <Item id="content" href="/admin/content" icon={I.content} label="Content" />
+              <Item id="insights" href="/admin/insights" icon={I.insights} label="Insights articles" />
               {tierAtLeast(planTier, "scale") && (
                 <>
                   <div className="sb-group">Configure</div>

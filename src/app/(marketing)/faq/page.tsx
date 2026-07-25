@@ -10,9 +10,9 @@ export default async function FaqPage() {
     <main>
       <section className="phero grid-bg">
         <div className="mk-container">
-          <span className="kicker">&mdash; Questions</span>
+          <span className="kicker">Questions</span>
           <h1>Frequently <span className="gold">Asked</span></h1>
-          <p className="sub">Straight answers on structuring, timelines, banking and compliance — before you commit to anything.</p>
+          <p className="sub">Straight answers on structuring, timelines, banking and compliance, before you commit to anything.</p>
         </div>
       </section>
 
@@ -29,7 +29,7 @@ export default async function FaqPage() {
         </div>
       </section>
 
-      <CtaBand heading="Still Have *Questions?*" body="Start an application — you can save and exit at any point — or book a call and we'll walk you through it." />
+      <CtaBand heading="Still Have *Questions?*" body="Book a call and we will walk you through it, step by step." />
     </main>
   );
 }

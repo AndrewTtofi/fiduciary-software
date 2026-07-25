@@ -62,7 +62,7 @@ export const SERVICES: Service[] = [
     blurb: "Cyprus company formation, administration and ongoing compliance support.",
     longBlurb: "End-to-end incorporation with the Registrar of Companies, plus registered office, company secretary, and ongoing corporate administration.",
     pickerBlurb: "Full incorporation and registered office setup.",
-    sub: "Cyprus company formation, administration and compliance support — one accountable team from incorporation onward.",
+    sub: "Cyprus company formation, administration and compliance support. One accountable team from incorporation onward.",
     band: "corporate services",
     included: [
       "Cyprus company incorporation, end to end",
@@ -90,7 +90,7 @@ export const SERVICES: Service[] = [
       "VAT registration and periodic returns",
       "Preparation for audit and annual statements",
       "Payroll and employer registrations where needed",
-      "Deadline management — you never chase a date",
+      "Deadline management, so you never chase a date",
     ],
     steps: [
       { t: "Scope & quote", d: "We size the work to your activity and agree a clear fee." },
@@ -107,7 +107,7 @@ export const SERVICES: Service[] = [
     sub: "Cyprus tax residency and non-dom guidance with strategic planning around your personal position.",
     band: "tax residency",
     included: [
-      "Eligibility assessment — 60-day and 183-day routes",
+      "Eligibility assessment for the 60-day and 183-day routes",
       "Non-dom registration and planning",
       "Tax residency certificates for treaty access",
       "Personal tax registrations and ongoing guidance",
@@ -123,7 +123,7 @@ export const SERVICES: Service[] = [
     key: "licensing",
     title: "Licensing Worldwide",
     blurb: "Regulatory support and market entry for licensed activities across jurisdictions.",
-    longBlurb: "CySEC investment-firm licenses, CASP / crypto-asset providers, EMI, and gambling licenses — application through approval.",
+    longBlurb: "CySEC investment-firm licenses, CASP crypto-asset providers, EMI, and gambling licenses, from application through approval.",
     pickerBlurb: "EMI, CASP, and Gambling license acquisition.",
     sub: "Global regulatory support and market entry assistance for licensed activities.",
     band: "licensing",
@@ -145,7 +145,7 @@ export const SERVICES: Service[] = [
     blurb: "Residency permits, permanent residence and work permits for you and your family.",
     longBlurb: "Pink slip, digital nomad, work permits, permanent residency, and EU citizenship advisory for you and your dependents.",
     pickerBlurb: "Residency permits and citizenship solutions.",
-    sub: "Residency permits, permanent residence and work permits — for you, your family and your team.",
+    sub: "Residency permits, permanent residence and work permits, for you, your family and your team.",
     band: "immigration",
     included: [
       "Residency permits and renewals",
@@ -165,7 +165,7 @@ export const SERVICES: Service[] = [
     blurb: "Account opening and banking relationship management, bank and EMI alike.",
     longBlurb: "Curated introductions to EU/EEA banking partners with full KYC packaging for corporate and personal accounts.",
     pickerBlurb: "Corporate and personal bank account opening.",
-    sub: "Account opening and banking relationship management — bank and EMI alike, matched to your profile.",
+    sub: "Account opening and banking relationship management, bank and EMI alike, matched to your profile.",
     band: "banking solutions",
     included: [
       "Business account opening, bank and EMI",

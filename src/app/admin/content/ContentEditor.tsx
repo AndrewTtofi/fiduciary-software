@@ -19,6 +19,7 @@ export function ContentEditor({ initial }: { initial: SiteContent }) {
   const setCta = (k: keyof SiteContent["cta"], v: string) => setC((p) => ({ ...p, cta: { ...p.cta, [k]: v } }));
   const setInsights = (k: "kicker" | "heading" | "rhHeading" | "rhBody", v: string) => setC((p) => ({ ...p, insights: { ...p.insights, [k]: v } }));
   const setContact = (k: keyof SiteContent["contact"], v: string) => setC((p) => ({ ...p, contact: { ...p.contact, [k]: v } }));
+  const setConsult = (k: keyof Omit<SiteContent["consultation"], "points">, v: string) => setC((p) => ({ ...p, consultation: { ...p.consultation, [k]: v } }));
 
   function listSet<K extends "steps" | "stats" | "testimonials" | "faq">(key: K, i: number, field: string, v: string) {
     setC((p) => {
@@ -43,14 +44,11 @@ export function ContentEditor({ initial }: { initial: SiteContent }) {
   }
   function featAdd() { setC((p) => ({ ...p, why: { ...p.why, features: [...p.why.features, { t: "", d: "" }] } })); }
   function featRemove(i: number) { setC((p) => ({ ...p, why: { ...p.why, features: p.why.features.filter((_, j) => j !== i) } })); }
-  function postSet(i: number, field: "tag" | "title" | "img", v: string) {
-    setC((p) => {
-      const posts = p.insights.posts.map((x, j) => (j === i ? { ...x, [field]: v } : x));
-      return { ...p, insights: { ...p.insights, posts } };
-    });
+  function pointSet(i: number, v: string) {
+    setC((p) => ({ ...p, consultation: { ...p.consultation, points: p.consultation.points.map((x, j) => (j === i ? v : x)) } }));
   }
-  function postAdd() { setC((p) => ({ ...p, insights: { ...p.insights, posts: [...p.insights.posts, { tag: "", title: "", img: "" }] } })); }
-  function postRemove(i: number) { setC((p) => ({ ...p, insights: { ...p.insights, posts: p.insights.posts.filter((_, j) => j !== i) } })); }
+  function pointAdd() { setC((p) => ({ ...p, consultation: { ...p.consultation, points: [...p.consultation.points, ""] } })); }
+  function pointRemove(i: number) { setC((p) => ({ ...p, consultation: { ...p.consultation, points: p.consultation.points.filter((_, j) => j !== i) } })); }
 
   function save() {
     setMsg(null);
@@ -157,19 +155,32 @@ export function ContentEditor({ initial }: { initial: SiteContent }) {
       </Card>
 
       {/* Insights */}
-      <Card title="Insights" onAdd={postAdd} addLabel="Add post">
+      <Card title="Insights section heading">
         <Field label="Kicker"><input className="input" value={c.insights.kicker} onChange={(e) => setInsights("kicker", e.target.value)} /></Field>
         <Field label="Heading"><textarea className="input" rows={2} value={c.insights.heading} onChange={(e) => setInsights("heading", e.target.value)} /></Field>
         <Field label="Right-hand heading"><input className="input" value={c.insights.rhHeading} onChange={(e) => setInsights("rhHeading", e.target.value)} /></Field>
         <Field label="Right-hand body"><textarea className="input" rows={2} value={c.insights.rhBody} onChange={(e) => setInsights("rhBody", e.target.value)} /></Field>
+        <p className="help">The article cards themselves are managed under <strong>Insights articles</strong> in the sidebar.</p>
+      </Card>
+
+      {/* Who takes your call */}
+      <Card title="Who takes your call (consultation page + homepage strip)" onAdd={pointAdd} addLabel="Add point">
+        <div className="grid gap-3 sm:grid-cols-2">
+          <Field label="Kicker"><input className="input" value={c.consultation.kicker} onChange={(e) => setConsult("kicker", e.target.value)} /></Field>
+          <Field label="Heading"><input className="input" value={c.consultation.heading} onChange={(e) => setConsult("heading", e.target.value)} /></Field>
+          <Field label="Person name"><input className="input" value={c.consultation.personName} onChange={(e) => setConsult("personName", e.target.value)} /></Field>
+          <Field label="Person title"><input className="input" value={c.consultation.personTitle} onChange={(e) => setConsult("personTitle", e.target.value)} /></Field>
+        </div>
+        <Field label="Body"><textarea className="input" rows={3} value={c.consultation.body} onChange={(e) => setConsult("body", e.target.value)} /></Field>
+        <Field label="Photo URL (portrait of the person, 4:5)"><input className="input" value={c.consultation.photoUrl} onChange={(e) => setConsult("photoUrl", e.target.value)} placeholder="/marketing/georgia.jpg" /></Field>
+        <Field label="Photo note (shown while no photo is set)"><input className="input" value={c.consultation.photoNote} onChange={(e) => setConsult("photoNote", e.target.value)} /></Field>
+        <Field label="Positioning strip heading"><textarea className="input" rows={2} value={c.consultation.stripHeading} onChange={(e) => setConsult("stripHeading", e.target.value)} /></Field>
+        <Field label="Positioning strip body"><input className="input" value={c.consultation.stripBody} onChange={(e) => setConsult("stripBody", e.target.value)} /></Field>
+        <Field label="Line under the booking form"><input className="input" value={c.consultation.underForm} onChange={(e) => setConsult("underForm", e.target.value)} /></Field>
         <hr className="hairline" style={{ margin: "8px 0" }} />
-        {c.insights.posts.map((p, i) => (
-          <ListItem key={i} onRemove={() => postRemove(i)} index={i + 1}>
-            <div className="grid gap-3 sm:grid-cols-2">
-              <Field label="Tag"><input className="input" value={p.tag} onChange={(e) => postSet(i, "tag", e.target.value)} /></Field>
-              <Field label="Image URL"><input className="input" value={p.img} onChange={(e) => postSet(i, "img", e.target.value)} /></Field>
-            </div>
-            <Field label="Title"><input className="input" value={p.title} onChange={(e) => postSet(i, "title", e.target.value)} /></Field>
+        {c.consultation.points.map((pt, i) => (
+          <ListItem key={i} onRemove={() => pointRemove(i)} index={i + 1}>
+            <Field label="Point"><input className="input" value={pt} onChange={(e) => pointSet(i, e.target.value)} /></Field>
           </ListItem>
         ))}
       </Card>

@@ -3,7 +3,7 @@ import { getBranding } from "@/lib/services/branding";
 
 export const metadata = {
   title: "Partner network",
-  description: "A vetted network of banks, EMIs, corporate-service providers, advisors and licensing partners — compare and apply with one reusable KYC profile.",
+  description: "A vetted network of banks, EMIs, corporate-service providers, advisors and licensing partners. Compare and apply with one reusable KYC profile.",
 };
 
 export default async function MarketplacePage() {
@@ -12,9 +12,9 @@ export default async function MarketplacePage() {
     <main>
       <section className="phero grid-bg">
         <div className="mk-container">
-          <span className="kicker">&mdash; Partner Network</span>
+          <span className="kicker">Partner Network</span>
           <h1>Our Vetted <span className="gold">Partner Network</span></h1>
-          <p className="sub">Banks, EMIs, corporate-service providers, advisors and licensing partners — compare and apply with one reusable KYC profile.</p>
+          <p className="sub">Banks, EMIs, corporate-service providers, advisors and licensing partners. Compare and apply with one reusable KYC profile.</p>
         </div>
       </section>
 

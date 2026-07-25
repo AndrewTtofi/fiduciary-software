@@ -1,102 +1,93 @@
 import Link from "next/link";
-import { Icon } from "@/components/Icon";
 import { CtaBand } from "@/components/marketing/CtaBand";
-import { getClientLoginEnabled } from "@/lib/services/settings";
+import { CheckIc } from "@/components/marketing/mk";
 
-export const metadata = { title: "Pricing" };
+export const metadata = { title: "Packages" };
 
-type Plan = {
-  tier: string;
-  amount: string;
-  unit: string;
+/* Scope comparison only — no fee numbers anywhere. Every package routes to
+   the booking form; the quote is personalised after the call. */
+type Pkg = {
+  tag: string;
+  title: string;
+  sub: string;
+  features: string[];
   feat?: boolean;
-  features: [boolean, string][];
 };
 
-const PLANS: Plan[] = [
+const PKGS: Pkg[] = [
   {
-    tier: "Essentials",
-    amount: "€1,200",
-    unit: "one-off + from €90/mo",
+    tag: "Essential",
+    title: "Formation",
+    sub: "Get a clean Cyprus company up and running.",
     features: [
-      [true, "Cyprus company formation"],
-      [true, "Registered office & secretary"],
-      [true, "Client dashboard & document vault"],
-      [true, "Email support"],
-      [false, "Accounting & VAT"],
-      [false, "Banking introductions"],
-      [false, "Dedicated advisor"],
+      "Company formation and registration",
+      "Registered office and secretary",
+      "Corporate bank or EMI introduction",
+      "First year compliance calendar",
     ],
   },
   {
-    tier: "Standard",
-    amount: "€2,400",
-    unit: "setup + from €240/mo",
+    tag: "Most chosen",
+    title: "Formation and Tax",
+    sub: "Company plus your Non-Dom tax residency.",
     feat: true,
     features: [
-      [true, "Everything in Essentials"],
-      [true, "Accounting & VAT compliance"],
-      [true, "Annual tax filing"],
-      [true, "Priority review (1 business day)"],
-      [true, "Secure messaging with your advisor"],
-      [true, "Deadline reminders"],
-      [false, "Banking introductions"],
+      "Everything in Formation",
+      "Tax residency and Non-Dom setup",
+      "60-day rule structuring",
+      "Accounting and VAT registration",
     ],
   },
   {
-    tier: "Full service",
-    amount: "Custom",
-    unit: "tailored to your engagement",
+    tag: "Full service",
+    title: "Relocation",
+    sub: "You, your family and your company, landed.",
     features: [
-      [true, "Everything in Standard"],
-      [true, "Banking introductions (25+ partners)"],
-      [true, "Tax residency (Non-Dom)"],
-      [true, "Immigration & relocation support"],
-      [true, "AML / KYC packaging"],
-      [true, "Dedicated advisor"],
-      [true, "Priority support"],
+      "Everything in Formation and Tax",
+      "Immigration and residence permits",
+      "Property and Permanent Residency guidance",
+      "Ongoing accounting and advisory",
     ],
   },
 ];
 
-export default async function PricingPage() {
-  // With client login off there is no application flow — route intent to booking.
-  const applyHref = (await getClientLoginEnabled()) ? "/login" : "/contact";
+export default function PricingPage() {
   return (
     <main>
       <section className="phero grid-bg">
         <div className="mk-container">
-          <span className="kicker">&mdash; Pricing</span>
-          <h1>One Firm. Priced to <span className="gold">Replace Four</span></h1>
-          <p className="sub">Every engagement is delivered fully managed, with a dedicated advisor and complete visibility. No setup headaches.</p>
+          <span className="kicker">How we work</span>
+          <h1>Choose the Scope That <span className="gold">Fits</span></h1>
+          <p className="sub">
+            Three ways to engage us. Your personalised quote comes after your call, once we
+            understand your situation.
+          </p>
         </div>
       </section>
 
-      <section className="ivory sec" style={{ paddingTop: 90 }}>
+      <section className="ivory sec" style={{ paddingTop: 72 }}>
         <div className="mk-container">
           <div className="price-grid">
-            {PLANS.map((p) => (
-              <div key={p.tier} className={`price-card reveal${p.feat ? " feat" : ""}`}>
-                <div className="tier">{p.tier}</div>
-                <div className="amt mono">{p.amount} <span>{p.unit}</span></div>
+            {PKGS.map((p) => (
+              <div key={p.title} className={`price-card reveal${p.feat ? " feat" : ""}`}>
+                <div className="tier">{p.tag}</div>
+                <h3>{p.title}</h3>
+                <div className="psub">{p.sub}</div>
                 <ul>
-                  {p.features.map(([on, label]) => (
-                    <li key={label} className={on ? undefined : "off"}>
-                      <Icon name={on ? "check" : "x"} className="ic-16" />
-                      <span>{label}</span>
-                    </li>
+                  {p.features.map((f) => (
+                    <li key={f}>{CheckIc}<span>{f}</span></li>
                   ))}
                 </ul>
-                <Link href={applyHref} className={`btn btn-block ${p.feat ? "btn-primary" : "btn-secondary"}`}>
-                  Choose {p.tier}
+                <Link href="/contact" className={`pill${p.feat ? "" : " ghost"}`}>
+                  Book Your Free 30-Minute Consultation
                 </Link>
               </div>
             ))}
           </div>
 
-          <p className="text-center text-muted mt-8" style={{ fontSize: "0.875rem" }}>
-            Indicative pricing — your exact quote depends on jurisdiction and scope.{" "}
-            <Link href={applyHref} className="link-gold">Start an application →</Link>
+          <p className="text-center mt-8" style={{ fontSize: ".875rem", color: "var(--mk-grey)" }}>
+            No price lists here on purpose. Every structure is different, so your quote is
+            personalised after your call.
           </p>
         </div>
       </section>

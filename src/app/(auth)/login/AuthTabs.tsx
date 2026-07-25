@@ -172,10 +172,10 @@ export function AuthTabs({
 function friendlyAuthError(code: string): string {
   switch (code) {
     case "EMAIL_NOT_VERIFIED":
-      return "Please verify your email — check your inbox for the link.";
+      return "Please verify your email. Check your inbox for the link.";
     case "CLIENT_LOGIN_DISABLED":
     case "AccessDenied":
-      return "Client sign-in is currently disabled — please book a consultation instead.";
+      return "Client sign-in is currently disabled. Please book a consultation instead.";
     default:
       return "Invalid email or password.";
   }

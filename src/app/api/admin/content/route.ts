@@ -27,12 +27,17 @@ const schema = z.object({
   cta: z.object({ heading: str(200), body: str(800), button: str(60) }),
   insights: z.object({
     kicker: str(120), heading: str(300), rhHeading: str(200), rhBody: str(800),
-    posts: z.array(z.object({ tag: str(60), title: str(200), img: str(300) })).max(12),
   }),
   contact: z.object({
     address: str(200), phone: str(40), whatsapp: str(40), email: str(200),
   }),
   faq: z.array(z.object({ q: str(300), a: str(2000) })).max(40),
+  consultation: z.object({
+    kicker: str(120), heading: str(300), body: str(1200),
+    personName: str(120), personTitle: str(160), photoUrl: str(500), photoNote: str(300),
+    points: z.array(str(300)).max(8),
+    stripHeading: str(400), stripBody: str(400), underForm: str(200),
+  }),
 });
 
 /** Save the full marketing-content blob. Staff-only. */

@@ -1,14 +1,20 @@
 import type { Metadata } from "next";
-import { Manrope, IBM_Plex_Mono } from "next/font/google";
+import { Plus_Jakarta_Sans, Playfair_Display, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
 import { getBranding, themeCss } from "@/lib/services/branding";
 
-// "Quiet Authority" — system-sans character. Manrope drives both body and
-// display (headings are bold sans, no serif); IBM Plex Mono for figures/IDs.
-const manrope = Manrope({
+// Brand type: Plus Jakarta Sans drives body/UI, Playfair Display carries
+// marketing display headings, IBM Plex Mono for figures/IDs.
+const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
   display: "swap",
   variable: "--font-body",
+});
+
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-display",
 });
 
 const plexMono = IBM_Plex_Mono({
@@ -39,7 +45,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const { themePreset, accentColor } = await getBranding();
   return (
-    <html lang="en" className={`${manrope.variable} ${plexMono.variable}`}>
+    <html lang="en" className={`${jakarta.variable} ${playfair.variable} ${plexMono.variable}`}>
       <head>
         {/* White-label theme override — recolours brand/surfaces app-wide. */}
         <style dangerouslySetInnerHTML={{ __html: themeCss(themePreset, accentColor) }} />

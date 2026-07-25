@@ -4,7 +4,7 @@ import { getClientLoginEnabled } from "@/lib/services/settings";
 
 export const metadata = {
   title: "AI Advisor",
-  description: "Tell our AI advisor what you're trying to do — lower tax, set up a company, get banking, relocate — and get an instant service + jurisdiction recommendation.",
+  description: "Tell our AI advisor what you're trying to do, from lowering tax to setting up a company, getting banking or relocating, and get an instant service and jurisdiction recommendation.",
 };
 
 export default async function AdvisorPage() {
@@ -13,7 +13,7 @@ export default async function AdvisorPage() {
     <main>
       <section className="phero grid-bg" style={{ paddingBottom: 30 }}>
         <div className="mk-container">
-          <span className="kicker">&mdash; AI Advisor</span>
+          <span className="kicker">AI Advisor</span>
           <h1>Tell Us What You&apos;re <span className="gold">Trying to Do</span></h1>
         </div>
       </section>

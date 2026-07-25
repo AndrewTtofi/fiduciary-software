@@ -12,7 +12,7 @@ export default async function AboutPage() {
     <main>
       <section className="phero grid-bg">
         <div className="mk-container">
-          <span className="kicker">&mdash; About us</span>
+          <span className="kicker">About us</span>
           <h1>
             Built Around One Promise:<br />
             <span className="gold">We Are Where Our Clients Need Us</span>

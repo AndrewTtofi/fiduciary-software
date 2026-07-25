@@ -19,7 +19,7 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
     <main>
       <section className="phero grid-bg">
         <div className="mk-container">
-          <span className="kicker">&mdash; {svc.title}</span>
+          <span className="kicker">{svc.title}</span>
           <h1>{svc.title}</h1>
           <p className="sub">{svc.sub}</p>
         </div>

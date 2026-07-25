@@ -27,7 +27,7 @@ export async function SiteHeader() {
         </Link>
         <HeaderNav services={SERVICES.map(({ key, title }) => ({ key, title }))} clientLogin={clientLogin} />
         <Link href="/contact" className="pill sm nav-cta">
-          Book a Consultation {ArrowIc}
+          Book Your Free 30-Minute Consultation {ArrowIc}
         </Link>
       </div>
     </header>

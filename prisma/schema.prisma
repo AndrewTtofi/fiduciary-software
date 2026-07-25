@@ -481,6 +481,24 @@ model SiteContent {
   updatedAt DateTime @updatedAt
 }
 
+/// Self-serve Insights articles (public blog). Staff write and publish these
+/// from the admin with no developer involved; clean URLs via `slug`.
+model Article {
+  id          String    @id @default(uuid())
+  slug        String    @unique
+  title       String
+  keyword     String // the one search phrase this article targets (card tag)
+  excerpt     String // teaser shown on cards and list pages
+  body        String // markdown body
+  image       String? // card/header image URL (optional)
+  published   Boolean   @default(false)
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([published, publishedAt])
+}
+
 model Service {
   id          String   @id @default(uuid())
   key         String   @unique

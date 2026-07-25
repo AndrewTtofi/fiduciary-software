@@ -12,7 +12,7 @@ export default async function ServicesMarketingPage() {
     <main>
       <section className="phero grid-bg">
         <div className="mk-container">
-          <span className="kicker">&mdash; {servicesIntro.eyebrow}</span>
+          <span className="kicker">{servicesIntro.eyebrow}</span>
           <h1>Everything Your Structure Needs, <span className="gold">Under One Roof</span></h1>
           <p className="sub">{servicesIntro.body}</p>
         </div>

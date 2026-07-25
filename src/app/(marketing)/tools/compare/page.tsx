@@ -4,7 +4,7 @@ import { getClientLoginEnabled } from "@/lib/services/settings";
 
 export const metadata = {
   title: "Compare jurisdictions",
-  description: "Compare 18+ corporate jurisdictions side by side — corporate tax, VAT, formation time, minimum capital and tax treaties.",
+  description: "Compare 18+ corporate jurisdictions side by side: corporate tax, VAT, formation time, minimum capital and tax treaties.",
 };
 
 export default async function ComparePage() {
@@ -13,7 +13,7 @@ export default async function ComparePage() {
     <main>
       <section className="phero grid-bg">
         <div className="mk-container">
-          <span className="kicker">&mdash; Free Tool</span>
+          <span className="kicker">Free Tool</span>
           <h1>Compare Jurisdictions <span className="gold">Side by Side</span></h1>
           <p className="sub">Select the jurisdictions you are weighing up. Best value in each column is highlighted.</p>
         </div>
@@ -27,7 +27,7 @@ export default async function ComparePage() {
             <a href="https://taxsummaries.pwc.com" target="_blank" rel="noreferrer noopener" className="link-gold">PwC Worldwide Tax Summaries</a>
             {" "}(reviewed {RATES_REVIEWED}); each row links to its source. Headline rates simplify many
             special regimes, and formation time, minimum capital and treaty counts are indicative.
-            This is general information, not tax advice — verify before relying.
+            This is general information, not tax advice. Verify before relying.
           </p>
         </div>
       </section>

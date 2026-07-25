@@ -17,7 +17,20 @@ export type Stat = { v: string; l: string };
 export type Testimonial = { q: string; n: string; r: string };
 export type Faq = { q: string; a: string };
 export type Feature = { t: string; d: string };
-export type Post = { tag: string; title: string; img: string };
+
+export type Consultation = {
+  kicker: string;
+  heading: string;
+  body: string;
+  personName: string;
+  personTitle: string;
+  photoUrl: string;
+  photoNote: string;
+  points: string[];
+  stripHeading: string;
+  stripBody: string;
+  underForm: string;
+};
 
 export type SiteContent = {
   hero: { eyebrow: string; headline: string; lead: string; primaryCta: string; secondaryCta: string };
@@ -29,34 +42,35 @@ export type SiteContent = {
   testimonialsIntro: { eyebrow: string; heading: string };
   testimonials: Testimonial[];
   cta: { heading: string; body: string; button: string };
-  insights: { kicker: string; heading: string; rhHeading: string; rhBody: string; posts: Post[] };
+  insights: { kicker: string; heading: string; rhHeading: string; rhBody: string };
   contact: { address: string; phone: string; whatsapp: string; email: string };
   faq: Faq[];
+  consultation: Consultation;
 };
 
 export const DEFAULT_CONTENT: SiteContent = {
   hero: {
-    eyebrow: "Corporate Services",
-    headline: "Your Trusted\n*Corporate Services Partner*\nin Cyprus & Beyond",
-    lead: "Seamless company incorporation in Cyprus and fiduciary support for international entrepreneurs — transparent, compliant and delivered by one accountable team.",
-    primaryCta: "Book a Consultation",
+    eyebrow: "Nicosia, Cyprus",
+    headline: "A Modern Cyprus Corporate\nand *Fiduciary* Services Firm",
+    lead: "We help international entrepreneurs and investors relocate, structure and operate in Cyprus. Founder to founder, start to finish, with no guesswork.",
+    primaryCta: "Book Your Free 30-Minute Consultation",
     secondaryCta: "Explore Services",
   },
   about: {
     kicker: "Who we are",
-    heading: "A Modern Cyprus Corporate & Fiduciary Services Firm",
-    body1: "Our team brings **decades of combined expertise** in corporate law, accounting and compliance to the formation and administration of Cyprus entities. Founded in **2024** and based in Nicosia, we serve international entrepreneurs with **transparent, compliant structures** — from incorporation to banking, tax residency and beyond.",
-    body2: "From our base at **Stadiou 15, Nicosia**, we support clients across Europe and beyond — always transparent on scope, timeline and fees.",
+    heading: "A Modern Cyprus Corporate and Fiduciary Services Firm",
+    body1: "Our team brings **decades of combined expertise** in corporate law, accounting and compliance to the formation and administration of Cyprus entities. Founded in **2024** and based in Nicosia, we serve international entrepreneurs with **transparent, compliant structures** from incorporation to banking, tax residency and beyond.",
+    body2: "From our base at **Stadiou 15, Nicosia**, we support clients across Europe and beyond, always transparent on scope and timeline.",
     cta: "Explore Our Services",
   },
   why: {
     kicker: "Why choose us",
     heading: "Experience Trusted\n*Fiduciary Expertise*\nThat Delivers Results",
     features: [
-      { t: "Transparent & Compliant", d: "Clean structures, clear fees and compliance designed in from day one — never bolted on after." },
-      { t: "One Team, End to End", d: "Formation, accounting, tax residency, immigration, licensing and banking under one roof — no handoffs between vendors." },
-      { t: "We Are Where Our Clients Need Us", d: "Cyprus-based, internationally minded — built for founders operating across borders." },
-      { t: "Direct, WhatsApp-First Access", d: "Reach your adviser directly — quick answers on the channel you already use." },
+      { t: "Transparent and Compliant", d: "Clean structures and compliance designed in from day one, never bolted on after." },
+      { t: "One Team, End to End", d: "Formation, accounting, tax residency, immigration, licensing and banking under one roof, with no handoffs between vendors." },
+      { t: "We Are Where Our Clients Need Us", d: "Cyprus based, internationally minded, built for founders operating across borders." },
+      { t: "Direct, WhatsApp First Access", d: "Reach your adviser directly and get quick answers on the channel you already use." },
     ],
   },
   steps: [
@@ -65,13 +79,14 @@ export const DEFAULT_CONTENT: SiteContent = {
     { t: "Onboard", d: "Once approved you unlock booking and a full workspace: documents, messaging, deadlines and your dedicated advisor." },
   ],
   servicesIntro: {
-    eyebrow: "Our services",
-    heading: "Everything Your Cyprus Structure Needs",
-    body: "Six core service lines, each with its own guided intake and required-document logic.",
+    eyebrow: "What we do",
+    heading: "One Team, End to End",
+    body: "Everything an international founder needs to land in Cyprus and operate cleanly, handled under one roof.",
   },
   stats: [
-    { v: "100%+", l: "Compliance Success Rate" },
-    { v: "6+", l: "Service Lines Under One Roof" },
+    { v: "8", l: "Jurisdictions we operate across" },
+    { v: "5 to 7", l: "Working days to a ready company" },
+    { v: "Decades", l: "Of combined team experience" },
   ],
   testimonialsIntro: { eyebrow: "IN THEIR WORDS", heading: "Principals run their setup on it." },
   testimonials: [
@@ -80,20 +95,15 @@ export const DEFAULT_CONTENT: SiteContent = {
     { q: "Tax residency and banking handled together, with one point of contact. Exactly what we needed relocating.", n: "Elena Pappas", r: "Private client · Cyprus" },
   ],
   cta: {
-    heading: "Speak With Our *Corporate Experts*",
-    body: "Reach out to our team for expert guidance on incorporation, residency and banking.",
-    button: "Book a Consultation",
+    heading: "Map Your Cyprus Structure\nin *30 Minutes*",
+    body: "Tell us where you are today and where you want to be. We will show you the route, the timeline and what it involves, before you commit to anything.",
+    button: "Book Your Free 30-Minute Consultation",
   },
   insights: {
-    kicker: "Our insights & resources",
-    heading: "Expert\n*Cyprus Insights* To\nStrengthen Your Business",
-    rhHeading: "Knowledge From A Trusted Corporate Services Firm",
-    rhBody: "Practical guidance from our corporate, tax and compliance team — on incorporating in Cyprus, securing tax residency, opening accounts and keeping your structure in good standing.",
-    posts: [
-      { tag: "Guide", title: "Incorporating in Cyprus: what founders should prepare before day one", img: "/marketing/p1.jpg" },
-      { tag: "Tax residency", title: "The 60-day rule, explained simply — and who it actually suits", img: "/marketing/p2.jpg" },
-      { tag: "Banking", title: "Bank or EMI? Choosing the right account for a new Cyprus company", img: "/marketing/p3.jpg" },
-    ],
+    kicker: "Insights",
+    heading: "Cyprus,\n*Explained Clearly*",
+    rhHeading: "Written By The People Who Set These Up Every Week",
+    rhBody: "Practical guides on tax, residency and company structure. One article, one search phrase, answered properly.",
   },
   contact: {
     address: "Stadiou 15, Nicosia, Cyprus",
@@ -102,13 +112,30 @@ export const DEFAULT_CONTENT: SiteContent = {
     email: "info@orocorporateservices.com",
   },
   faq: [
-    { q: "Why do I submit documents before booking a call?", a: "The gate ensures every consultation is with a serious, pre-qualified prospect. It also means your advisor walks into the call already knowing your situation — no time wasted on basics." },
-    { q: "Where is my data stored?", a: "All data — including identity documents and financial information — is encrypted and stored within the EU, with GDPR-compliant data-portability and exit terms." },
-    { q: "How long does review take?", a: "Typically 1–3 business days. You are notified by email (and WhatsApp, if enabled) the moment your application is approved and booking unlocks." },
+    { q: "Who takes my consultation call?", a: "A founding partner of the firm. Your form is read before you speak, so you never repeat your story, and if Cyprus is not the right move for you, we will tell you that too." },
+    { q: "How fast can my company be ready?", a: "Once we have your documents, a Cyprus company is typically ready in 5 to 7 working days." },
+    { q: "Where is my data stored?", a: "All data, including identity documents and financial information, is encrypted and stored within the EU, with GDPR compliant data portability and exit terms." },
     { q: "What happens to my information if I do not proceed?", a: "You can request export or deletion of your records at any time. Nothing is shared with third parties without your consent." },
-    { q: "Which services can I apply for?", a: "Company formation, accounting & tax, tax residency, immigration, licensing and banking. Each has a tailored intake form so you only answer relevant questions." },
-    { q: "How is pricing structured?", a: "Three engagements — Essentials, Standard and Full service — billed as a setup fee plus a monthly retainer, or a custom quote. See the pricing page for a full comparison." },
+    { q: "Which services can I ask about?", a: "Company formation, accounting and VAT, tax residency and Non-Dom, immigration and residency, licensing and banking. One team handles all of it end to end." },
+    { q: "How is pricing structured?", a: "Every engagement is scoped to your situation. You receive a personalised quote after your call, once we understand what you need." },
   ],
+  consultation: {
+    kicker: "Who Takes Your Call",
+    heading: "You talk with the people who *built this firm*",
+    body: "In this industry, \"book a free call\" usually means a sales team reading a script. Not here. When you book a consultation, you speak with Georgia, a founding partner, with a decade of experience moving international entrepreneurs to Cyprus.",
+    personName: "Georgia",
+    personTitle: "Co-Founder and Relocation Expert",
+    photoUrl: "",
+    photoNote: "Professional photo of Georgia, office setting",
+    points: [
+      "She reads your form before you speak, so you never repeat your story.",
+      "Behind her stands the full firm: formations, VAT, legal, banking and licensing.",
+      "If Cyprus is not the right move for you, she will tell you that too.",
+    ],
+    stripHeading: "We are not influencers. We do not run a marketing agency. **You talk with the people who built this firm.**",
+    stripBody: "Book a consultation and you speak with a founding partner, not a sales desk.",
+    underForm: "Your consultation is held by a founding partner of the firm.",
+  },
 };
 
 /** Merge a stored partial over the defaults: objects merge per-field; arrays
@@ -126,9 +153,10 @@ function merge(stored: Partial<SiteContent> | null | undefined): SiteContent {
     ? (s.why!.features as Feature[])
     : DEFAULT_CONTENT.why.features;
   const insights = obj<SiteContent["insights"]>("insights");
-  insights.posts = Array.isArray((s.insights as Partial<SiteContent["insights"]> | undefined)?.posts)
-    ? (s.insights!.posts as Post[])
-    : DEFAULT_CONTENT.insights.posts;
+  const consultation = obj<Consultation>("consultation");
+  consultation.points = Array.isArray((s.consultation as Partial<Consultation> | undefined)?.points)
+    ? (s.consultation!.points as string[])
+    : DEFAULT_CONTENT.consultation.points;
   return {
     hero: obj("hero"),
     about: obj("about"),
@@ -142,6 +170,7 @@ function merge(stored: Partial<SiteContent> | null | undefined): SiteContent {
     insights,
     contact: obj("contact"),
     faq: arr<Faq>("faq"),
+    consultation,
   };
 }
 

@@ -19,7 +19,7 @@ export function LegalPage({
     <main>
       <section className="phero grid-bg">
         <div className="mk-container">
-          <span className="kicker">&mdash; Legal</span>
+          <span className="kicker">Legal</span>
           <h1>{title}</h1>
           <p className="sub">Last updated {updated}</p>
         </div>

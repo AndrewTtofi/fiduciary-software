@@ -37,8 +37,8 @@ export default async function LoginPage({
               className="mb-5 px-4 py-3"
               style={{ background: "var(--surface-2)", borderRadius: "var(--radius-sm)", fontSize: "0.8125rem" }}
             >
-              Client accounts are currently disabled —{" "}
-              <Link href="/contact" className="text-brand">book a consultation</Link> instead.
+              Client accounts are currently disabled.{" "}
+              <Link href="/contact" className="text-brand">Book a consultation</Link> instead.
             </div>
           )}
 
