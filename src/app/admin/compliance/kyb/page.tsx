@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { Kpi, ComingSoon } from "@/components/admin/Kpi";
 import { Icon } from "@/components/Icon";
@@ -14,6 +15,8 @@ export const dynamic = "force-dynamic";
 export default async function KybPage() {
   await requireRole("staff");
   const { planTier } = await getBranding();
+  // Below Professional the compliance suite is hidden entirely, not upsold.
+  if (!tierAtLeast(planTier, "professional")) notFound();
   if (!tierAtLeast(planTier, "scale")) return <AdminShell active="kyb"><UpgradeGate required="scale" currentTier={planTier} title="KYB verification" desc="Verify companies against official registries across 200+ countries — legal status, directors, filings and ownership — wrap a KYB aggregator, build the workflow." /></AdminShell>;
 
   const prospects = await prisma.prospect.findMany({ include: { user: true, details: true }, orderBy: { createdAt: "desc" }, take: 100 });

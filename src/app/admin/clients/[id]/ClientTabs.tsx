@@ -11,10 +11,11 @@ const TABS: { key: ClientTab; label: string }[] = [
   { key: "activity", label: "Activity" },
 ];
 
-export function ClientTabs({ active }: { active: ClientTab }) {
+export function ClientTabs({ active, showDocuments = true }: { active: ClientTab; showDocuments?: boolean }) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const tabs = showDocuments ? TABS : TABS.filter((t) => t.key !== "documents");
 
   function go(tab: ClientTab) {
     const params = new URLSearchParams(searchParams.toString());
@@ -26,7 +27,7 @@ export function ClientTabs({ active }: { active: ClientTab }) {
 
   return (
     <div className="chips mb-10">
-      {TABS.map((t) => {
+      {tabs.map((t) => {
         const isActive = active === t.key;
         return (
           <button

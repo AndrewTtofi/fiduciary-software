@@ -1,3 +1,4 @@
+import { notFound } from "next/navigation";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { Kpi } from "@/components/admin/Kpi";
 import { Icon } from "@/components/Icon";
@@ -13,6 +14,8 @@ export const dynamic = "force-dynamic";
 export default async function KycPage({ searchParams }: { searchParams: Promise<{ ref?: string }> }) {
   await requireRole("staff");
   const { planTier } = await getBranding();
+  // Below Professional the compliance suite is hidden entirely, not upsold.
+  if (!tierAtLeast(planTier, "professional")) notFound();
   if (!tierAtLeast(planTier, "scale")) return <AdminShell active="kyc"><UpgradeGate required="scale" currentTier={planTier} title="KYC / ID verification" desc="Document + biometric liveness, face-match and deepfake checks across 230+ countries — wrap a provider (iDenfy / Onfido / Veriff), build the workflow." /></AdminShell>;
 
   const sp = await searchParams;

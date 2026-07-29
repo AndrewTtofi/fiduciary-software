@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { requireRole } from "@/lib/auth/guards";
+import { getBranding, tierAtLeast } from "@/lib/services/branding";
 import { prisma } from "@/lib/db";
 import { PartyWorkspace } from "@/components/compliance/PartyWorkspace";
 
@@ -8,6 +9,8 @@ export const dynamic = "force-dynamic";
 
 export default async function PartyPage({ params }: { params: Promise<{ id: string; partyId: string }> }) {
   await requireRole("staff");
+  // Below Professional the compliance suite is hidden entirely, not upsold.
+  if (!tierAtLeast((await getBranding()).planTier, "professional")) notFound();
   const { partyId } = await params;
   const party = await prisma.party.findUnique({
     where: { id: partyId },

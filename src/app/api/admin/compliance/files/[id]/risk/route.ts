@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { blockBelowTier } from "@/lib/auth/tier-guard";
 import { z } from "zod";
 import { assertRole } from "@/lib/auth/guards";
 import { overrideRiskRating } from "@/lib/services/compliance/risk-persist";
@@ -11,6 +12,8 @@ const schema = z.object({
 });
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
+  const tierBlock = await blockBelowTier("professional");
+  if (tierBlock) return tierBlock;
   const me = await assertRole("staff");
   const { id } = await params;
   const body = schema.safeParse(await req.json().catch(() => ({})));

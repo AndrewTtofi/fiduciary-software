@@ -36,6 +36,17 @@ export const COUNTRIES: string[] = [
   "Zambia", "Zimbabwe",
 ];
 
+/* EU/EEA + Switzerland + UK: citizens with free-movement or simplified routes
+   to Cyprus. Anyone outside this set who wants to relocate needs the
+   immigration route — that combination flags the lead for direct follow-up. */
+export const EU_FREE_MOVEMENT: ReadonlySet<string> = new Set([
+  "Austria", "Belgium", "Bulgaria", "Croatia", "Cyprus", "Czechia", "Denmark",
+  "Estonia", "Finland", "France", "Germany", "Greece", "Hungary", "Ireland",
+  "Italy", "Latvia", "Lithuania", "Luxembourg", "Malta", "Netherlands",
+  "Poland", "Portugal", "Romania", "Slovakia", "Slovenia", "Spain", "Sweden",
+  "Iceland", "Liechtenstein", "Norway", "Switzerland", "United Kingdom",
+]);
+
 /* Country calling codes for the phone input. `iso2` renders the small flag
    via regional-indicator emoji, no image assets needed. */
 export type DialCode = { name: string; iso2: string; dial: string };

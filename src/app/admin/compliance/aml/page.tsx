@@ -1,3 +1,4 @@
+import { notFound } from "next/navigation";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { UpgradeGate } from "@/components/admin/UpgradeGate";
 import { requireRole } from "@/lib/auth/guards";
@@ -22,6 +23,8 @@ function riskBadge(r: string) {
 export default async function AmlPage() {
   await requireRole("staff");
   const { planTier } = await getBranding();
+  // Below Professional the compliance suite is hidden entirely, not upsold.
+  if (!tierAtLeast(planTier, "professional")) notFound();
   if (!tierAtLeast(planTier, "scale")) {
     return (
       <AdminShell active="aml">

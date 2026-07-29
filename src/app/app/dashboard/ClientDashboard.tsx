@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-type Service = { id: string; serviceType: string; status: string };
+type Service = { id: string; serviceType: string; status: string; stageLabel: string };
 type KeyDate = { id: string; description: string; dueDate: Date; status: string };
 type DocReq = { id: string; description: string; dueAt: Date | null };
 type Activity = { id: string; action: string; createdAt: Date };
@@ -158,13 +158,16 @@ export function ClientDashboard({
             {services.length === 0 ? (
               <p className="text-muted" style={{ fontSize: "0.875rem" }}>No services selected yet.</p>
             ) : (
-              <div className="flex flex-col gap-2 items-start">
-                {services.map((s) => (
-                  <span key={s.id} className={`badge ${s.status === "completed" ? "badge-approved" : "badge-new"}`}>
-                    {titleize(s.serviceType)}
-                  </span>
+              <ul className="flex flex-col">
+                {services.map((s, i) => (
+                  <li key={s.id} className="py-3 flex justify-between items-center gap-6" style={i ? { borderTop: "1px solid var(--border)" } : undefined}>
+                    <span style={{ fontSize: "0.875rem" }}>{titleize(s.serviceType)}</span>
+                    <span className={`badge ${s.status === "completed" ? "badge-approved" : "badge-new"}`}>
+                      {s.stageLabel}
+                    </span>
+                  </li>
                 ))}
-              </div>
+              </ul>
             )}
           </div>
           )}

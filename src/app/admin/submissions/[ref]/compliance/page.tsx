@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { requireRole } from "@/lib/auth/guards";
+import { getBranding, tierAtLeast } from "@/lib/services/branding";
 import { prisma } from "@/lib/db";
 import { ComplianceDashboard } from "@/components/compliance/ComplianceDashboard";
 import { recomputeAndStoreRisk } from "@/lib/services/compliance/risk-persist";
@@ -20,6 +21,8 @@ async function loadProspect(ref: string) {
 
 export default async function SubmissionCompliancePage({ params }: { params: Promise<{ ref: string }> }) {
   const me = await requireRole("staff");
+  // Below Professional the compliance suite is hidden entirely, not upsold.
+  if (!tierAtLeast((await getBranding()).planTier, "professional")) notFound();
   const { ref } = await params;
   let prospect = await loadProspect(ref);
   // Prospects that skipped the onboarding submit (seeded/imported data) have no

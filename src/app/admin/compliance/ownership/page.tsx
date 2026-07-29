@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { Kpi, ComingSoon } from "@/components/admin/Kpi";
 import { Icon } from "@/components/Icon";
@@ -44,6 +45,8 @@ function OwnerTree({ nodes, parentFrac, depth }: { nodes: OwnerNode[]; parentFra
 export default async function OwnershipPage({ searchParams }: { searchParams: Promise<{ ref?: string }> }) {
   await requireRole("staff");
   const { planTier } = await getBranding();
+  // Below Professional the compliance suite is hidden entirely, not upsold.
+  if (!tierAtLeast(planTier, "professional")) notFound();
   if (!tierAtLeast(planTier, "scale")) return <AdminShell active="ownership-map"><UpgradeGate required="scale" currentTier={planTier} title="Ownership map" desc="Visualise multi-layer corporate structures with effective-ownership %, UBO flags at the 25% threshold and screening status at every node." /></AdminShell>;
 
   const sp = await searchParams;

@@ -11,13 +11,19 @@ export type ServiceRow = {
   notes: string | null;
 };
 
+export type StageWording = Record<ServiceRow["status"], string>;
+
+const DEFAULT_WORDING: StageWording = { pending: "Pending", in_progress: "In progress", completed: "Completed" };
+
 export function ServicesEngagedList({
-  clientId, rows, partners, taxonomy,
+  clientId, rows, partners, taxonomy, stageLabels = {},
 }: {
   clientId: string;
   rows: ServiceRow[];
   partners: { id: string; fullName: string }[];
   taxonomy: { key: string; label: string }[];
+  /** Firm-edited stage wording per service key (Admin → Status stages). */
+  stageLabels?: Record<string, StageWording>;
 }) {
   return (
     <section className="mb-8">
@@ -33,6 +39,7 @@ export function ServicesEngagedList({
               row={r}
               partners={partners}
               taxonomy={taxonomy}
+              stages={stageLabels[r.serviceType] ?? DEFAULT_WORDING}
             />
           ))}
     </section>

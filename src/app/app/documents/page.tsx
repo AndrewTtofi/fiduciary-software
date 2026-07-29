@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { ClientShell } from "@/components/client/ClientShell";
 import { requireUser } from "@/lib/auth/guards";
 import { prisma } from "@/lib/db";
-import { getBranding } from "@/lib/services/branding";
+import { getBranding, tierAtLeast } from "@/lib/services/branding";
 import { bucketDocument, BUCKET_KYC, BUCKET_CORRESPONDENCE } from "@/lib/services/documents-bucket";
 import { RequestsBlock, type ReqRow } from "./RequestsBlock";
 import { ClientFolderBlock, type ClientDocRow } from "./ClientFolderBlock";
@@ -13,7 +13,9 @@ export const dynamic = "force-dynamic";
 
 export default async function MyDocumentsPage() {
   const user = await requireUser();
-  const { brandName } = await getBranding();
+  const { brandName, planTier } = await getBranding();
+  // Starter is a pure status tracker — the documents area does not exist.
+  if (!tierAtLeast(planTier, "professional")) redirect("/app/dashboard");
   const [prospect, client] = await Promise.all([
     prisma.prospect.findUnique({ where: { userId: user.id }, include: { documents: { orderBy: { uploadedAt: "desc" } } } }),
     prisma.client.findUnique({

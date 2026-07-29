@@ -644,6 +644,29 @@
 .shell-marketing .slot-b { border: 1px solid var(--mk-border); border-radius: 8px; padding: 12px; font-size: .86rem; font-family: var(--font-mono); cursor: pointer; background: #fff; color: var(--mk-navy); text-align: center; transition: border-color .15s, background .15s; }
 .shell-marketing .slot-b:hover { border-color: var(--mk-gold); }
 .shell-marketing .slot-b.sel { background: var(--mk-gold); border-color: var(--mk-gold); color: var(--mk-navy); font-weight: 600; }
+.shell-marketing .optlist { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+@media (max-width: 640px) { .shell-marketing .optlist { grid-template-columns: 1fr; } }
+.shell-marketing .optb { border: 1px solid var(--mk-border); border-radius: 8px; padding: 12px 14px; font-size: .9rem; font-family: inherit; cursor: pointer; background: #fff; color: var(--mk-ink); text-align: left; transition: border-color .15s, background .15s; }
+.shell-marketing .optb:hover { border-color: var(--mk-gold); }
+.shell-marketing .optb.sel { background: var(--mk-cream); border-color: var(--mk-gold); color: var(--mk-navy); font-weight: 600; }
+/* Calendly-style slot picker */
+.shell-marketing .slotcal { display: grid; grid-template-columns: minmax(240px, 300px) 1fr; gap: 20px; border: 1px solid var(--mk-border); border-radius: 12px; padding: 18px; }
+@media (max-width: 640px) { .shell-marketing .slotcal { grid-template-columns: 1fr; } }
+.shell-marketing .slotcal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; font-weight: 600; color: var(--mk-navy); font-size: .95rem; }
+.shell-marketing .slotcal-head button { border: 1px solid var(--mk-border); background: #fff; border-radius: 8px; width: 30px; height: 30px; cursor: pointer; color: var(--mk-navy); font-size: 1rem; line-height: 1; }
+.shell-marketing .slotcal-head button:disabled { opacity: .35; cursor: default; }
+.shell-marketing .slotcal-head button:not(:disabled):hover { border-color: var(--mk-gold); }
+.shell-marketing .slotcal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+.shell-marketing .slotcal-dow { text-align: center; font-family: var(--font-mono); font-size: .68rem; text-transform: uppercase; letter-spacing: .05em; color: var(--mk-grey-2); padding: 4px 0; }
+.shell-marketing .slotcal-day { aspect-ratio: 1; border: 0; border-radius: 50%; background: transparent; font-family: inherit; font-size: .85rem; color: var(--mk-grey-2); cursor: default; }
+.shell-marketing .slotcal-day.avail { background: var(--mk-cream); color: var(--mk-navy); font-weight: 600; cursor: pointer; }
+.shell-marketing .slotcal-day.avail:hover { background: var(--mk-gold-bright); }
+.shell-marketing .slotcal-day.sel { background: var(--mk-gold); color: var(--mk-navy); }
+.shell-marketing .slotcal-daylabel { font-weight: 600; color: var(--mk-navy); font-size: .92rem; margin-bottom: 10px; }
+.shell-marketing .slotcal-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 8px; align-content: start; max-height: 280px; overflow-y: auto; }
+.shell-marketing .slotcal-tz { display: flex; align-items: center; gap: 10px; margin-top: 10px; }
+.shell-marketing .slotcal-tz label { font-size: .8rem; font-weight: 600; color: var(--mk-navy); }
+.shell-marketing .slotcal-tz select { border: 1px solid var(--mk-border); border-radius: 8px; padding: 8px 10px; font-size: .85rem; font-family: inherit; background: #fff; color: var(--mk-ink); max-width: 260px; }
 .shell-marketing .cc-wrap { position: relative; }
 .shell-marketing .cc-list { position: absolute; top: calc(100% + 4px); left: 0; right: 0; z-index: 40; background: #fff; border: 1px solid var(--mk-border); border-radius: 10px; box-shadow: var(--mk-shadow-lg); max-height: 240px; overflow-y: auto; padding: 6px; }
 .shell-marketing .cc-opt { display: block; width: 100%; text-align: left; background: none; border: 0; padding: 10px 12px; border-radius: 6px; font-size: .92rem; font-family: inherit; color: var(--mk-ink); cursor: pointer; }
@@ -680,6 +703,15 @@
 .shell-marketing .c-meta a { color: var(--mk-gold); font-weight: 600; }
 .shell-marketing .ok-note { background: var(--mk-good-bg); color: var(--mk-good); border-radius: 12px; padding: 16px 20px; font-size: .9rem; margin-top: 20px; }
 .shell-marketing .err-note { background: var(--mk-bad-bg); color: var(--mk-bad); border-radius: 12px; padding: 16px 20px; font-size: .9rem; margin-top: 20px; }
+
+/* ── cookie consent ──────────────────────────────────────────────── */
+.shell-marketing .cookie-bar { position: fixed; left: 16px; right: 16px; bottom: 16px; z-index: 90; background: var(--mk-navy-deep); color: #cfd6e2; border: 1px solid rgba(255, 255, 255, .12); border-radius: 14px; padding: 18px 22px; display: flex; align-items: center; gap: 20px; flex-wrap: wrap; box-shadow: var(--mk-shadow-lg); }
+.shell-marketing .cookie-bar p { margin: 0; font-size: .88rem; flex: 1 1 320px; }
+.shell-marketing .cookie-bar .row { display: flex; gap: 10px; }
+/* The bar is navy — the light-page ghost pill (navy text) would vanish here. */
+.shell-marketing .cookie-bar .pill.ghost { color: #cfd6e2; border-color: rgba(255, 255, 255, .35); }
+.shell-marketing .cookie-bar .pill.ghost:hover { color: #fff; border-color: var(--mk-gold); }
+@media (min-width: 720px) { .shell-marketing .cookie-bar { left: auto; max-width: 560px; } }
 
 /* ── footer ──────────────────────────────────────────────────────── */
 .shell-marketing .mk-footer { background: var(--mk-navy-deep); color: #aeb7c7; padding: 64px 0 0; }

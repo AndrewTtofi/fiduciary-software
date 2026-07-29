@@ -12,6 +12,7 @@ export default async function AdminBookingsPage() {
     include: {
       expert: true,
       prospect: { include: { user: true, client: true } },
+      lead: true,
     },
     take: 200,
   });
@@ -47,7 +48,9 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 function BookingTable({ rows }: { rows: Array<{
   id: string; startsAt: Date; timezone: string; status: BookingStatus; durationMinutes: number;
   expert: { fullName: string };
-  prospect: { id: string; referenceNumber: string; user: { fullName: string; email: string }; client: { id: string } | null };
+  // Portal bookings carry a prospect; public hard-bookings carry a lead.
+  prospect: { id: string; referenceNumber: string; user: { fullName: string; email: string }; client: { id: string } | null } | null;
+  lead: { id: string; name: string | null; email: string } | null;
 }> }) {
   if (rows.length === 0) {
     return <div className="bg-admin-surface border border-admin-border rounded-elem p-8 text-center text-admin-muted text-meta">Nothing here yet.</div>;
@@ -73,17 +76,19 @@ function BookingTable({ rows }: { rows: Array<{
                 <div className="font-mono text-[12px] text-admin-muted">{b.startsAt.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", timeZone: b.timezone })} {b.timezone}</div>
               </Td>
               <Td>
-                <div className="font-semibold">{b.prospect.user.fullName}</div>
-                <div className="text-[12px] text-admin-muted">{b.prospect.user.email}</div>
+                <div className="font-semibold">{b.prospect?.user.fullName ?? b.lead?.name ?? b.lead?.email ?? "—"}</div>
+                <div className="text-[12px] text-admin-muted">{b.prospect?.user.email ?? b.lead?.email ?? ""}</div>
               </Td>
-              <Td className="font-mono">{b.prospect.referenceNumber}</Td>
+              <Td className="font-mono">{b.prospect?.referenceNumber ?? "Website"}</Td>
               <Td>{b.expert.fullName}</Td>
               <Td><span className="badge badge-info">{b.status}</span></Td>
               <Td>
-                {b.prospect.client ? (
+                {b.prospect?.client ? (
                   <Link href={`/admin/clients/${b.prospect.client.id}`} className="text-accent text-meta font-semibold">View client</Link>
-                ) : (
+                ) : b.prospect ? (
                   <Link href={`/admin/submissions/${b.prospect.referenceNumber}`} className="text-accent text-meta font-semibold">View submission</Link>
+                ) : (
+                  <Link href="/admin/crm" className="text-accent text-meta font-semibold">View lead</Link>
                 )}
               </Td>
             </tr>

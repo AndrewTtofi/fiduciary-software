@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { AdminClientShell } from "../AdminClientShell";
 import { requireRole } from "@/lib/auth/guards";
+import { getBranding, tierAtLeast } from "@/lib/services/branding";
 import { prisma } from "@/lib/db";
 import { RequestForm } from "./RequestForm";
 import { CancelRequestClient } from "../CancelRequestClient";
@@ -11,6 +12,8 @@ export const metadata = { title: "Request documents" };
 
 export default async function RequestDocsPage({ params }: { params: Promise<{ id: string }> }) {
   await requireRole("staff");
+  // Document requests are not part of the Starter status tracker.
+  if (!tierAtLeast((await getBranding()).planTier, "professional")) notFound();
   const { id } = await params;
   const client = await prisma.client.findUnique({
     where: { id },

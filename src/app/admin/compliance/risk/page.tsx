@@ -1,3 +1,4 @@
+import { notFound } from "next/navigation";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { Kpi, ComingSoon } from "@/components/admin/Kpi";
 import { Icon } from "@/components/Icon";
@@ -16,6 +17,8 @@ const bandBadge = (b: string) => (b === "high" ? "badge-danger" : b === "medium"
 export default async function ClientRiskPage() {
   await requireRole("staff");
   const { planTier } = await getBranding();
+  // Below Professional the compliance suite is hidden entirely, not upsold.
+  if (!tierAtLeast(planTier, "professional")) notFound();
   if (!tierAtLeast(planTier, "scale")) return <AdminShell active="client-risk"><UpgradeGate required="scale" currentTier={planTier} title="Client risk" desc="A 0–100 risk score per client from jurisdiction, structure, screening and documentation signals, with manual override and audit trail." /></AdminShell>;
 
   const prospects = await prisma.prospect.findMany({ include: { user: true, details: true }, orderBy: { createdAt: "desc" }, take: 100 });

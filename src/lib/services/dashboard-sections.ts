@@ -10,7 +10,7 @@ import { getBranding, tierAtLeast, type PlanTier } from "@/lib/services/branding
  */
 export const DASHBOARD_SECTIONS = [
   { key: "kpis",             label: "Summary KPIs",        description: "Counters for active services, upcoming dates, open requests and recent messages.", minTier: "starter" },
-  { key: "documentRequests", label: "Document requests",   description: "Outstanding documents your firm has requested from the client.",                  minTier: "starter" },
+  { key: "documentRequests", label: "Document requests",   description: "Outstanding documents your firm has requested from the client.",                  minTier: "professional" },
   { key: "keyDates",         label: "Upcoming key dates",  description: "Filing deadlines and reminders due in the next 30 days.",                          minTier: "starter" },
   { key: "consultation",     label: "Consultation",        description: "Card to book or manage an advisor consultation.",                                  minTier: "starter" },
   { key: "selectedServices", label: "Selected services",   description: "The services the client is engaged for.",                                          minTier: "starter" },

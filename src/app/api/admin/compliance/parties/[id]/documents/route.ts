@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { blockBelowTier } from "@/lib/auth/tier-guard";
 import { assertRole } from "@/lib/auth/guards";
 import { prisma } from "@/lib/db";
 import { uploadDocument, MAX_BYTES } from "@/lib/services/documents";
@@ -9,6 +10,8 @@ export const runtime = "nodejs";
 const ALLOWED: DocType[] = ["passport", "proof_of_address", "other"];
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
+  const tierBlock = await blockBelowTier("professional");
+  if (tierBlock) return tierBlock;
   const me = await assertRole("staff");
   const { id: partyId } = await params;
   const party = await prisma.party.findUnique({

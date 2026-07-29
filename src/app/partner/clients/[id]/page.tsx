@@ -4,6 +4,7 @@ import { PartnerShell } from "@/components/admin/PartnerShell";
 import { requireRole } from "@/lib/auth/guards";
 import { prisma } from "@/lib/db";
 import { getBranding } from "@/lib/services/branding";
+import { getStageLabels, DEFAULT_STAGE_LABELS } from "@/lib/services/settings";
 import { PartnerNoteForm } from "./PartnerNoteForm";
 
 export const metadata = { title: "Client profile" };
@@ -33,6 +34,10 @@ export default async function PartnerClientProfile({ params }: { params: Promise
   if (!client) notFound();
 
   const initials = client.user.fullName.split(" ").map((p) => p[0]).join("").slice(0, 2).toUpperCase();
+  // Firm-editable stage wording (Admin → Status stages).
+  const stageLabels = await getStageLabels();
+  const stageFor = (serviceType: string, status: string) =>
+    stageLabels[serviceType]?.[status as keyof typeof DEFAULT_STAGE_LABELS] ?? prettySvcStatus(status);
 
   return (
     <PartnerShell active="clients">
@@ -63,7 +68,7 @@ export default async function PartnerClientProfile({ params }: { params: Promise
             <div key={s.id} className="border border-admin-border rounded-elem p-4 mb-3">
               <div className="flex justify-between items-start gap-3">
                 <div className="font-semibold">{pretty(s.serviceType)}</div>
-                <span className="badge badge-info">{prettySvcStatus(s.status)}</span>
+                <span className="badge badge-info">{stageFor(s.serviceType, s.status)}</span>
               </div>
               <div className="text-[13px] text-admin-muted mt-1">
                 {s.startDate ? `Started ${s.startDate.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}` : "Not started"}

@@ -28,18 +28,23 @@ async function tick24h() {
       reminderSent24h: false,
       startsAt: { gte: lo, lte: hi },
     },
-    include: { expert: true, prospect: { include: { user: true } } },
+    include: { expert: true, prospect: { include: { user: true } }, lead: true },
   });
   for (const b of due) {
-    await notify().send({
-      channel: "email",
-      to: b.prospect.user.email,
-      template: "reminder-24h",
-      data: { expert: b.expert.fullName, when: b.startsAt.toISOString() },
-    });
-    if ((await notify().send({
+    // Attendee lives on the prospect (portal bookings) or the lead (public).
+    const attendeeEmail = b.prospect?.user.email ?? b.lead?.email;
+    const attendeePhone = b.prospect?.user.phone ?? b.lead?.phone;
+    if (attendeeEmail) {
+      await notify().send({
+        channel: "email",
+        to: attendeeEmail,
+        template: "reminder-24h",
+        data: { expert: b.expert.fullName, when: b.startsAt.toISOString() },
+      });
+    }
+    if (attendeePhone && (await notify().send({
       channel: "whatsapp",
-      to: b.prospect.user.phone ?? "",
+      to: attendeePhone,
       template: "reminder-24h",
       data: { expert: b.expert.fullName, when: b.startsAt.toISOString() },
     })).ok) {
@@ -59,15 +64,18 @@ async function tick1h() {
       reminderSent1h: false,
       startsAt: { gte: lo, lte: hi },
     },
-    include: { expert: true, prospect: { include: { user: true } } },
+    include: { expert: true, prospect: { include: { user: true } }, lead: true },
   });
   for (const b of due) {
-    await notify().send({
-      channel: "email",
-      to: b.prospect.user.email,
-      template: "reminder-1h",
-      data: { expert: b.expert.fullName, when: b.startsAt.toISOString() },
-    });
+    const attendeeEmail = b.prospect?.user.email ?? b.lead?.email;
+    if (attendeeEmail) {
+      await notify().send({
+        channel: "email",
+        to: attendeeEmail,
+        template: "reminder-1h",
+        data: { expert: b.expert.fullName, when: b.startsAt.toISOString() },
+      });
+    }
     await prisma.booking.update({ where: { id: b.id }, data: { reminderSent1h: true } });
   }
 }

@@ -4,15 +4,13 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 
 // Plain props only — this is a client component, so it must not import from
-// server modules (e.g. branding.ts pulls in the Prisma/pg adapter). The tier
-// label is computed server-side and passed in as `minTierLabel`.
+// server modules (e.g. branding.ts pulls in the Prisma/pg adapter). Sections
+// above the deployment's plan are filtered out server-side before render.
 type SectionState = {
   key: string;
   label: string;
   description: string;
-  minTierLabel: string;
   enabled: boolean;
-  locked: boolean;
 };
 
 export function SectionsTable({ initial }: { initial: SectionState[] }) {
@@ -56,15 +54,12 @@ export function SectionsTable({ initial }: { initial: SectionState[] }) {
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
               <span className="font-semibold text-meta">{r.label}</span>
-              {r.locked && (
-                <span className="badge badge-pending">Requires {r.minTierLabel}</span>
-              )}
             </div>
             <p className="text-admin-muted text-[12px] mt-0.5">{r.description}</p>
           </div>
           <Switch
-            on={r.enabled && !r.locked}
-            disabled={r.locked || (pending && busyKey === r.key)}
+            on={r.enabled}
+            disabled={pending && busyKey === r.key}
             onChange={(v) => toggle(r.key, v)}
           />
         </div>

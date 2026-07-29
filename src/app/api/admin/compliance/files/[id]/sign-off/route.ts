@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { blockBelowTier } from "@/lib/auth/tier-guard";
 import { z } from "zod";
 import { assertRole } from "@/lib/auth/guards";
 import { signOffComplianceFile } from "@/lib/services/compliance/sign-off";
@@ -8,6 +9,8 @@ export const runtime = "nodejs";
 const schema = z.object({ note: z.string().min(5).max(2000) });
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
+  const tierBlock = await blockBelowTier("professional");
+  if (tierBlock) return tierBlock;
   const me = await assertRole("staff");
   const { id } = await params;
   const body = schema.safeParse(await req.json().catch(() => ({})));

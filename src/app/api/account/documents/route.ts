@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { blockBelowTier } from "@/lib/auth/tier-guard";
 import { assertRole } from "@/lib/auth/guards";
 import { uploadClientDocument } from "@/lib/services/client-portal";
 import { MAX_BYTES } from "@/lib/services/documents";
@@ -6,6 +7,8 @@ import { MAX_BYTES } from "@/lib/services/documents";
 export const runtime = "nodejs";
 
 export async function POST(req: Request) {
+  const tierBlock = await blockBelowTier("professional");
+  if (tierBlock) return tierBlock;
   const user = await assertRole("prospect", "client");
 
   const form = await req.formData().catch(() => null);

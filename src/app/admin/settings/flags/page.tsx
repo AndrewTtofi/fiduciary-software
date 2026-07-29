@@ -1,3 +1,4 @@
+import { features } from "@/lib/env";
 import { KNOWN_FLAGS, getAllFlags } from "@/lib/services/settings";
 import { FlagsTable, type FlagRow } from "./FlagsTable";
 
@@ -9,6 +10,7 @@ function envPresentFor(key: string): boolean {
     case "googleOAuth":   return !!(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET);
     case "linkedinOAuth": return !!(process.env.LINKEDIN_CLIENT_ID && process.env.LINKEDIN_CLIENT_SECRET);
     case "whatsapp":      return !!(process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN && process.env.TWILIO_WHATSAPP_FROM);
+    case "calendarBusy":  return features.calendarBusy;
     default:              return false;
   }
 }

@@ -1,3 +1,4 @@
+import { notFound } from "next/navigation";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { Kpi, ComingSoon } from "@/components/admin/Kpi";
 import { Icon } from "@/components/Icon";
@@ -14,6 +15,8 @@ const statusBadge = (s: string) => (s === "approved" ? "badge-approved" : "badge
 export default async function AmlReportingPage() {
   await requireRole("staff");
   const { planTier } = await getBranding();
+  // Below Professional the compliance suite is hidden entirely, not upsold.
+  if (!tierAtLeast(planTier, "professional")) notFound();
   if (!tierAtLeast(planTier, "scale")) return <AdminShell active="aml-reporting"><UpgradeGate required="scale" currentTier={planTier} title="AML reporting" desc="Generate SAR/STR filings, periodic AML reviews, KYC-refresh packs and UBO confirmations from your live case data, with an audit trail." /></AdminShell>;
 
   return (

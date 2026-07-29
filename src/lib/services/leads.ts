@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db";
 import { email } from "@/lib/providers/email";
 import { getServerBranding } from "@/lib/services/branding-server";
+import { EU_FREE_MOVEMENT } from "@/lib/data/countries";
 
 export type LeadSource = "calculator" | "intake" | "manual" | "contact";
 
@@ -11,9 +12,42 @@ const esc = (s: string) =>
 const META_LABELS: Record<string, string> = {
   country: "Lives and pays tax in",
   nationality: "Citizenship / passports",
+  relocate: "Relocating to Cyprus",
+  property: "Property interest",
+  timeline: "Timeline",
+  services: "Services needed",
   heardFrom: "Heard about us via",
   preferredSlotLabel: "Preferred slot (Cyprus time)",
 };
+
+/** Automatic lead routing per the firm's spec. Flags are internal only — they
+ *  go on the lead record and the staff notification, never to the visitor.
+ *  - Non-EU/EEA citizenship + relocating → the immigration route is required.
+ *  - Property "for permanent residency" or "maybe" → PR-by-investment lead.
+ *  - Licensing in the requested services → high-value lead.
+ *  The last two notify the founders directly (subject-line escalation). */
+export function computeLeadFlags(input: {
+  serviceKey?: string | null;
+  meta?: Record<string, string> | null;
+}): { flags: string[]; highValue: boolean } {
+  const m = input.meta ?? {};
+  const flags: string[] = [];
+
+  const citizenships = (m.nationality ?? "").split(",").map((s) => s.trim()).filter(Boolean);
+  const nonEu = citizenships.some((c) => !EU_FREE_MOVEMENT.has(c));
+  const relocating = (m.relocate ?? "").startsWith("Yes");
+  if (nonEu && relocating) flags.push("Immigration route required");
+
+  const property = m.property ?? "";
+  const prInterest = property.startsWith("Yes, for permanent residency") || property.startsWith("Maybe");
+  if (prInterest) flags.push("PR by investment opportunity");
+
+  const licensing =
+    input.serviceKey === "licensing" || /licensing/i.test(m.services ?? "");
+  if (licensing) flags.push("High value licensing lead");
+
+  return { flags, highValue: prInterest || licensing };
+}
 
 /** Consultation-request emails: a full-answer notification to the firm and a
  *  confirmation to the visitor. Best-effort — a mail failure must never fail
@@ -25,7 +59,7 @@ export async function sendConsultationEmails(input: {
   serviceKey?: string | null;
   note?: string | null;
   meta?: Record<string, string> | null;
-}) {
+}, opts: { booked?: boolean } = {}) {
   const { brandName, legalName, contactEmail } = await getServerBranding();
   const name = input.name?.trim() || "there";
 
@@ -41,8 +75,7 @@ export async function sendConsultationEmails(input: {
   }
   if (input.note) rows.push(["Their situation", input.note]);
 
-  // High-value routing per the firm's lead spec: licensing leads are flagged.
-  const highValue = input.serviceKey === "licensing";
+  const { flags, highValue } = computeLeadFlags(input);
 
   if (contactEmail) {
     await email().send({
@@ -55,20 +88,33 @@ export async function sendConsultationEmails(input: {
                  .map(([k, v]) => `<tr><td style="color:#5C6672">${esc(k)}</td><td><b>${esc(v)}</b></td></tr>`)
                  .join("")}
              </table>
-             ${highValue ? "<p><b>Licensing lead. Flagged high value.</b></p>" : ""}
-             <p>Confirm the slot with the visitor to complete the booking.</p>`,
+             ${
+               flags.length
+                 ? `<p><b>Internal routing (not shown to the visitor):</b></p>
+                    <ul>${flags.map((f) => `<li><b>${esc(f)}</b></li>`).join("")}</ul>`
+                 : ""
+             }
+             ${
+               opts.booked
+                 ? "<p>The slot is <b>booked</b> — reserved internally and mirrored to the calendar.</p>"
+                 : "<p>Confirm the slot with the visitor to complete the booking.</p>"
+             }`,
     });
   }
 
-  await email().send({
-    to: input.email,
-    subject: `Your consultation request with ${brandName}`,
-    html: `<p>Hello ${esc(name)},</p>
-           <p>We received your consultation request and your answers. A founding partner reads
-           them before you speak, so you never repeat your story.</p>
-           <p>We will confirm your slot by email${input.phone ? " or WhatsApp" : ""} within 24 hours.</p>
-           <p>${esc(legalName || brandName)}</p>`,
-  });
+  // Hard-booked visitors already received their confirmation with the
+  // calendar invite — only slot-less requests get the "we'll confirm" email.
+  if (!opts.booked) {
+    await email().send({
+      to: input.email,
+      subject: `Your consultation request with ${brandName}`,
+      html: `<p>Hello ${esc(name)},</p>
+             <p>We received your consultation request and your answers. A founding partner reads
+             them before you speak, so you never repeat your story.</p>
+             <p>We will confirm your slot by email${input.phone ? " or WhatsApp" : ""} within 24 hours.</p>
+             <p>${esc(legalName || brandName)}</p>`,
+    });
+  }
 }
 
 /** Create a lead, or refresh an existing one with the same email + source so we
@@ -83,6 +129,12 @@ export async function upsertLead(input: {
   meta?: Record<string, string> | null;
 }) {
   const email = input.email.trim().toLowerCase();
+  // Stamp the automatic routing flags onto the record so staff read them in
+  // the CRM without re-deriving the logic.
+  const { flags } = computeLeadFlags(input);
+  if (flags.length) {
+    input = { ...input, meta: { ...(input.meta ?? {}), flags: flags.join(" · ") } };
+  }
   const existing = await prisma.lead.findFirst({
     where: { email, source: input.source },
     orderBy: { createdAt: "desc" },

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { signOut } from "@/lib/auth";
-import { getBranding } from "@/lib/services/branding";
+import { getBranding, tierAtLeast } from "@/lib/services/branding";
 import { BrandMark } from "@/components/BrandMark";
 
 type ActiveKey = "dashboard" | "application" | "messages" | "documents" | "booking" | "marketplace" | "applications" | "settings";
@@ -41,7 +41,9 @@ export async function ClientShell({
   approved: boolean;
   title?: string;
 }) {
-  const { brandName, brandMark, logo } = await getBranding();
+  const { brandName, brandMark, logo, planTier } = await getBranding();
+  // On Starter the portal is a pure status tracker — no document exchange.
+  const showDocuments = tierAtLeast(planTier, "professional");
   const Item = ({ id, icon, label, locked }: { id: ActiveKey; icon: React.ReactNode; label: string; locked?: boolean }) => {
     const cls = `sb-item${active === id ? " active" : ""}${locked ? " locked" : ""}`;
     const inner = <>{icon}<span>{label}</span>{locked && <span className="lockic">{I.lock}</span>}</>;
@@ -63,7 +65,7 @@ export async function ClientShell({
           <Item id="dashboard" icon={I.dashboard} label="Dashboard" />
           <Item id="application" icon={I.briefcase} label="My application" />
           <div className="sb-group">Engagement</div>
-          <Item id="documents" icon={I.documents} label="Documents" />
+          {showDocuments && <Item id="documents" icon={I.documents} label="Documents" />}
           <Item id="messages" icon={I.message} label="Messages" />
           <Item id="booking" icon={I.calendar} label="Book consultation" locked={!approved} />
           <div className="sb-group">Network</div>

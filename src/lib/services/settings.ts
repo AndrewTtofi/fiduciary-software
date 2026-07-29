@@ -8,6 +8,7 @@ export const KNOWN_FLAGS = [
   { key: "googleOAuth",   label: "Google OAuth sign-in",   envHint: "GOOGLE_CLIENT_ID + GOOGLE_CLIENT_SECRET" },
   { key: "linkedinOAuth", label: "LinkedIn OAuth sign-in", envHint: "LINKEDIN_CLIENT_ID + LINKEDIN_CLIENT_SECRET" },
   { key: "whatsapp",      label: "WhatsApp notifications", envHint: "TWILIO_ACCOUNT_SID + TWILIO_AUTH_TOKEN + TWILIO_WHATSAPP_FROM" },
+  { key: "calendarBusy",  label: "Staff calendar availability (Google / Outlook)", envHint: "CALENDAR_BUSY_DRIVER + driver credentials" },
 ] as const;
 
 export type FlagKey = (typeof KNOWN_FLAGS)[number]["key"];
@@ -16,9 +17,13 @@ export type FlagKey = (typeof KNOWN_FLAGS)[number]["key"];
 export type DocumentsPhase = "mandatory" | "optional" | "off";
 
 /** Read the configured onboarding document-upload phase mode (defaults to
- *  "mandatory" for any unexpected stored value). */
+ *  "mandatory" for any unexpected stored value). On the Starter plan the
+ *  platform is a pure status tracker — uploads are always off, regardless of
+ *  the stored setting. (Tier compared inline: importing tierAtLeast from the
+ *  branding service here would create an import cycle.) */
 export async function getDocumentsPhase(): Promise<DocumentsPhase> {
   const org = await getOrgSettings();
+  if (org.planTier === "starter") return "off";
   const v = org.documentsPhase;
   return v === "optional" || v === "off" ? v : "mandatory";
 }
@@ -71,6 +76,42 @@ export async function getServices(opts: { activeOnly?: boolean } = {}) {
     where: opts.activeOnly ? { active: true } : undefined,
     orderBy: [{ sortOrder: "asc" }, { label: "asc" }],
   });
+}
+
+/* ── service status-stage wording ───────────────────────────────────── */
+
+/** The three progress stages of a client service (ClientService.status). The
+ *  underlying enum is fixed; only the wording is editable. */
+export const SVC_STAGES = ["pending", "in_progress", "completed"] as const;
+export type SvcStageKey = (typeof SVC_STAGES)[number];
+
+export const DEFAULT_STAGE_LABELS: Record<SvcStageKey, string> = {
+  pending: "Pending",
+  in_progress: "In progress",
+  completed: "Completed",
+};
+
+/** Merge a stored Service.stageLabels JSON over the defaults, ignoring
+ *  anything malformed. */
+export function readStageLabels(value: unknown): Record<SvcStageKey, string> {
+  const out = { ...DEFAULT_STAGE_LABELS };
+  if (value && typeof value === "object") {
+    for (const stage of SVC_STAGES) {
+      const v = (value as Record<string, unknown>)[stage];
+      if (typeof v === "string" && v.trim()) out[stage] = v.trim();
+    }
+  }
+  return out;
+}
+
+/** Stage wording per service key, defaults filled in. Staff edit these at
+ *  /admin/status-stages; the client portal, partner portal and admin status
+ *  pickers all read from here so a wording change shows everywhere at once. */
+export async function getStageLabels(): Promise<Record<string, Record<SvcStageKey, string>>> {
+  const services = await getServices();
+  const out: Record<string, Record<SvcStageKey, string>> = {};
+  for (const s of services) out[s.key] = readStageLabels(s.stageLabels);
+  return out;
 }
 
 /** Read a single flag (defaults to false if unset). */

@@ -13,6 +13,7 @@ const prisma = new PrismaClient({ adapter: pgAdapter() });
  * - COMPANY_LEGAL_NAME  → OrgSettings.legalName (emails, legal pages, footer ©)
  * - COMPANY_EMAIL       → OrgSettings.contactEmail
  * - COMPANY_ADDRESS     → OrgSettings.address
+ * - COMPANY_PLAN_TIER   → OrgSettings.planTier (starter | professional | scale)
  *
  * Each optional field is only written when its env var is set, so existing /
  * UI-customised branding is preserved. No-op when COMPANY_NAME is unset.
@@ -23,13 +24,19 @@ export async function ensureBranding() {
   const name = process.env.COMPANY_NAME?.trim();
   if (!name) { console.log("[branding] COMPANY_NAME not set — leaving branding as-is."); return; }
 
-  const optional: { legalName?: string; contactEmail?: string; address?: string } = {};
+  const optional: { legalName?: string; contactEmail?: string; address?: string; planTier?: string } = {};
   const legalName = process.env.COMPANY_LEGAL_NAME?.trim();
   const contactEmail = process.env.COMPANY_EMAIL?.trim();
   const address = process.env.COMPANY_ADDRESS?.trim();
+  const planTier = process.env.COMPANY_PLAN_TIER?.trim().toLowerCase();
   if (legalName) optional.legalName = legalName;
   if (contactEmail) optional.contactEmail = contactEmail;
   if (address) optional.address = address;
+  if (planTier === "starter" || planTier === "professional" || planTier === "scale") {
+    optional.planTier = planTier;
+  } else if (planTier) {
+    console.warn(`[branding] ignoring unknown COMPANY_PLAN_TIER="${planTier}".`);
+  }
 
   const row = await prisma.orgSettings.upsert({
     where: { id: "singleton" },

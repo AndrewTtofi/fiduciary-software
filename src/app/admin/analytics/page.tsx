@@ -40,10 +40,11 @@ export default async function AdminAnalyticsPage() {
   }
   const topCountries = Array.from(countryCounts.entries()).sort((a, b) => b[1] - a[1]).slice(0, 5);
 
-  // Average time to consultation = time between submission and first booking
-  const submittedToBooking = await prisma.booking.findMany({
+  // Average time to consultation = time between submission and first booking.
+  // Public (lead) hard-bookings have no prospect and are excluded.
+  const submittedToBooking = (await prisma.booking.findMany({
     select: { startsAt: true, prospect: { select: { createdAt: true } } },
-  });
+  })).filter((b): b is typeof b & { prospect: { createdAt: Date } } => b.prospect !== null);
   const avgDays = submittedToBooking.length
     ? Math.round(submittedToBooking.reduce((sum, b) => sum + (b.startsAt.getTime() - b.prospect.createdAt.getTime()), 0) / submittedToBooking.length / (1000 * 60 * 60 * 24))
     : 0;

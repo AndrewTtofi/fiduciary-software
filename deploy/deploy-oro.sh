@@ -72,6 +72,7 @@ upsert_env COMPANY_NAME "${COMPANY_NAME:-}"
 upsert_env COMPANY_LEGAL_NAME "${COMPANY_LEGAL_NAME:-}"
 upsert_env COMPANY_EMAIL "${COMPANY_EMAIL:-}"
 upsert_env COMPANY_ADDRESS "${COMPANY_ADDRESS:-}"
+upsert_env COMPANY_PLAN_TIER "${COMPANY_PLAN_TIER:-}"
 # Keep APP_URL/AUTH_URL in sync when the public URL is managed via repo vars.
 if [ -n "${ORO_PUBLIC_URL:-}" ]; then
   upsert_env APP_URL "$ORO_PUBLIC_URL"
@@ -175,6 +176,7 @@ docker compose exec -T \
   -e COMPANY_LEGAL_NAME="${COMPANY_LEGAL_NAME:-}" \
   -e COMPANY_EMAIL="${COMPANY_EMAIL:-}" \
   -e COMPANY_ADDRESS="${COMPANY_ADDRESS:-}" \
+  -e COMPANY_PLAN_TIER="${COMPANY_PLAN_TIER:-}" \
   web node ./dist-worker/worker/ensure-branding.js || echo "[deploy] branding provisioning skipped/failed (non-fatal)"
 
 # 6) recreating web changes its container IP — bounce the proxy so Caddy

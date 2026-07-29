@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { getBranding } from "@/lib/services/branding";
 import { getSiteContent } from "@/lib/services/content";
-import { listPublicSlots } from "@/lib/services/booking";
+import { listPublicAvailability } from "@/lib/services/booking";
 import { SERVICES } from "@/components/marketing/ServiceIcons";
 import { telLink, waLink } from "@/components/marketing/mk";
 import { ContactBookingForm } from "./ContactBookingForm";
@@ -11,25 +11,13 @@ export const metadata = { title: "Book Your Consultation" };
 // Availability changes as bookings land — always render fresh.
 export const dynamic = "force-dynamic";
 
-/** The firm operates on Cyprus time; slot pills are labelled accordingly. */
-const DISPLAY_TZ = "Europe/Nicosia";
-
 export default async function ContactPage() {
   const [{ brandName }, { contact, consultation }, slotDates] = await Promise.all([
     getBranding(),
     getSiteContent(),
-    listPublicSlots(6).catch(() => [] as Date[]),
+    listPublicAvailability().catch(() => [] as Date[]),
   ]);
-  const slots = slotDates.map((d) => ({
-    iso: d.toISOString(),
-    label: d.toLocaleString("en-GB", {
-      weekday: "short",
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false,
-      timeZone: DISPLAY_TZ,
-    }).replace(",", ""),
-  }));
+  const slots = slotDates.map((d) => d.toISOString());
   const inquiries = SERVICES.map(({ key, title }) => ({ key, title }));
 
   return (

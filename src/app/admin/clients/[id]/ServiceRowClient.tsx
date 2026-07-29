@@ -1,12 +1,13 @@
 "use client";
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import type { ServiceRow } from "./ServicesEngagedList";
+import type { ServiceRow, StageWording } from "./ServicesEngagedList";
 
-export function ServiceRowClient({ row, partners, taxonomy }: {
+export function ServiceRowClient({ row, partners, taxonomy, stages }: {
   row: ServiceRow;
   partners: { id: string; fullName: string }[];
   taxonomy: { key: string; label: string }[];
+  stages: StageWording;
 }) {
   const router = useRouter();
   const [pending, start] = useTransition();
@@ -51,9 +52,9 @@ export function ServiceRowClient({ row, partners, taxonomy }: {
         <label className="flex flex-col gap-1">
           <span className="text-[11px] uppercase tracking-widest text-admin-muted">Status</span>
           <select value={draft.status} onChange={(e) => setDraft({ ...draft, status: e.target.value as ServiceRow["status"] })} className="input">
-            <option value="pending">Pending</option>
-            <option value="in_progress">In progress</option>
-            <option value="completed">Completed</option>
+            <option value="pending">{stages.pending}</option>
+            <option value="in_progress">{stages.in_progress}</option>
+            <option value="completed">{stages.completed}</option>
           </select>
         </label>
         <label className="flex flex-col gap-1">

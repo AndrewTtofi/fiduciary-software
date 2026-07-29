@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { Kpi, ComingSoon } from "@/components/admin/Kpi";
 import { Icon } from "@/components/Icon";
@@ -17,6 +18,8 @@ const sevBadge = (s: string) => (s === "high" ? "badge-danger" : s === "medium" 
 export default async function AiScreeningPage() {
   await requireRole("staff");
   const { planTier } = await getBranding();
+  // Below Professional the compliance suite is hidden entirely, not upsold.
+  if (!tierAtLeast(planTier, "professional")) notFound();
   if (!tierAtLeast(planTier, "scale")) return <AdminShell active="ai-screening"><UpgradeGate required="scale" currentTier={planTier} title="AI screening" desc="An intelligence layer over raw AML: collapses thousands of vendor hits into a handful of true matches with reasons, sources and one-click escalation." /></AdminShell>;
 
   const prospects = await prisma.prospect.findMany({ include: { user: true, details: true }, orderBy: { createdAt: "desc" }, take: 100 });

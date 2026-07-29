@@ -268,6 +268,23 @@ model Client {
   internalNotes    InternalNote[]
   complianceFile   ComplianceFile?
   documentRequests DocumentRequest[]
+  checklistItems   ChecklistItem[]
+}
+
+/// Staff-only manual checklist per client engagement ("Passport received",
+/// "Proof of address received", …). Purely internal record-keeping: rendered
+/// only inside /admin, never exposed through any client-facing query.
+model ChecklistItem {
+  id        String   @id @default(uuid())
+  clientId  String
+  client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  label     String
+  done      Boolean  @default(false)
+  doneAt    DateTime?
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@index([clientId])
 }
 
 model ClientService {
@@ -330,14 +347,21 @@ model InternalNote {
 
 model Booking {
   id              String        @id @default(uuid())
-  prospectId      String
-  prospect        Prospect      @relation(fields: [prospectId], references: [id], onDelete: Cascade)
+  /// Portal bookings belong to a prospect; public hard-bookings to a lead.
+  /// Exactly one of the two is set.
+  prospectId      String?
+  prospect        Prospect?     @relation(fields: [prospectId], references: [id], onDelete: Cascade)
+  leadId          String?
+  lead            Lead?         @relation(fields: [leadId], references: [id], onDelete: Cascade)
   expertId        String
   expert          User          @relation("Expert", fields: [expertId], references: [id])
   startsAt        DateTime
   timezone        String
-  durationMinutes Int           @default(45)
+  durationMinutes Int           @default(30)
   status          BookingStatus @default(confirmed)
+  /// Id of the mirrored event in the connected staff calendar (Google/Outlook),
+  /// null when the calendar write failed or no calendar is connected.
+  calendarEventId String?
   reminderSent24h Boolean       @default(false)
   reminderSent1h  Boolean       @default(false)
 
@@ -455,6 +479,8 @@ model Lead {
   createdAt      DateTime @default(now())
   lastActivityAt DateTime @default(now())
 
+  bookings Booking[]
+
   @@index([email])
   @@index([createdAt])
 }
@@ -506,6 +532,10 @@ model Service {
   description String?
   sortOrder   Int      @default(0)
   active      Boolean  @default(true)
+  /// Per-service wording for the three progress stages shown to clients
+  /// ({ pending, in_progress, completed } → label). Null → built-in defaults.
+  /// Editable by firm staff at /admin/status-stages — no developer needed.
+  stageLabels Json?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }

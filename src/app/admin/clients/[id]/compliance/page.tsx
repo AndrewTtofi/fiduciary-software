@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { requireRole } from "@/lib/auth/guards";
+import { getBranding, tierAtLeast } from "@/lib/services/branding";
 import { prisma } from "@/lib/db";
 import { recomputeAndStoreRisk } from "@/lib/services/compliance/risk-persist";
 import { ComplianceDashboard } from "@/components/compliance/ComplianceDashboard";
@@ -10,6 +11,8 @@ export const metadata = { title: "Compliance" };
 
 export default async function ClientCompliancePage({ params }: { params: Promise<{ id: string }> }) {
   await requireRole("staff");
+  // Below Professional the compliance suite is hidden entirely, not upsold.
+  if (!tierAtLeast((await getBranding()).planTier, "professional")) notFound();
   const { id } = await params;
   const file = await prisma.complianceFile.findFirst({
     where: { clientId: id },

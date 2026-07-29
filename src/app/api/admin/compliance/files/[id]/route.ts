@@ -1,10 +1,13 @@
 import { NextResponse } from "next/server";
+import { blockBelowTier } from "@/lib/auth/tier-guard";
 import { assertRole } from "@/lib/auth/guards";
 import { prisma } from "@/lib/db";
 
 export const runtime = "nodejs";
 
 export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
+  const tierBlock = await blockBelowTier("professional");
+  if (tierBlock) return tierBlock;
   await assertRole("staff");
   const { id } = await params;
   const file = await prisma.complianceFile.findUnique({

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { Kpi } from "@/components/admin/Kpi";
 import { Icon } from "@/components/Icon";
@@ -26,6 +27,9 @@ const CARDS: Card[] = [
 export default async function ComplianceHubPage() {
   await requireRole("staff");
   const { planTier } = await getBranding();
+  // The compliance hub does not exist below Professional — hidden entirely,
+  // not upsold. Starter firms run a plain status tracker.
+  if (!tierAtLeast(planTier, "professional")) notFound();
 
   const prospects = await prisma.prospect.findMany({ include: { user: true, details: true }, orderBy: { createdAt: "desc" }, take: 100 });
   const subs = prospects.map(prospectToSub);
@@ -63,7 +67,7 @@ export default async function ComplianceHubPage() {
             <>
               <div className="row-between" style={{ alignItems: "flex-start" }}>
                 <div className="kpi-tile"><Icon name={c.icon} className="ic-18" /></div>
-                {unlocked ? <Icon name="arrow" className="ic-16" /> : <span className="badge badge-neutral"><Icon name="lock" className="ic-16" /> {c.tier === "scale" ? "Scale" : "Professional"}</span>}
+                {unlocked ? <Icon name="arrow" className="ic-16" /> : <span className="badge badge-neutral"><Icon name="lock" className="ic-16" /> Not in your package</span>}
               </div>
               <div style={{ fontWeight: 600, marginTop: "var(--space-3)" }}>{c.title}</div>
               <p className="muted mt-2" style={{ fontSize: "var(--fs-xs)" }}>{c.desc}</p>

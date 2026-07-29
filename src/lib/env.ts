@@ -50,6 +50,20 @@ const schema = z.object({
   TWILIO_AUTH_TOKEN: z.string().optional(),
   TWILIO_WHATSAPP_FROM: z.string().optional(),
 
+  // Staff calendar busy-time source — booking slots are offered only when the
+  // connected calendar(s) are free. "none" keeps internal-only availability.
+  CALENDAR_BUSY_DRIVER: z.enum(["none", "google", "outlook"]).default("none"),
+  // google: OAuth refresh token for the staff Google/Gmail account (uses
+  // GOOGLE_CLIENT_ID/SECRET above); calendar ids default to "primary".
+  GOOGLE_CALENDAR_REFRESH_TOKEN: z.string().optional(),
+  GOOGLE_CALENDAR_IDS: z.string().optional(),
+  // outlook: Microsoft Graph app-only (client credentials) + the mailbox
+  // address(es) whose calendars define availability.
+  MS_TENANT_ID: z.string().optional(),
+  MS_CLIENT_ID: z.string().optional(),
+  MS_CLIENT_SECRET: z.string().optional(),
+  MS_CALENDAR_USERS: z.string().optional(),
+
   // App behavior
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   SEED_ON_BOOT: z.coerce.boolean().default(false),
@@ -97,4 +111,14 @@ export const features = {
     return !!(e.TWILIO_ACCOUNT_SID && e.TWILIO_AUTH_TOKEN && e.TWILIO_WHATSAPP_FROM);
   },
   get resendEmail() { return env().EMAIL_DRIVER === "resend" && !!env().RESEND_API_KEY; },
+  get calendarBusy() {
+    const e = env();
+    if (e.CALENDAR_BUSY_DRIVER === "google") {
+      return !!(e.GOOGLE_CLIENT_ID && e.GOOGLE_CLIENT_SECRET && e.GOOGLE_CALENDAR_REFRESH_TOKEN);
+    }
+    if (e.CALENDAR_BUSY_DRIVER === "outlook") {
+      return !!(e.MS_TENANT_ID && e.MS_CLIENT_ID && e.MS_CLIENT_SECRET && e.MS_CALENDAR_USERS);
+    }
+    return false;
+  },
 };

@@ -1,7 +1,8 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { requireRole } from "@/lib/auth/guards";
-import { getServices } from "@/lib/services/settings";
+import { getBranding, tierAtLeast } from "@/lib/services/branding";
+import { getServices, getStageLabels } from "@/lib/services/settings";
 import { Role } from "@prisma/client";
 import { listThread } from "@/lib/services/messages";
 import { AdminClientShell } from "./AdminClientShell";
@@ -14,6 +15,8 @@ import { ClientStatusPanel } from "./ClientStatusPanel";
 import { ClientNotes } from "./ClientNotes";
 import { ClientActivity } from "./ClientActivity";
 import { QuickActions } from "./QuickActions";
+import { ChecklistCard } from "./ChecklistCard";
+import { getClientChecklist } from "@/lib/services/client-checklist";
 import { ClientTabs } from "./ClientTabs";
 import { tabFromParam } from "./tabs";
 import { ConversationView } from "./ConversationView";
@@ -32,7 +35,12 @@ export default async function ClientProfilePage({
   await requireRole("staff");
   const { id } = await params;
   const sp = await searchParams;
-  const tab = tabFromParam(sp.tab);
+  // Starter runs a plain status tracker: no compliance file, no document
+  // workspace, no document requests — those surfaces disappear entirely.
+  const { planTier } = await getBranding();
+  const fullWorkspace = tierAtLeast(planTier, "professional");
+  const requested = tabFromParam(sp.tab);
+  const tab = !fullWorkspace && requested === "documents" ? "overview" : requested;
 
   const client = await prisma.client.findUnique({
     where: { id },
@@ -61,8 +69,10 @@ export default async function ClientProfilePage({
   // Use getServices() (not a raw query) so the taxonomy lazily seeds when empty —
   // otherwise service folders fall back to raw snake_case keys.
   const taxonomy = (await getServices({ activeOnly: true })).map((s) => ({ key: s.key, label: s.label }));
+  const stageLabels = await getStageLabels();
 
   const messages = await listThread(client.id);
+  const checklist = await getClientChecklist(client.id);
 
   const initials = client.user.fullName.split(" ").map((p) => p[0]).join("").slice(0, 2).toUpperCase();
 
@@ -82,7 +92,11 @@ export default async function ClientProfilePage({
         )}
         staff={staff}
       />
-      <QuickActions clientId={client.id} />
+      <QuickActions clientId={client.id} showRequestDocs={fullWorkspace} />
+      <ChecklistCard
+        clientId={client.id}
+        initial={checklist.map((c) => ({ id: c.id, label: c.label, done: c.done }))}
+      />
     </div>
   );
 
@@ -108,13 +122,15 @@ export default async function ClientProfilePage({
         }}
       />
 
-      <ComplianceBar
-        clientId={client.id}
-        status={client.complianceFile?.status ?? null}
-        riskRating={client.complianceFile?.riskRating ?? null}
-      />
+      {fullWorkspace && (
+        <ComplianceBar
+          clientId={client.id}
+          status={client.complianceFile?.status ?? null}
+          riskRating={client.complianceFile?.riskRating ?? null}
+        />
+      )}
 
-      <ClientTabs active={tab} />
+      <ClientTabs active={tab} showDocuments={fullWorkspace} />
 
       <div className="grid gap-10 lg:grid-cols-[1fr_320px] items-start max-w-[1240px]">
         {/* ── Tab body ──────────────────────────────────────── */}
@@ -149,10 +165,11 @@ export default async function ClientProfilePage({
               }))}
               partners={partners}
               taxonomy={taxonomy}
+              stageLabels={stageLabels}
             />
           )}
 
-          {tab === "documents" && (
+          {tab === "documents" && fullWorkspace && (
             <DocumentsSection
               clientId={client.id}
               services={client.services.map((s) => ({ serviceType: s.serviceType }))}

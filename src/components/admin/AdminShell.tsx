@@ -9,7 +9,7 @@ type AdminTab =
   | "dashboard" | "submissions" | "compliance-hub"
   | "kyc" | "aml" | "kyb" | "ai-screening" | "ownership-map" | "client-risk" | "aml-reporting" | "compliance-calendar"
   | "leads" | "clients" | "messages"
-  | "documents" | "bookings" | "client-dashboard" | "branding" | "users" | "analytics" | "content" | "insights"
+  | "documents" | "bookings" | "client-dashboard" | "status-stages" | "branding" | "users" | "analytics" | "content" | "insights"
   | "integrations" | "settings";
 
 const I = {
@@ -35,7 +35,7 @@ const TITLES: Record<AdminTab, string> = {
   kyc: "KYC / ID verification", aml: "AML screening", kyb: "KYB verification", "ai-screening": "AI screening",
   "ownership-map": "Ownership map", "client-risk": "Client risk", "aml-reporting": "AML reporting", "compliance-calendar": "Compliance calendar",
   leads: "Leads / CRM", clients: "Clients", messages: "Messages",
-  documents: "Documents & e-sign", bookings: "Bookings", "client-dashboard": "Client dashboard", branding: "Branding", users: "Users", analytics: "Analytics", content: "Content", insights: "Insights articles",
+  documents: "Documents & e-sign", bookings: "Bookings", "client-dashboard": "Client dashboard", "status-stages": "Status stages", branding: "Branding", users: "Users", analytics: "Analytics", content: "Content", insights: "Insights articles",
   integrations: "Connect & API", settings: "Settings",
 };
 
@@ -79,9 +79,9 @@ export async function AdminShell({
               <div className="sb-group">Overview</div>
               <Item id="dashboard" href="/admin" icon={I.dashboard} label="Dashboard" />
               <Item id="submissions" href="/admin/submissions" icon={I.submissions} label="Submissions" />
-              <Item id="compliance-hub" href="/admin/compliance" icon={<Icon name="shield" />} label="Compliance hub" />
               {tierAtLeast(planTier, "professional") && (
                 <>
+                  <Item id="compliance-hub" href="/admin/compliance" icon={<Icon name="shield" />} label="Compliance hub" />
                   <div className="sb-group">Compliance</div>
                   {tierAtLeast(planTier, "scale") && (
                     <>
@@ -107,6 +107,7 @@ export async function AdminShell({
               )}
               <Item id="bookings" href="/admin/bookings" icon={I.bookings} label="Bookings" />
               <Item id="client-dashboard" href="/admin/client-dashboard" icon={I.dashboard} label="Client dashboard" />
+              <Item id="status-stages" href="/admin/status-stages" icon={I.submissions} label="Status stages" />
               <div className="sb-group">Firm</div>
               <Item id="branding" href="/admin/branding" icon={I.image} label="Branding" />
               <Item id="users" href="/admin/users" icon={I.users} label="Users" />

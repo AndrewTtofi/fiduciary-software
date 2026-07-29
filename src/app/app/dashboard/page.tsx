@@ -4,8 +4,9 @@ import { ClientShell } from "@/components/client/ClientShell";
 import { requireUser } from "@/lib/auth/guards";
 import { prisma } from "@/lib/db";
 import { getProspectForUser } from "@/lib/services/client-view";
-import { getBranding } from "@/lib/services/branding";
+import { getBranding, tierAtLeast } from "@/lib/services/branding";
 import { getVisibleDashboardSections } from "@/lib/services/dashboard-sections";
+import { getStageLabels, DEFAULT_STAGE_LABELS } from "@/lib/services/settings";
 import { ClientDashboard } from "./ClientDashboard";
 
 export const metadata = { title: "Dashboard" };
@@ -60,17 +61,27 @@ export default async function ClientDashboardPage() {
   );
 
   const sections = await getVisibleDashboardSections();
+  const { brandName, planTier } = await getBranding();
+  // Starter is a plain status tracker: no compliance wording reaches clients.
+  const showCompliance = tierAtLeast(planTier, "professional");
+  // Stage wording is firm-editable (Admin → Status stages).
+  const stageLabels = await getStageLabels();
 
   return (
     <ClientShell active="dashboard" approved={true}>
       <ClientDashboard
         sections={sections}
         name={dbUser?.fullName ?? "Client"}
-        brandName={(await getBranding()).brandName}
+        brandName={brandName}
         since={client.createdAt}
-        complianceStatus={client.complianceFile?.status ?? null}
-        riskRating={client.complianceFile?.riskRating ?? null}
-        services={client.services.map((s) => ({ id: s.id, serviceType: s.serviceType, status: s.status }))}
+        complianceStatus={showCompliance ? (client.complianceFile?.status ?? null) : null}
+        riskRating={showCompliance ? (client.complianceFile?.riskRating ?? null) : null}
+        services={client.services.map((s) => ({
+          id: s.id,
+          serviceType: s.serviceType,
+          status: s.status,
+          stageLabel: stageLabels[s.serviceType]?.[s.status] ?? DEFAULT_STAGE_LABELS[s.status],
+        }))}
         upcomingKeyDates={client.keyDates.map((kd) => ({
           id: kd.id,
           description: kd.description,

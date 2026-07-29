@@ -1,5 +1,5 @@
+import { notFound } from "next/navigation";
 import { AdminShell } from "@/components/admin/AdminShell";
-import { UpgradeGate } from "@/components/admin/UpgradeGate";
 import { requireRole } from "@/lib/auth/guards";
 import { getBranding, tierAtLeast } from "@/lib/services/branding";
 import { prisma } from "@/lib/db";
@@ -39,14 +39,8 @@ function buildObligations(clients: { company: string; client: string }[]): Oblig
 export default async function ComplianceCalendarPage() {
   await requireRole("staff");
   const { planTier } = await getBranding();
-  if (!tierAtLeast(planTier, "professional")) {
-    return (
-      <AdminShell active="compliance-calendar">
-        <UpgradeGate required="professional" currentTier={planTier} title="Compliance calendar"
-          desc="Track KYC-document expiries, UBO submissions and annual-return deadlines across every client — the stickiness layer that keeps clients on the platform." />
-      </AdminShell>
-    );
-  }
+  // Below Professional the compliance suite is hidden entirely, not upsold.
+  if (!tierAtLeast(planTier, "professional")) notFound();
 
   const approved = await prisma.prospect.findMany({
     where: { status: ProspectStatus.approved },
