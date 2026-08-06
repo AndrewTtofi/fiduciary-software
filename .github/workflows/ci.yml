@@ -6,6 +6,11 @@ on:
     tags: ['v*']
   pull_request:
     branches: [main]
+  # Manual trigger. GitHub occasionally drops a push event — it did so for the
+  # squash-merge of #26, which left main with no CI run and therefore no image
+  # and no deploy. Without this there was no way to start CI again short of
+  # pushing another commit.
+  workflow_dispatch:
 
 permissions:
   contents: read
