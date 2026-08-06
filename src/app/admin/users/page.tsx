@@ -1,78 +1,160 @@
+import Link from "next/link";
 import { AdminShell } from "@/components/admin/AdminShell";
+import { DataTable, type DataRow } from "@/components/admin/DataTable";
 import { requireRole } from "@/lib/auth/guards";
+import { auth } from "@/lib/auth";
+import { getBranding, tierAtLeast } from "@/lib/services/branding";
+import { PortalOffNotice } from "@/components/admin/PortalOffNotice";
 import { prisma } from "@/lib/db";
 import { VerifyButton } from "./VerifyButton";
 import { CreateUserForm } from "./CreateUserForm";
+import { TeamManager, type Member } from "./TeamManager";
 
 export const metadata = { title: "Users" };
 export const dynamic = "force-dynamic";
 
-export default async function AdminUsersPage() {
+/* Two different populations share the User table, and showing them in one
+   undifferentiated list is what made this page confusing:
+     • the firm's own people (staff, partner) — colleagues
+     • portal logins (client, prospect)       — customers
+   The engagement record for a customer lives under Clients; this page is only
+   about the sign-in account, so client rows link across rather than restate it. */
+type Tab = "team" | "logins";
+const TEAM_ROLES = ["staff", "partner"] as const;
+
+const ROLE_LABEL: Record<string, string> = {
+  staff: "Staff", partner: "Partner", client: "Client", prospect: "Applicant",
+};
+
+export default async function AdminUsersPage({ searchParams }: { searchParams: Promise<{ tab?: string }> }) {
   await requireRole("staff");
+  const session = await auth();
+  const { planTier } = await getBranding();
+  const tab: Tab = (await searchParams).tab === "logins" ? "logins" : "team";
 
   const users = await prisma.user.findMany({
     select: {
-      id: true,
-      email: true,
-      fullName: true,
-      role: true,
-      emailVerified: true,
-      createdAt: true,
+      id: true, email: true, fullName: true, role: true,
+      emailVerified: true, createdAt: true, deactivatedAt: true,
+      clientAccount: { select: { id: true } },
+      prospect: { select: { referenceNumber: true } },
     },
     orderBy: [{ emailVerified: "asc" }, { createdAt: "desc" }],
   });
 
-  const unverifiedCount = users.filter((u) => !u.emailVerified).length;
+  const isTeam = (r: string) => (TEAM_ROLES as readonly string[]).includes(r);
+  const team = users.filter((u) => isTeam(u.role));
+  const logins = users.filter((u) => !isTeam(u.role));
+  const shown = tab === "team" ? team : logins;
+
+  const unverified = shown.filter((u) => !u.emailVerified).length;
+
+  const teamMembers: Member[] = team.map((u) => ({
+    id: u.id,
+    email: u.email,
+    fullName: u.fullName,
+    role: u.role as "staff" | "partner",
+    deactivatedAt: u.deactivatedAt ? u.deactivatedAt.toISOString() : null,
+    createdAt: u.createdAt.toISOString(),
+  }));
+
+  const rows: DataRow[] = shown.map((u) => ({
+    key: u.id,
+    // Unverified first — the only row here that needs an action.
+    sort: [u.fullName, u.email, ROLE_LABEL[u.role] ?? u.role, u.emailVerified ? 1 : 0, u.createdAt.getTime()],
+    cells: [
+      <div className="cell-entity" key="n">
+        <div className="avatar" style={{ width: 26, height: 26, fontSize: 11 }}>{initialsOf(u.fullName)}</div>
+        <span style={{ fontWeight: 600 }}>{u.fullName}</span>
+      </div>,
+      <span className="mono" style={{ fontSize: "var(--fs-xs)" }} key="e">{u.email}</span>,
+      <span className="tag" key="r">{ROLE_LABEL[u.role] ?? u.role}</span>,
+      u.emailVerified
+        ? <span className="badge badge-approved" key="v">Verified</span>
+        : <span className="badge badge-pending" key="v">Awaiting email</span>,
+      <span className="mono muted" key="c">
+        {u.createdAt.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}
+      </span>,
+      // Where the rest of this person's file lives, so nobody looks for an
+      // engagement on the accounts page.
+      u.clientAccount
+        ? <Link href={`/admin/clients/${u.clientAccount.id}`} className="link-gold" key="l">Client record →</Link>
+        : u.prospect
+          ? <Link href={`/admin/submissions/${u.prospect.referenceNumber}`} className="link-gold" key="l">Submission →</Link>
+          : <span className="muted" key="l">—</span>,
+      u.emailVerified ? <span className="muted" key="a">—</span> : <VerifyButton userId={u.id} key="a" />,
+    ],
+  }));
+
+  const TABS: { key: Tab; label: string; n: number }[] = [
+    { key: "team", label: "Firm team", n: team.length },
+    { key: "logins", label: "Client logins", n: logins.length },
+  ];
 
   return (
     <AdminShell active="users">
       <div className="mb-6">
         <div className="eyebrow mb-2">Firm</div>
-        <h2 style={{ fontSize: "1.563rem", fontWeight: 700, letterSpacing: "-0.02em" }}>Users</h2>
-        <p className="muted mt-2" style={{ fontSize: "var(--fs-sm)" }}>
-          {unverifiedCount > 0
-            ? `${unverifiedCount} account${unverifiedCount === 1 ? "" : "s"} awaiting email verification.`
-            : "All accounts have verified emails."}
+        <h2 style={{ fontSize: "var(--fs-h3)", fontWeight: 700, letterSpacing: "-0.02em" }}>Users</h2>
+        <p className="muted mt-2" style={{ fontSize: "var(--fs-sm)", maxWidth: "68ch", lineHeight: 1.6 }}>
+          Sign-in accounts only. <strong>Firm team</strong> is the people who work here;{" "}
+          <strong>Client logins</strong> are portal accounts for the people you act for — their
+          engagements, documents and key dates live under <Link href="/admin/clients" className="link-gold">Clients</Link>.
         </p>
       </div>
 
-      <CreateUserForm />
-
-      <div className="tbl-wrap">
-        <div className="tbl-toolbar"><strong>Users</strong><span className="muted right" style={{ fontSize: "var(--fs-xs)" }}>{users.length}</span></div>
-        <table className="tbl">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Email</th>
-              <th>Role</th>
-              <th>Verified</th>
-              <th>Created</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {users.map((u) => (
-              <tr key={u.id}>
-                <td><span style={{ fontWeight: 600 }}>{u.fullName}</span></td>
-                <td className="mono">{u.email}</td>
-                <td style={{ textTransform: "capitalize" }}>{u.role}</td>
-                <td>
-                  {u.emailVerified ? (
-                    <span className="badge badge-approved">Verified</span>
-                  ) : (
-                    <span className="badge badge-pending">Pending</span>
-                  )}
-                </td>
-                <td className="mono muted">
-                  {u.createdAt.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}
-                </td>
-                <td>{u.emailVerified ? <span className="muted">—</span> : <VerifyButton userId={u.id} />}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <div className="chips mb-6">
+        {TABS.map((t) => (
+          <Link
+            key={t.key}
+            href={t.key === "team" ? "/admin/users" : `/admin/users?tab=${t.key}`}
+            className={`chip${tab === t.key ? " active" : ""}`}
+          >
+            {t.label}<span className="chip-n">{t.n}</span>
+          </Link>
+        ))}
       </div>
+
+      {unverified > 0 && (
+        <p className="note mb-6">
+          {unverified} account{unverified === 1 ? "" : "s"} on this tab {unverified === 1 ? "is" : "are"} awaiting
+          email verification. Use <strong>Verify</strong> to confirm one manually.
+        </p>
+      )}
+
+      {tab === "team" ? (
+        <TeamManager
+          members={teamMembers}
+          currentUserId={session?.user?.id ?? ""}
+          partnersAllowed={tierAtLeast(planTier, "professional")}
+        />
+      ) : (
+        <>
+          <PortalOffNotice what="these accounts cannot be used to sign in." />
+          {/* This form only ever provisions client accounts. */}
+          <CreateUserForm />
+          <DataTable
+            title="Client logins"
+            count={shown.length}
+            columns={[
+              { label: "Name", sortable: true },
+              { label: "Email", sortable: true },
+              { label: "Role", sortable: true },
+              { label: "Verified", sortable: true },
+              { label: "Created", sortable: true },
+              { label: "Their file" },
+              { label: "Action" },
+            ]}
+            rows={rows}
+            emptyTitle="No client logins yet"
+            emptyBody="Create a client account above, or convert an approved submission from the Clients page."
+          />
+        </>
+      )}
     </AdminShell>
   );
+}
+
+function initialsOf(name: string) {
+  return name.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase();
 }

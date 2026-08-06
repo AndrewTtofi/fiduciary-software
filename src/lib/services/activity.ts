@@ -28,6 +28,7 @@ export type ActivityAction =
   | "booking.created"
   | "booking.reminder_sent"
   | "booking.cancelled"
+  | "booking.rescheduled"
   | "user.email_verified"
   | "user.created"
   | "compliance.file_created"

@@ -4,6 +4,8 @@ import argon2 from "argon2";
 import crypto from "node:crypto";
 import { assertRole } from "@/lib/auth/guards";
 import { prisma } from "@/lib/db";
+import { sendTeamInvite } from "@/lib/services/auth-flows";
+import { getBranding, tierAtLeast } from "@/lib/services/branding";
 
 export const runtime = "nodejs";
 
@@ -27,6 +29,19 @@ export async function POST(req: Request) {
   const existing = await prisma.user.findUnique({ where: { email: parsed.data.email } });
   if (existing) return NextResponse.json({ error: "A user with that email already exists" }, { status: 409 });
 
+  // A partner account on a plan without partner access logs straight into a
+  // "portal unavailable" wall, so refuse to create one rather than hand over
+  // credentials that cannot be used.
+  if (parsed.data.role === "partner") {
+    const { planTier } = await getBranding();
+    if (!tierAtLeast(planTier, "professional")) {
+      return NextResponse.json(
+        { error: "Partner access needs the Professional plan. Create this person as Staff, or ask the platform operator to upgrade." },
+        { status: 409 },
+      );
+    }
+  }
+
   const tempPassword = makeTempPassword();
   const passwordHash = await argon2.hash(tempPassword, { type: argon2.argon2id });
 
@@ -40,5 +55,10 @@ export async function POST(req: Request) {
     },
   });
 
-  return NextResponse.json({ ok: true, email: parsed.data.email, tempPassword });
+  // Emails a set-your-own-password link so the firm never has to relay a
+  // credential. Best-effort — the one-time password below is the fallback when
+  // mail is not configured.
+  const invited = await sendTeamInvite(parsed.data).catch(() => ({ ok: false as const }));
+
+  return NextResponse.json({ ok: true, email: parsed.data.email, tempPassword, invited: invited.ok });
 }

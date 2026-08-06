@@ -2,13 +2,28 @@ import Link from "next/link";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { requireRole } from "@/lib/auth/guards";
 import { prisma } from "@/lib/db";
-import { listLeads } from "@/lib/services/leads";
+import { computeLeadFlags, listLeads } from "@/lib/services/leads";
+import { Jurisdiction, JurisdictionStack, splitCountries } from "@/components/admin/Flag";
 import { CrmTable, type CrmRecord } from "./CrmTable";
 
 export const metadata = { title: "Leads / CRM" };
 export const dynamic = "force-dynamic";
 
 type Tab = "all" | "leads" | "applicants" | "clients";
+
+/* The routing rules staff act on, as pills. `computeLeadFlags` is the single
+   source of truth — it already drives the internal notification emails. */
+const ROUTE_TONE: Record<string, "" | "is-value" | "is-risk"> = {
+  "Immigration route required": "",
+  "PR by investment opportunity": "is-value",
+  "High value licensing lead": "is-risk",
+};
+function routePills(serviceKey: string | null | undefined, meta: Record<string, string>) {
+  return computeLeadFlags({ serviceKey, meta }).flags.map((label) => ({
+    label,
+    tone: ROUTE_TONE[label] ?? "",
+  }));
+}
 
 function pretty(s: string | null | undefined) {
   if (!s) return "—";
@@ -51,9 +66,11 @@ export default async function CrmPage({ searchParams }: { searchParams: Promise<
     ...registeredOnly.map((u) => u.email.toLowerCase()),
   ]);
 
+  // Build the whole funnel, then filter for display — the chips need counts
+  // for every tab, not just the one being viewed.
   const records: CrmRecord[] = [];
 
-  if (tab === "all" || tab === "leads") {
+  {
     for (const l of leads) {
       if (accountEmails.has(l.email.toLowerCase())) continue;
       const meta = (l.meta ?? {}) as Record<string, string>;
@@ -72,6 +89,11 @@ export default async function CrmPage({ searchParams }: { searchParams: Promise<
         stage: "Lead",
         detail: bits.join(" · "),
         leadId: l.id,
+        country: meta.country ?? null,
+        passports: meta.nationality ?? null,
+        countryCell: <Jurisdiction country={meta.country ?? null} />,
+        passportsCell: <JurisdictionStack countries={splitCountries(meta.nationality)} />,
+        routes: routePills(l.serviceKey, meta),
         sections: [
           {
             title: "Contact",
@@ -111,6 +133,11 @@ export default async function CrmPage({ searchParams }: { searchParams: Promise<
         type: "Applicant",
         stage: "registered",
         detail: "Account created — onboarding not started",
+        country: null,
+        passports: null,
+        countryCell: <Jurisdiction country={null} />,
+        passportsCell: <JurisdictionStack countries={[]} />,
+        routes: [],
         sections: [
           {
             title: "Contact",
@@ -130,11 +157,12 @@ export default async function CrmPage({ searchParams }: { searchParams: Promise<
 
   for (const p of prospects) {
     const isClient = !!p.client;
-    if (isClient && tab !== "all" && tab !== "clients") continue;
-    if (!isClient && tab !== "all" && tab !== "applicants") continue;
 
     const services = Array.isArray(p.servicesSelected) ? (p.servicesSelected as string[]) : [];
     const svc = services.length ? pretty(services[0]) : "—";
+    const answer = (field: string) => p.details.find((d) => d.fieldName === field)?.fieldValue ?? null;
+    const country = answer("residenceCountry") ?? answer("currentTaxResidency");
+    const passports = answer("nationality");
     const sections: CrmRecord["sections"] = [
       {
         title: "Contact",
@@ -174,14 +202,31 @@ export default async function CrmPage({ searchParams }: { searchParams: Promise<
       submissionHref: `/admin/submissions/${p.referenceNumber}`,
       complianceHref: `/admin/submissions/${p.referenceNumber}/compliance`,
       clientHref: p.client ? `/admin/clients/${p.client.id}` : undefined,
+      country,
+      passports,
+      countryCell: <Jurisdiction country={country} />,
+      passportsCell: <JurisdictionStack countries={splitCountries(passports)} />,
+      routes: routePills(services[0] ?? null, {
+        nationality: passports ?? "",
+        relocate: services.includes("immigration") ? "Yes" : "",
+        services: services.join(", "),
+      }),
       sections,
     });
   }
+
+  const inTab = (r: CrmRecord, t: Tab) =>
+    t === "all" ? true
+    : t === "leads" ? r.type === "Lead"
+    : t === "clients" ? r.type === "Client"
+    : r.type === "Applicant";
 
   const TABS: { key: Tab; label: string }[] = [
     { key: "all", label: "All" }, { key: "leads", label: "Leads" },
     { key: "applicants", label: "Applicants" }, { key: "clients", label: "Clients" },
   ];
+  const counts = Object.fromEntries(TABS.map((t) => [t.key, records.filter((r) => inTab(r, t.key)).length])) as Record<Tab, number>;
+  const visible = records.filter((r) => inTab(r, tab));
 
   return (
     <AdminShell active="leads">
@@ -197,12 +242,12 @@ export default async function CrmPage({ searchParams }: { searchParams: Promise<
       <div className="chips mb-6">
         {TABS.map((t) => (
           <Link key={t.key} href={t.key === "all" ? "/admin/crm" : `/admin/crm?tab=${t.key}`} className={`chip${tab === t.key ? " active" : ""}`}>
-            {t.label}
+            {t.label}<span className="chip-n">{counts[t.key]}</span>
           </Link>
         ))}
       </div>
 
-      <CrmTable records={records} />
+      <CrmTable records={visible} />
     </AdminShell>
   );
 }

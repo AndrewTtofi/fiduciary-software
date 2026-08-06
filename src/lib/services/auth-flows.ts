@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { Role } from "@prisma/client";
 import { email } from "@/lib/providers/email";
 import { getServerBranding } from "@/lib/services/branding-server";
+import { getClientLoginEnabled } from "@/lib/services/settings";
 import { env } from "@/lib/env";
 import { registerSchema, type RegisterInput, forgotSchema, resetSchema } from "@/lib/schema/auth";
 
@@ -91,12 +92,23 @@ export async function verifyEmailByToken(rawToken: string) {
  * Forgot-password: always returns ok=true to avoid email enumeration. Real
  * delivery happens only when the email is on file.
  */
+const esc = (v: string) =>
+  v.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+
 export async function startPasswordReset(rawEmail: string) {
   const parsed = forgotSchema.safeParse({ email: rawEmail });
   if (!parsed.success) return { ok: true as const };
 
   const user = await prisma.user.findUnique({ where: { email: parsed.data.email } });
   if (!user) return { ok: true as const };
+
+  // Never invite a client to set a password they cannot then sign in with:
+  // the credentials check refuses client/prospect while the portal is off, so
+  // the reset link would lead straight to "Client accounts are disabled".
+  // Silent, like the not-found case, so the response leaks nothing.
+  if ((user.role === Role.client || user.role === Role.prospect) && !(await getClientLoginEnabled())) {
+    return { ok: true as const };
+  }
 
   const rawToken = makeToken();
   const hashed = hashToken(rawToken);
@@ -116,6 +128,43 @@ export async function startPasswordReset(rawEmail: string) {
     html: `<p>You requested a password reset.</p>
            <p>Use the link below within 1 hour. If you did not request this, ignore this email.</p>
            <p><a href="${link}">${link}</a></p>`,
+  });
+
+  return { ok: true as const };
+}
+
+/** Welcome email for an admin-provisioned colleague.
+
+ *  The account is created with a one-time password that only ever appears on
+ *  the screen of whoever created it. That is fragile — dismiss the box and it
+ *  is gone — and it makes the firm handle someone else's credential. This
+ *  emails a set-your-own-password link instead, on the same token machinery as
+ *  the reset flow but with a week's expiry, because an invite is often opened
+ *  days later. Best-effort: a mail failure must never fail account creation. */
+export async function sendTeamInvite(input: { email: string; fullName: string; role: "staff" | "partner" }) {
+  const user = await prisma.user.findUnique({ where: { email: input.email.toLowerCase() } });
+  if (!user) return { ok: false as const };
+
+  const rawToken = makeToken();
+  await prisma.passwordReset.create({
+    data: {
+      userId: user.id,
+      token: hashToken(rawToken),
+      expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+    },
+  });
+
+  const link = `${env().APP_URL}/reset/${rawToken}`;
+  const { legalName, brandName } = await getServerBranding();
+  const where = input.role === "partner" ? "the partner portal" : "the admin";
+  await email().send({
+    to: user.email,
+    subject: `Your account at ${legalName}`,
+    html: `<p>Hello ${esc(input.fullName)},</p>
+           <p>An account has been created for you at ${esc(brandName)}, with access to ${where}.</p>
+           <p>Choose your password using the link below, then sign in with <b>${esc(user.email)}</b>. The link is valid for 7 days.</p>
+           <p><a href="${link}">${link}</a></p>
+           <p>If you were not expecting this, you can ignore this email.</p>`,
   });
 
   return { ok: true as const };

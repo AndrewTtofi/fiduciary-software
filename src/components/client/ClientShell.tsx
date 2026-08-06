@@ -30,6 +30,16 @@ const TITLES: Record<ActiveKey, string> = {
   settings: "Settings",
 };
 
+/* Declared at module scope: a component created inside another component is a
+   new type on every render, which throws away its state. */
+function NavItem({ id, icon, label, locked, active }: {
+  id: ActiveKey; icon: React.ReactNode; label: string; locked?: boolean; active: ActiveKey;
+}) {
+  const cls = `sb-item${active === id ? " active" : ""}${locked ? " locked" : ""}`;
+  const inner = <>{icon}<span>{label}</span>{locked && <span className="lockic">{I.lock}</span>}</>;
+  return locked ? <span className={cls} aria-disabled>{inner}</span> : <Link href={`/app/${id}`} className={cls}>{inner}</Link>;
+}
+
 export async function ClientShell({
   children,
   active,
@@ -44,11 +54,6 @@ export async function ClientShell({
   const { brandName, brandMark, logo, planTier } = await getBranding();
   // On Starter the portal is a pure status tracker — no document exchange.
   const showDocuments = tierAtLeast(planTier, "professional");
-  const Item = ({ id, icon, label, locked }: { id: ActiveKey; icon: React.ReactNode; label: string; locked?: boolean }) => {
-    const cls = `sb-item${active === id ? " active" : ""}${locked ? " locked" : ""}`;
-    const inner = <>{icon}<span>{label}</span>{locked && <span className="lockic">{I.lock}</span>}</>;
-    return locked ? <span className={cls} aria-disabled>{inner}</span> : <Link href={`/app/${id}`} className={cls}>{inner}</Link>;
-  };
 
   return (
     <div className="shell shell-client">
@@ -62,15 +67,15 @@ export async function ClientShell({
         </Link>
         <nav className="sb-nav">
           <div className="sb-group">Overview</div>
-          <Item id="dashboard" icon={I.dashboard} label="Dashboard" />
-          <Item id="application" icon={I.briefcase} label="My application" />
+          <NavItem id="dashboard" icon={I.dashboard} label="Dashboard" active={active} />
+          <NavItem id="application" icon={I.briefcase} label="My application" active={active} />
           <div className="sb-group">Engagement</div>
-          {showDocuments && <Item id="documents" icon={I.documents} label="Documents" />}
-          <Item id="messages" icon={I.message} label="Messages" />
-          <Item id="booking" icon={I.calendar} label="Book consultation" locked={!approved} />
+          {showDocuments && <NavItem id="documents" icon={I.documents} label="Documents" active={active} />}
+          <NavItem id="messages" icon={I.message} label="Messages" active={active} />
+          <NavItem id="booking" icon={I.calendar} label="Book consultation" locked={!approved} active={active} />
           <div className="sb-group">Network</div>
-          <Item id="marketplace" icon={I.users} label="Partner network" />
-          <Item id="applications" icon={I.briefcase} label="My applications" />
+          <NavItem id="marketplace" icon={I.users} label="Partner network" active={active} />
+          <NavItem id="applications" icon={I.briefcase} label="My applications" active={active} />
         </nav>
         <div className="sb-foot">
           <Link href="/app/settings" className={`sb-item${active === "settings" ? " active" : ""}`}>{I.settings}<span>Settings</span></Link>

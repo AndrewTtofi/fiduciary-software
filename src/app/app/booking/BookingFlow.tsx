@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useState, useTransition , useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 
 interface Expert { id: string; fullName: string; email: string }
@@ -8,9 +8,20 @@ interface Slot { startUtc: string; available: boolean }
 interface Day { dateIso: string; slots: Slot[] }
 interface Availability { tz: string; days: Day[] }
 
+const FIRM_TZ = "Europe/Nicosia";
+/* The browser's zone never changes mid-session, so there is nothing to
+   subscribe to; the server snapshot keeps hydration consistent. */
+const NO_SUBSCRIBE = () => () => {};
+
 export function BookingFlow({ experts, reference }: { experts: Expert[]; reference: string }) {
   const [expertId, setExpertId] = useState<string>(experts[0]?.id ?? "");
-  const [tz, setTz] = useState<string>("Europe/Nicosia");
+  /* Derived, not set from an effect: the server has no browser zone, so the
+     server snapshot keeps hydration consistent and no cascading render occurs. */
+  const tz = useSyncExternalStore(
+    NO_SUBSCRIBE,
+    () => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone || FIRM_TZ; } catch { return FIRM_TZ; } },
+    () => FIRM_TZ,
+  );
   const [availability, setAvailability] = useState<Availability | null>(null);
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
   const [confirmation, setConfirmation] = useState<{ when: string; expert: string } | null>(null);
@@ -19,15 +30,7 @@ export function BookingFlow({ experts, reference }: { experts: Expert[]; referen
   const router = useRouter();
 
   useEffect(() => {
-    // Detect browser timezone once on mount; falls back to Europe/Nicosia.
-    try { setTz(Intl.DateTimeFormat().resolvedOptions().timeZone || "Europe/Nicosia"); }
-    catch { /* keep default */ }
-  }, []);
-
-  useEffect(() => {
     if (!expertId) return;
-    setAvailability(null);
-    setSelectedSlot(null);
     void fetch(`/api/bookings/availability?expertId=${expertId}&tz=${encodeURIComponent(tz)}`)
       .then((r) => r.json() as Promise<Availability>)
       .then(setAvailability);
@@ -95,7 +98,13 @@ export function BookingFlow({ experts, reference }: { experts: Expert[]; referen
                 <button
                   key={e.id}
                   type="button"
-                  onClick={() => setExpertId(e.id)}
+                  onClick={() => {
+                    // Clear the previous adviser's grid here rather than in the
+                    // fetch effect, which set state during commit.
+                    setExpertId(e.id);
+                    setAvailability(null);
+                    setSelectedSlot(null);
+                  }}
                   className={`flex items-center gap-4 p-4 rounded-elem border transition-all ${expertId === e.id ? "" : "hover:border-accent"}`}
                   style={
                     expertId === e.id

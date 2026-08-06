@@ -7,14 +7,17 @@ import { prisma } from "@/lib/db";
    the public pages always render even before anything is edited, and new
    fields added later degrade gracefully.
 
+   Fields the public pages do not read are deliberately absent: the site was
+   redesigned after this CMS was written (see 8645527), which baked some
+   headings into the page layouts and dropped the steps/testimonials sections.
+   Offering an input that changes nothing is worse than offering none.
+
    Rich-text conventions (rendered by GoldText/BoldText in components/marketing/mk.tsx):
    - headings: "\n" splits lines; *asterisks* mark the gold italic span.
    - bodies:   **double asterisks** mark emphasised (dark) text.
    ===================================================================== */
 
-export type Step = { t: string; d: string };
 export type Stat = { v: string; l: string };
-export type Testimonial = { q: string; n: string; r: string };
 export type Faq = { q: string; a: string };
 export type Feature = { t: string; d: string };
 
@@ -34,13 +37,10 @@ export type Consultation = {
 
 export type SiteContent = {
   hero: { eyebrow: string; headline: string; lead: string; primaryCta: string; secondaryCta: string };
-  about: { kicker: string; heading: string; body1: string; body2: string; cta: string };
-  why: { kicker: string; heading: string; features: Feature[] };
-  steps: Step[];
+  about: { body1: string; body2: string };
+  why: { kicker: string; features: Feature[] };
   servicesIntro: { eyebrow: string; heading: string; body: string };
   stats: Stat[];
-  testimonialsIntro: { eyebrow: string; heading: string };
-  testimonials: Testimonial[];
   cta: { heading: string; body: string; button: string };
   insights: { kicker: string; heading: string; rhHeading: string; rhBody: string };
   contact: { address: string; phone: string; whatsapp: string; email: string };
@@ -57,15 +57,11 @@ export const DEFAULT_CONTENT: SiteContent = {
     secondaryCta: "Explore Services",
   },
   about: {
-    kicker: "Who we are",
-    heading: "A Modern Cyprus Corporate and Fiduciary Services Firm",
     body1: "Our team brings **decades of combined expertise** in corporate law, accounting and compliance to the formation and administration of Cyprus entities. Founded in **2024** and based in Nicosia, we serve international entrepreneurs with **transparent, compliant structures** from incorporation to banking, tax residency and beyond.",
     body2: "From our base at **Stadiou 15, Nicosia**, we support clients across Europe and beyond, always transparent on scope and timeline.",
-    cta: "Explore Our Services",
   },
   why: {
     kicker: "Why choose us",
-    heading: "Experience Trusted\n*Fiduciary Expertise*\nThat Delivers Results",
     features: [
       { t: "Transparent and Compliant", d: "Clean structures and compliance designed in from day one, never bolted on after." },
       { t: "One Team, End to End", d: "Formation, accounting, tax residency, immigration, licensing and banking under one roof, with no handoffs between vendors." },
@@ -73,11 +69,6 @@ export const DEFAULT_CONTENT: SiteContent = {
       { t: "Direct, WhatsApp First Access", d: "Reach your adviser directly and get quick answers on the channel you already use." },
     ],
   },
-  steps: [
-    { t: "Apply", d: "Create an account and submit your details and documents through a short, guided application — tailored to the services you need." },
-    { t: "Review", d: "Our compliance team reviews each application with KYC and sanctions screening, then approves — usually within one business day." },
-    { t: "Onboard", d: "Once approved you unlock booking and a full workspace: documents, messaging, deadlines and your dedicated advisor." },
-  ],
   servicesIntro: {
     eyebrow: "What we do",
     heading: "One Team, End to End",
@@ -87,12 +78,6 @@ export const DEFAULT_CONTENT: SiteContent = {
     { v: "8", l: "Jurisdictions we operate across" },
     { v: "5 to 7", l: "Working days to a ready company" },
     { v: "Decades", l: "Of combined team experience" },
-  ],
-  testimonialsIntro: { eyebrow: "IN THEIR WORDS", heading: "Principals run their setup on it." },
-  testimonials: [
-    { q: "Incorporated and banked in under three weeks. The portal made the document back-and-forth painless.", n: "Daniel Roth", r: "Founder, fintech · Germany" },
-    { q: "Finally a corporate-services firm that feels like software. I always knew exactly what was outstanding.", n: "Aisha Karim", r: "Director · UAE" },
-    { q: "Tax residency and banking handled together, with one point of contact. Exactly what we needed relocating.", n: "Elena Pappas", r: "Private client · Cyprus" },
   ],
   cta: {
     heading: "Map Your Cyprus Structure\nin *30 Minutes*",
@@ -161,11 +146,8 @@ function merge(stored: Partial<SiteContent> | null | undefined): SiteContent {
     hero: obj("hero"),
     about: obj("about"),
     why,
-    steps: arr<Step>("steps"),
     servicesIntro: obj("servicesIntro"),
     stats: arr<Stat>("stats"),
-    testimonialsIntro: obj("testimonialsIntro"),
-    testimonials: arr<Testimonial>("testimonials"),
     cta: obj("cta"),
     insights,
     contact: obj("contact"),

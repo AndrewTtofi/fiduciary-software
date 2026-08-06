@@ -13,6 +13,9 @@ export const metadata = { title: "Dashboard" };
 export const dynamic = "force-dynamic";
 
 export default async function ClientDashboardPage() {
+  // Read the clock once. Calling Date.now() repeatedly mid-render is impure and
+  // could straddle a boundary, giving two windows computed from different nows.
+  const now = new Date();
   const user = await requireUser();
   const dbUser = await prisma.user.findUnique({ where: { id: user.id }, select: { fullName: true } });
   const prospect = await getProspectForUser(user.id);
@@ -40,7 +43,7 @@ export default async function ClientDashboardPage() {
     where: {
       clientId: client.id,
       sender: { role: "staff" },
-      createdAt: { gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) },
+      createdAt: { gte: new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000) },
     },
   });
 
@@ -55,9 +58,9 @@ export default async function ClientDashboardPage() {
     take: 8,
   });
 
-  const next14 = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000);
+  const next14 = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000);
   const hasUpcomingBooking = prospect.bookings.some(
-    (b) => b.status === "confirmed" && b.startsAt >= new Date() && b.startsAt <= next14,
+    (b) => b.status === "confirmed" && b.startsAt >= now && b.startsAt <= next14,
   );
 
   const sections = await getVisibleDashboardSections();

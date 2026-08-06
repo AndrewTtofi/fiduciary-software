@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { CompletenessChip } from "@/components/admin/CompletenessChip";
-import { Icon } from "@/components/Icon";
+import { DataTable, type DataRow } from "@/components/admin/DataTable";
+import { Jurisdiction, JurisdictionStack, splitCountries } from "@/components/admin/Flag";
 import { prisma } from "@/lib/db";
 import { ProspectStatus } from "@prisma/client";
 import type { Completeness } from "@/lib/services/prospect-intel";
@@ -17,25 +18,68 @@ export default async function AdminSubmissionsPage({ searchParams }: PageProps) 
   const statusFilter = (sp.status ?? "all") as "all" | "pending" | "needs_info" | "approved" | "rejected";
   const q = (sp.q ?? "").trim();
 
-  const rows = await prisma.prospect.findMany({
+  // The search narrows the counts too, so the chips describe what is actually
+  // in front of you rather than the whole table.
+  const searchWhere = q
+    ? {
+        OR: [
+          { referenceNumber: { contains: q, mode: "insensitive" as const } },
+          { user: { fullName: { contains: q, mode: "insensitive" as const } } },
+          { user: { email: { contains: q, mode: "insensitive" as const } } },
+        ],
+      }
+    : {};
+
+  const [rows, byStatus] = await Promise.all([
+    prisma.prospect.findMany({
     where: {
       ...(statusFilter !== "all" ? { status: statusFilter as ProspectStatus } : {}),
-      ...(q
-        ? {
-            OR: [
-              { referenceNumber: { contains: q, mode: "insensitive" } },
-              { user: { fullName: { contains: q, mode: "insensitive" } } },
-              { user: { email: { contains: q, mode: "insensitive" } } },
-            ],
-          }
-        : {}),
+      ...searchWhere,
     },
     include: {
       user: true,
-      details: { where: { fieldName: { in: ["residenceCountry", "nationality"] } } },
+      details: { where: { fieldName: { in: ["residenceCountry", "currentTaxResidency", "nationality"] } } },
     },
     orderBy: { createdAt: "desc" },
     take: 100,
+    }),
+    prisma.prospect.groupBy({ by: ["status"], where: searchWhere, _count: true }),
+  ]);
+
+  const countOf = (key: string) =>
+    key === "all"
+      ? byStatus.reduce((n, g) => n + g._count, 0)
+      : byStatus.find((g) => g.status === key)?._count ?? 0;
+
+  const tableRows: DataRow[] = rows.map((p) => {
+    const answer = (f: string) => p.details.find((d) => d.fieldName === f)?.fieldValue ?? null;
+    const country = answer("residenceCountry") ?? answer("currentTaxResidency");
+    const passports = splitCountries(answer("nationality"));
+    const services = Array.isArray(p.servicesSelected) ? (p.servicesSelected as string[]) : [];
+    const eff = (p.completenessOverride ?? p.completeness) as Completeness | null;
+    return {
+      key: p.id,
+      href: `/admin/submissions/${p.referenceNumber}`,
+      sort: [
+        p.referenceNumber, p.user.fullName, services.join(", "), country, passports.join(", "),
+        eff ? COMPLETENESS_ORDER[eff] : null, p.createdAt.getTime(), p.status,
+      ],
+      cells: [
+        <span className="mono" style={{ fontSize: "var(--fs-xs)" }} key="r">{p.referenceNumber}</span>,
+        <div key="a"><div style={{ fontWeight: 500 }}>{p.user.fullName}</div><div className="sub">{p.user.email}</div></div>,
+        <div className="row gap-2" style={{ flexWrap: "wrap" }} key="s">
+          {services.length === 0 ? <span className="muted">—</span>
+            : services.map((s) => <span key={s} className="tag">{pretty(s)}</span>)}
+        </div>,
+        <Jurisdiction country={country} key="c" />,
+        <JurisdictionStack countries={passports} key="p" />,
+        eff ? <CompletenessChip value={eff} key="b" /> : <span className="muted" key="b">—</span>,
+        <span className="mono" key="d">
+          {p.createdAt.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}
+        </span>,
+        <span className={`badge ${statusClass(p.status)}`} key="st">{prettyStatus(p.status)}</span>,
+      ],
+    };
   });
 
   return (
@@ -66,93 +110,36 @@ export default async function AdminSubmissionsPage({ searchParams }: PageProps) 
               href={f.key === "all" ? "/admin/submissions" : `/admin/submissions?status=${f.key}`}
               className={`chip ${isActive ? "active" : ""}`}
             >
-              {f.label}
+              {f.label}<span className="chip-n">{countOf(f.key)}</span>
             </Link>
           );
         })}
       </div>
 
       {/* ── Table ─────────────────────────────────────────────────── */}
-      <div className="tbl-wrap">
-        <div className="tbl-toolbar">
-          <strong>Submissions</strong>
-          <span className="muted right" style={{ fontSize: "var(--fs-xs)" }}>{rows.length}</span>
-        </div>
-        <table className="tbl">
-          <thead>
-            <tr>
-              <th>Reference</th>
-              <th>Applicant</th>
-              <th>Services</th>
-              <th>Country</th>
-              <th>Brief</th>
-              <th>Submitted</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.length === 0 ? (
-              <tr>
-                <td colSpan={7}>
-                  <div className="empty">
-                    <div className="ec"><Icon name="search" /></div>
-                    <h3>No submissions match.</h3>
-                    <p>Try a different filter, or wait for the next application to arrive.</p>
-                  </div>
-                </td>
-              </tr>
-            ) : rows.map((p) => {
-              const country = p.details.find((d) => d.fieldName === "residenceCountry")?.fieldValue
-                            ?? p.details.find((d) => d.fieldName === "nationality")?.fieldValue
-                            ?? "—";
-              const services = Array.isArray(p.servicesSelected) ? (p.servicesSelected as string[]) : [];
-              return (
-                <tr key={p.id}>
-                  <td>
-                    <Link
-                      href={`/admin/submissions/${p.referenceNumber}`}
-                      className="mono"
-                      style={{ fontSize: "var(--fs-xs)" }}
-                    >
-                      {p.referenceNumber}
-                    </Link>
-                  </td>
-                  <td>
-                    <Link href={`/admin/submissions/${p.referenceNumber}`} style={{ display: "block" }}>
-                      <div style={{ fontWeight: 500 }}>{p.user.fullName}</div>
-                      <div className="sub">{p.user.email}</div>
-                    </Link>
-                  </td>
-                  <td>
-                    <div className="row gap-2" style={{ flexWrap: "wrap" }}>
-                      {services.length === 0 && <span className="muted">—</span>}
-                      {services.map((s) => (
-                        <span key={s} className="badge badge-neutral">{pretty(s)}</span>
-                      ))}
-                    </div>
-                  </td>
-                  <td className="muted">{country}</td>
-                  <td>
-                    {(() => {
-                      const eff = (p.completenessOverride ?? p.completeness) as Completeness | null;
-                      return eff ? <CompletenessChip value={eff} /> : <span className="muted">—</span>;
-                    })()}
-                  </td>
-                  <td className="mono">
-                    {p.createdAt.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}
-                  </td>
-                  <td>
-                    <span className={`badge ${statusClass(p.status)}`}>{prettyStatus(p.status)}</span>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
+      <DataTable
+        title="Submissions"
+        count={rows.length}
+        columns={[
+          { label: "Reference", sortable: true },
+          { label: "Applicant", sortable: true },
+          { label: "Services", sortable: true },
+          { label: "Lives in", sortable: true },
+          { label: "Passports" },
+          { label: "Brief", sortable: true },
+          { label: "Submitted", sortable: true },
+          { label: "Status", sortable: true },
+        ]}
+        rows={tableRows}
+        emptyTitle="No submissions match."
+        emptyBody="Try a different filter, or wait for the next application to arrive."
+      />
     </AdminShell>
   );
 }
+
+/* Brief completeness sorts low → high, not alphabetically. */
+const COMPLETENESS_ORDER: Record<Completeness, number> = { low: 0, med: 1, high: 2 };
 
 function pretty(s: string) {
   return s.split("_").map((w) => w[0].toUpperCase() + w.slice(1)).join(" ");

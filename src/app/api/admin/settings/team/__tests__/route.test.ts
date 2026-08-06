@@ -19,6 +19,17 @@ vi.mock("@/lib/auth/guards", () => ({
     return sessionState.user;
   },
 }));
+
+// The POST route now checks the plan tier before allowing a partner account,
+// and emails a set-password invite. Neither belongs in this route's contract
+// tests, so both are stubbed to the permissive case.
+vi.mock("@/lib/services/branding", () => ({
+  getBranding: async () => ({ planTier: "scale" }),
+  tierAtLeast: () => true,
+}));
+vi.mock("@/lib/services/auth-flows", () => ({
+  sendTeamInvite: async () => ({ ok: true }),
+}));
 vi.mock("@/lib/providers/email", () => ({
   email: () => ({ send: async () => ({ ok: true }) }),
 }));

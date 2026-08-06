@@ -130,17 +130,50 @@ export function EditableClientHeader({
           </div>
         </div>
       ) : (
-        <dl className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-x-10 gap-y-6">
-          <Fact label="Country" value={draft.country ?? "—"} mono />
-          <Fact label="Tax residency" value={draft.taxResidency ?? "—"} mono />
-          <Fact label="HE number" value={draft.registrationNumber ?? "—"} mono />
-          <Fact label="VAT number" value={draft.vatNumber ?? "—"} mono />
-          <Fact
-            label="Engagement letter"
-            value={draft.engagementLetterDate ? new Date(draft.engagementLetterDate).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) : "—"}
-          />
-          <Fact label="Address" value={draft.address ?? "—"} className="md:col-span-2 lg:col-span-1" />
-        </dl>
+        (() => {
+          /* Six columns of mostly "—" was a lot of page for data nobody had
+             filled in. Show what is set; summarise the rest as one prompt to
+             Edit profile, so an empty record reads as an invitation rather
+             than a wall of dashes. */
+          const facts = [
+            { label: "Country", value: draft.country, mono: true },
+            { label: "Tax residency", value: draft.taxResidency, mono: true },
+            { label: "HE number", value: draft.registrationNumber, mono: true },
+            { label: "VAT number", value: draft.vatNumber, mono: true },
+            {
+              label: "Engagement letter",
+              value: draft.engagementLetterDate
+                ? new Date(draft.engagementLetterDate).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })
+                : null,
+            },
+            { label: "Address", value: draft.address },
+          ];
+          const set = facts.filter((f) => f.value);
+          const missing = facts.filter((f) => !f.value).map((f) => f.label.toLowerCase());
+
+          if (set.length === 0) {
+            return (
+              <p className="muted" style={{ fontSize: "var(--fs-sm)" }}>
+                No company details recorded yet — country, tax residency, HE and VAT numbers,
+                engagement letter and address. Use <strong>Edit profile</strong> to add them.
+              </p>
+            );
+          }
+          return (
+            <>
+              <dl className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-x-10 gap-y-6">
+                {set.map((f) => (
+                  <Fact key={f.label} label={f.label} value={String(f.value)} mono={f.mono} />
+                ))}
+              </dl>
+              {missing.length > 0 && (
+                <p className="help mt-4">
+                  Not recorded: {missing.join(", ")}.
+                </p>
+              )}
+            </>
+          );
+        })()
       )}
     </section>
   );

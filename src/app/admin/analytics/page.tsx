@@ -1,5 +1,6 @@
 import { AdminShell } from "@/components/admin/AdminShell";
 import { Kpi } from "@/components/admin/Kpi";
+import { Jurisdiction } from "@/components/admin/Flag";
 import { prisma } from "@/lib/db";
 import { ProspectStatus, BookingStatus } from "@prisma/client";
 
@@ -40,14 +41,35 @@ export default async function AdminAnalyticsPage() {
   }
   const topCountries = Array.from(countryCounts.entries()).sort((a, b) => b[1] - a[1]).slice(0, 5);
 
-  // Average time to consultation = time between submission and first booking.
-  // Public (lead) hard-bookings have no prospect and are excluded.
-  const submittedToBooking = (await prisma.booking.findMany({
-    select: { startsAt: true, prospect: { select: { createdAt: true } } },
-  })).filter((b): b is typeof b & { prospect: { createdAt: Date } } => b.prospect !== null);
-  const avgDays = submittedToBooking.length
-    ? Math.round(submittedToBooking.reduce((sum, b) => sum + (b.startsAt.getTime() - b.prospect.createdAt.getTime()), 0) / submittedToBooking.length / (1000 * 60 * 60 * 24))
-    : 0;
+  // Average time to consultation = submission → that applicant's FIRST
+  // consultation. Public (lead) hard-bookings have no prospect and are excluded.
+  //
+  // Two things this has to get right, both of which used to produce a negative
+  // or inflated figure: only the earliest booking per applicant counts (an
+  // applicant with three consultations is still one wait), and a consultation
+  // scheduled before the application was submitted has no "time to consult" at
+  // all — it is excluded rather than averaged in as negative days.
+  const bookingsWithProspect = (await prisma.booking.findMany({
+    select: { startsAt: true, prospectId: true, prospect: { select: { createdAt: true } } },
+  })).filter((b): b is typeof b & { prospectId: string; prospect: { createdAt: Date } } =>
+    b.prospectId !== null && b.prospect !== null,
+  );
+
+  const firstBookingPerProspect = new Map<string, { startsAt: Date; createdAt: Date }>();
+  for (const b of bookingsWithProspect) {
+    const seen = firstBookingPerProspect.get(b.prospectId);
+    if (!seen || b.startsAt < seen.startsAt) {
+      firstBookingPerProspect.set(b.prospectId, { startsAt: b.startsAt, createdAt: b.prospect.createdAt });
+    }
+  }
+  const waits = [...firstBookingPerProspect.values()]
+    .map((b) => b.startsAt.getTime() - b.createdAt.getTime())
+    .filter((ms) => ms >= 0);
+  const avgDays = waits.length
+    ? Math.round(waits.reduce((sum, ms) => sum + ms, 0) / waits.length / (1000 * 60 * 60 * 24))
+    : null;
+
+  const busiest = Math.max(0, ...byService.map(([, n]) => n));
 
   return (
     <AdminShell active="analytics">
@@ -65,40 +87,37 @@ export default async function AdminAnalyticsPage() {
         <Kpi label="Consultations booked" value={bookingsTotal} icon="calendar" />
         <Kpi label="Completed" value={completed} icon="check" />
         <Kpi label="No-shows" value={noShows} icon="flag" />
-        <Kpi label="Avg time to consult." value={`${avgDays} d`} icon="clock" />
+        <Kpi label="Avg time to consult." value={avgDays === null ? "—" : `${avgDays} d`} icon="clock" />
       </div>
 
       <div className="grid grid-2">
         <div className="card">
           <h3 className="card-title">Submissions by service</h3>
           {byService.length === 0 ? <p className="muted" style={{ fontSize: "var(--fs-sm)" }}>No data yet.</p> :
-            <ul className="row" style={{ flexDirection: "column", gap: 12, alignItems: "stretch" }}>
-              {byService.map(([service, count]) => {
-                const pct = total ? Math.round((count / total) * 100) : 0;
-                return (
-                  <li key={service}>
-                    <div className="row-between" style={{ fontSize: "var(--fs-sm)", marginBottom: 4 }}>
-                      <span>{pretty(service)}</span>
-                      <span className="mono muted">{count}</span>
-                    </div>
-                    <div style={{ height: 8, borderRadius: 999, background: "var(--admin-border)" }}>
-                      <div style={{ height: "100%", borderRadius: 999, width: `${pct}%`, background: "var(--brand)" }} />
-                    </div>
-                  </li>
-                );
-              })}
-            </ul>
+            <div>
+              {byService.map(([service, count]) => (
+                // Bars scale against the busiest service, not the total, so the
+                // shape of the mix stays readable when one service dominates.
+                <div className="bar-row" key={service}>
+                  <span style={{ fontSize: "var(--fs-sm)" }}>{pretty(service)}</span>
+                  <span className="bar-track">
+                    <span className="bar-fill" style={{ width: `${busiest ? Math.round((count / busiest) * 100) : 0}%` }} />
+                  </span>
+                  <span className="bar-n">{count}</span>
+                </div>
+              ))}
+            </div>
           }
         </div>
 
         <div className="card">
-          <h3 className="card-title">Top countries</h3>
+          <h3 className="card-title">Top jurisdictions</h3>
           {topCountries.length === 0 ? <p className="muted" style={{ fontSize: "var(--fs-sm)" }}>No data yet.</p> :
             <ul className="row" style={{ flexDirection: "column", gap: 8, alignItems: "stretch" }}>
               {topCountries.map(([country, count]) => (
                 <li key={country} className="row-between" style={{ fontSize: "var(--fs-sm)" }}>
-                  <span>{country}</span>
-                  <span className="mono muted">{count}</span>
+                  <Jurisdiction country={country} />
+                  <span className="bar-n">{count}</span>
                 </li>
               ))}
             </ul>

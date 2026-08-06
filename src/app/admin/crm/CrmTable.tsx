@@ -3,6 +3,8 @@
 import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import type { ReactNode } from "react";
+import { DataTable, type DataRow } from "@/components/admin/DataTable";
 
 export type CrmRecord = {
   key: string;
@@ -12,6 +14,16 @@ export type CrmRecord = {
   type: "Lead" | "Applicant" | "Client";
   stage: string; // Lead | registered | pending | needs_info | approved | rejected | Client
   detail: string;
+  /** Where they live and pay tax — free text as captured on the form. */
+  country: string | null;
+  /** Citizenships held, comma-separated as captured. */
+  passports: string | null;
+  /* The flag artwork is ~110KB and is rendered on the server, so these arrive
+     already rendered rather than being drawn inside this client component. */
+  countryCell: ReactNode;
+  passportsCell: ReactNode;
+  /** Derived routing rules (computeLeadFlags), shown as pills in the drawer. */
+  routes: { label: string; tone: string }[];
   /** Full record fields shown in the detail drawer, grouped in sections. */
   sections: { title: string; fields: { label: string; value: string }[] }[];
   /** Available actions */
@@ -34,42 +46,49 @@ export function CrmTable({ records }: { records: CrmRecord[] }) {
     return () => window.removeEventListener("keydown", onKey);
   }, [openKey]);
 
+  const rows: DataRow[] = records.map((r) => ({
+    key: r.key,
+    sort: [r.name, r.service, r.country, r.type, STAGE_ORDER[r.stage] ?? 99, r.detail],
+    cells: [
+      <div className="cell-entity" key="n">
+        <div className="avatar" style={{ width: 28, height: 28, fontSize: 11 }}>{initialsOf(r.name)}</div>
+        <div><div style={{ fontWeight: 500 }}>{r.name}</div><div className="sub">{r.email}</div></div>
+      </div>,
+      r.service,
+      <span key="j">{r.countryCell}</span>,
+      <span className="tag" key="t">{r.type}</span>,
+      <span className={`badge ${stageClass(r.stage)}`} key="s">{stageLabel(r.stage)}</span>,
+      <span className="muted" key="d">{r.detail}</span>,
+    ],
+  }));
+
   return (
     <>
-      <div className="tbl-wrap">
-        <div className="tbl-toolbar">
-          <strong>Pipeline</strong>
-          <span className="muted right" style={{ fontSize: "var(--fs-xs)" }}>{records.length} records</span>
-        </div>
-        <table className="tbl">
-          <thead>
-            <tr><th>Name</th><th>Service</th><th>Type</th><th>Stage</th><th>Detail</th></tr>
-          </thead>
-          <tbody>
-            {records.length === 0 ? (
-              <tr><td colSpan={5}><div className="empty"><h3>No records</h3><p>Nothing matches this filter yet.</p></div></td></tr>
-            ) : records.map((r) => (
-              <tr key={r.key} style={{ cursor: "pointer" }} onClick={() => setOpenKey(r.key)}>
-                <td>
-                  <div className="cell-entity">
-                    <div className="avatar" style={{ width: 28, height: 28, fontSize: 11 }}>{initialsOf(r.name)}</div>
-                    <div><div style={{ fontWeight: 500 }}>{r.name}</div><div className="sub">{r.email}</div></div>
-                  </div>
-                </td>
-                <td>{r.service}</td>
-                <td><span className="tag">{r.type}</span></td>
-                <td><span className={`badge ${stageClass(r.stage)}`}>{stageLabel(r.stage)}</span></td>
-                <td className="muted">{r.detail}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <DataTable
+        title="Pipeline"
+        count={`${records.length} records`}
+        columns={[
+          { label: "Name", sortable: true },
+          { label: "Service", sortable: true },
+          { label: "Lives in", sortable: true },
+          { label: "Type", sortable: true },
+          { label: "Stage", sortable: true },
+          { label: "Detail" },
+        ]}
+        rows={rows}
+        onRowClick={setOpenKey}
+      />
 
       {open && <RecordDrawer record={open} onClose={() => setOpenKey(null)} />}
     </>
   );
 }
+
+/* Sort the pipeline by how far along it is, not alphabetically — "Client"
+   after "approved" is the order staff think in. */
+const STAGE_ORDER: Record<string, number> = {
+  Lead: 0, registered: 1, pending: 2, needs_info: 3, approved: 4, Client: 5, rejected: 6,
+};
 
 function RecordDrawer({ record, onClose }: { record: CrmRecord; onClose: () => void }) {
   const router = useRouter();
@@ -136,6 +155,25 @@ function RecordDrawer({ record, onClose }: { record: CrmRecord; onClose: () => v
         </div>
 
         <div className="drawer-body">
+          {/* What the case needs, before the adviser reads a single field. */}
+          {!issued && record.routes.length > 0 && (
+            <div className="routes mb-4">
+              {record.routes.map((r) => (
+                <span key={r.label} className={`route ${r.tone}`}>{r.label}</span>
+              ))}
+            </div>
+          )}
+          {!issued && (record.country || record.passports) && (
+            <section className="kv-section">
+              <div className="kv-title">Jurisdiction</div>
+              <dl className="kv">
+                <dt>Lives and pays tax in</dt>
+                <dd>{record.countryCell}</dd>
+                <dt>Passports held</dt>
+                <dd>{record.passportsCell}</dd>
+              </dl>
+            </section>
+          )}
           {issued ? (
             <div className="card">
               {issued.password ? (

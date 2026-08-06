@@ -19,7 +19,14 @@ export function AuthTabs({
   allowSignup?: boolean;
 }) {
   const searchParams = use(searchParamsPromise);
-  const [tab, setTab] = useState<Tab>(allowSignup ? initial : "signin");
+  const [tab, setTabState] = useState<Tab>(allowSignup ? initial : "signin");
+
+  /* Switching tabs clears the previous tab's error. Doing this in an effect
+     keyed on `tab` set state during commit and cascaded an extra render. */
+  function setTab(next: Tab) {
+    setTabState(next);
+    setError(null);
+  }
   const [error, setError] = useState<string | null>(
     searchParams.error ? friendlyAuthError(searchParams.error) : null,
   );
@@ -37,8 +44,6 @@ export function AuthTabs({
       default: return "/onboarding";
     }
   }
-
-  useEffect(() => { setError(null); }, [tab]);
 
   async function onSignIn(formData: FormData) {
     setError(null);

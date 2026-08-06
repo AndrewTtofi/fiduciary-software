@@ -6,6 +6,7 @@ import { Icon } from "@/components/Icon";
 import { ADVISOR_INTENTS, STARTER_CHIPS, intentById, matchIntent, advisorGreeting, type Intent } from "@/lib/data/advisor";
 import { svcDef } from "@/lib/data/services";
 import { JURISDICTIONS } from "@/lib/data/jurisdictions";
+import { Flag } from "@/components/admin/Flag";
 
 const jurOf = (id: string) => JURISDICTIONS.find((j) => j.id === id) ?? JURISDICTIONS[0];
 type Rec = { serviceIds: string[]; jurIds: string[]; primaryJur: string; showProviders: boolean };
@@ -85,7 +86,7 @@ export function AdvisorChat({ brand, applyHref = "/login" }: { brand: string; ap
         <div className="flabel mt-4">Where</div>
         <div className="rec-jur">
           <div className="row-between wrap">
-            <div className="row gap-2" style={{ alignItems: "center" }}><span style={{ fontSize: 20 }}>{jr.flag}</span><strong>{jr.name}</strong>{jr.eu && <span className="tag">EU</span>}</div>
+            <div className="row gap-2" style={{ alignItems: "center" }}><Flag country={jr.iso} /><strong>{jr.name}</strong>{jr.eu && <span className="tag">EU</span>}</div>
             <div className="row gap-3 mono muted" style={{ fontSize: "var(--fs-xs)" }}><span>Corp {jr.corpTax}%</span><span>VAT {jr.vat}%</span><span>~{jr.days}d</span></div>
           </div>
           {others && <div className="muted mt-2" style={{ fontSize: "var(--fs-xs)" }}>Also strong: {others}</div>}

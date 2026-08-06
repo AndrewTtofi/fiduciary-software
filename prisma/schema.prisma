@@ -179,6 +179,7 @@ model User {
   hitReviews           ScreeningHit[]   @relation("HitReviewer")
   reviewTaskAssignments ReviewTask[]    @relation("ReviewAssignee")
   docRequestsMade      DocumentRequest[] @relation("DocRequestedBy")
+  mediaUploads         MediaAsset[]
 
   @@index([role])
 }
@@ -445,8 +446,12 @@ model OrgSettings {
   jurisdiction String?  // governing-law country for legal pages; defaults to "Cyprus"
   accentColor  String?  // hex; overrides the theme preset's brand colour
   themePreset  String   @default("indigo") // indigo | emerald | gold | burgundy | slate
-  // Plan tier gates feature availability (starter | professional | scale)
-  planTier     String   @default("professional")
+  // Plan tier gates feature availability (starter | professional | scale).
+  // Defaults to the entry product: a deployment nobody has configured should
+  // receive what was bought, not the full compliance suite by accident. Set
+  // per deployment via the COMPANY_PLAN_TIER env var (ensure-branding) or in
+  // Settings → Branding & plan.
+  planTier     String   @default("starter")
   // Onboarding document-upload phase: "mandatory" (passport + proof required to
   // submit), "optional" (step shown, submit allowed with no docs), or "off"
   // (step removed entirely — onboarding becomes 2 steps).
@@ -460,6 +465,32 @@ model OrgSettings {
   // code-defined default; plan-tier locking is enforced on top. See
   // src/lib/services/dashboard-sections.ts.
   dashboardSections Json?
+
+  // ── Consultation scheduling ──────────────────────────────────────────
+  // When the firm takes consultations. These were hard-coded constants in
+  // src/lib/services/booking.ts, which meant a firm in another time zone, or
+  // one taking Saturday calls, needed a code change and a redeploy.
+  // Null/empty falls back to the code defaults, so an un-configured
+  // deployment behaves exactly as before.
+  //
+  // Weekdays offered, 0 = Sunday … 6 = Saturday.
+  consultDays        Int[]    @default([1, 2, 3, 4, 5])
+  // Working windows as "HH:MM-HH:MM" on the firm's own wall clock. Slots are
+  // generated inside these every `consultIntervalMins`; two windows give the
+  // usual lunch gap. Listing every start time by hand does not scale — a 09:00
+  // to 18:00 day at 30 minutes is 18 of them.
+  consultRanges      String[] @default(["09:00-12:00", "14:00-17:00"])
+  // How often a slot starts inside a window.
+  consultIntervalMins Int     @default(60)
+  // Length of a consultation, and how much warning staff get before one.
+  // Shorter than the interval leaves a gap between calls.
+  consultMinutes     Int      @default(30)
+  consultNoticeMins  Int      @default(60)
+  // How far ahead the picker opens.
+  consultHorizonDays Int      @default(14)
+  // IANA zone the wall-clock times above are anchored to.
+  consultTimezone    String   @default("Europe/Nicosia")
+
   updatedAt    DateTime @updatedAt
 }
 
@@ -505,6 +536,25 @@ model SiteContent {
   id        String   @id @default("singleton")
   data      Json
   updatedAt DateTime @updatedAt
+}
+
+/// Publicly served images for the marketing site (article card images and
+/// photos placed inside article bodies). Deliberately NOT routed through the
+/// storage provider: that seam encrypts every object and serves it only to an
+/// authenticated user, which is correct for client documents and wrong for a
+/// public blog image. Bytes live in Postgres so a deployment keeps one backup
+/// story and one container, matching the self-hosted single-stack model.
+model MediaAsset {
+  id           String   @id @default(uuid())
+  filename     String
+  mime         String
+  sizeBytes    Int
+  data         Bytes
+  uploadedById String?
+  uploadedBy   User?    @relation(fields: [uploadedById], references: [id], onDelete: SetNull)
+  createdAt    DateTime @default(now())
+
+  @@index([createdAt])
 }
 
 /// Self-serve Insights articles (public blog). Staff write and publish these

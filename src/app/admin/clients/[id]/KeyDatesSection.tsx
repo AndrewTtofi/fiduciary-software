@@ -11,6 +11,7 @@ export type KeyDate = {
 };
 
 export function KeyDatesSection({ clientId, rows }: { clientId: string; rows: KeyDate[] }) {
+  const [duePreview, setDuePreview] = useState("");
   const [hideCompleted, setHideCompleted] = useState(true);
   const visible = hideCompleted ? rows.filter((r) => r.status !== "completed") : rows;
 
@@ -33,7 +34,15 @@ export function KeyDatesSection({ clientId, rows }: { clientId: string; rows: Ke
           className="mt-6 grid gap-2 grid-cols-[1fr_auto_auto]"
         >
           <input name="description" placeholder="Description (e.g. Annual return)" className="input" required />
-          <input name="dueDate" type="date" className="input" required />
+          <input
+            name="dueDate" type="date" className="input" required
+            onChange={(e) => setDuePreview(e.target.value)}
+          />
+          {duePreview && (
+            <span className="help" style={{ whiteSpace: "nowrap" }}>
+              {new Date(duePreview).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}
+            </span>
+          )}
           <button type="submit" className="btn btn-primary px-4 py-2 text-meta">+ Add</button>
         </form>
       </div>

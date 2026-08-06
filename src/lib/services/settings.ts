@@ -1,4 +1,14 @@
 import { prisma } from "@/lib/db";
+import {
+  DEFAULT_CONSULTATION_HOURS, expandRanges, isValidTimeZone, parseRange,
+  type ConsultationHours, type TimeRange,
+} from "./consultation-hours";
+
+// Re-exported so existing imports from "@/lib/services/settings" keep working.
+export {
+  DEFAULT_CONSULTATION_HOURS, DEFAULT_RANGES, expandRanges, isValidTimeZone, parseHhMm, parseRange,
+  type ConsultationHours, type TimeRange,
+} from "./consultation-hours";
 import { SERVICE_KEYS } from "@/lib/schema/onboarding";
 
 /** Known feature-flag keys exposed in the admin UI. Adding a key here makes it
@@ -35,6 +45,37 @@ export async function getClientLoginEnabled(): Promise<boolean> {
   const org = await getOrgSettings();
   return org.clientLoginEnabled;
 }
+
+/** The firm's consultation schedule, with anything missing or malformed
+ *  falling back to the defaults — a broken row must never empty the picker. */
+export async function getConsultationHours(): Promise<ConsultationHours> {
+  const org = await getOrgSettings();
+  const d = DEFAULT_CONSULTATION_HOURS;
+
+  const days = Array.isArray(org.consultDays) && org.consultDays.length
+    ? [...new Set(org.consultDays.filter((n) => Number.isInteger(n) && n >= 0 && n <= 6))].sort((a, b) => a - b)
+    : d.days;
+
+  const parsedRanges = Array.isArray(org.consultRanges)
+    ? org.consultRanges.map(parseRange).filter((r): r is TimeRange => r !== null)
+    : [];
+  const ranges = parsedRanges.length ? parsedRanges : d.ranges;
+  const intervalMins = org.consultIntervalMins > 0 ? org.consultIntervalMins : d.intervalMins;
+  const minutes = org.consultMinutes > 0 ? org.consultMinutes : d.minutes;
+  const times = expandRanges(ranges, intervalMins, minutes);
+
+  return {
+    days: days.length ? days : d.days,
+    ranges,
+    intervalMins,
+    times: times.length ? times : d.times,
+    minutes,
+    noticeMins: org.consultNoticeMins >= 0 ? org.consultNoticeMins : d.noticeMins,
+    horizonDays: org.consultHorizonDays > 0 ? Math.min(org.consultHorizonDays, 120) : d.horizonDays,
+    timezone: isValidTimeZone(org.consultTimezone) ? org.consultTimezone : d.timezone,
+  };
+}
+
 
 const DEFAULT_SERVICE_LABELS: Record<string, string> = {
   company_formation: "Company Formation",
@@ -91,10 +132,23 @@ export const DEFAULT_STAGE_LABELS: Record<SvcStageKey, string> = {
   completed: "Completed",
 };
 
+/** Sensible wording per service, so the editor explains itself. "Pending /
+ *  In progress / Completed" told a client nothing and made the settings page
+ *  look like six copies of the same empty form. */
+export const SERVICE_STAGE_DEFAULTS: Record<string, Record<SvcStageKey, string>> = {
+  company_formation: { pending: "Documents received", in_progress: "Submitted to the Registrar", completed: "Company registered" },
+  accounting:        { pending: "Records received",   in_progress: "Bookkeeping in progress",     completed: "Filed and up to date" },
+  tax_residency:     { pending: "Documents received", in_progress: "Application filed",           completed: "Certificate issued" },
+  immigration:       { pending: "Documents received", in_progress: "With the immigration authority", completed: "Permit granted" },
+  licensing:         { pending: "Scope agreed",       in_progress: "With the regulator",          completed: "Licence granted" },
+  banking:           { pending: "Introduction made",  in_progress: "Bank review in progress",     completed: "Account opened" },
+};
+
 /** Merge a stored Service.stageLabels JSON over the defaults, ignoring
- *  anything malformed. */
-export function readStageLabels(value: unknown): Record<SvcStageKey, string> {
-  const out = { ...DEFAULT_STAGE_LABELS };
+ *  anything malformed. Falls back to the service's own wording when the firm
+ *  has not customised it. */
+export function readStageLabels(value: unknown, serviceKey?: string): Record<SvcStageKey, string> {
+  const out = { ...(serviceKey ? SERVICE_STAGE_DEFAULTS[serviceKey] ?? DEFAULT_STAGE_LABELS : DEFAULT_STAGE_LABELS) };
   if (value && typeof value === "object") {
     for (const stage of SVC_STAGES) {
       const v = (value as Record<string, unknown>)[stage];
@@ -110,7 +164,7 @@ export function readStageLabels(value: unknown): Record<SvcStageKey, string> {
 export async function getStageLabels(): Promise<Record<string, Record<SvcStageKey, string>>> {
   const services = await getServices();
   const out: Record<string, Record<SvcStageKey, string>> = {};
-  for (const s of services) out[s.key] = readStageLabels(s.stageLabels);
+  for (const s of services) out[s.key] = readStageLabels(s.stageLabels, s.key);
   return out;
 }
 

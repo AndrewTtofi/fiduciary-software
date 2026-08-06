@@ -23,11 +23,14 @@ export default async function ComparePage() {
         <div className="mk-container">
           <CompareTool applyHref={applyHref} />
           <p className="muted mt-6" style={{ fontSize: "var(--fs-xs)", maxWidth: "80ch" }}>
-            Corporate income tax and VAT/GST figures verified against{" "}
+            Corporate income tax and VAT/GST figures are checked against{" "}
             <a href="https://taxsummaries.pwc.com" target="_blank" rel="noreferrer noopener" className="link-gold">PwC Worldwide Tax Summaries</a>
-            {" "}(reviewed {RATES_REVIEWED}); each row links to its source. Headline rates simplify many
-            special regimes, and formation time, minimum capital and treaty counts are indicative.
-            This is general information, not tax advice. Verify before relying.
+            {" "}— last full review {RATES_REVIEWED}. Any row added since is marked{" "}
+            <span className="tag" style={{ color: "var(--mk-warn, #B5751B)" }}>unchecked</span>{" "}
+            until it has been through the same review. Every row links to its source.
+            Headline rates simplify many special regimes, and formation time, minimum capital and
+            treaty counts are indicative. This is general information, not tax advice.
+            Verify before relying.
           </p>
         </div>
       </section>

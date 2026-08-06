@@ -11,11 +11,17 @@ const TABS: { key: ClientTab; label: string }[] = [
   { key: "activity", label: "Activity" },
 ];
 
-export function ClientTabs({ active, showDocuments = true }: { active: ClientTab; showDocuments?: boolean }) {
+export function ClientTabs({ active, showDocuments = true, portalOn = true }: {
+  active: ClientTab; showDocuments?: boolean;
+  /** Messages still reach the client by email with the portal off, so the tab
+   *  stays — but "Conversation" implies a two-way thread they can open. */
+  portalOn?: boolean;
+}) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const tabs = showDocuments ? TABS : TABS.filter((t) => t.key !== "documents");
+  const tabs = (showDocuments ? TABS : TABS.filter((t) => t.key !== "documents"))
+    .map((t) => (t.key === "conversation" && !portalOn ? { ...t, label: "Emails" } : t));
 
   function go(tab: ClientTab) {
     const params = new URLSearchParams(searchParams.toString());

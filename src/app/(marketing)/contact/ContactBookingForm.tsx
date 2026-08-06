@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState , useSyncExternalStore } from "react";
 import { ArrowIc } from "@/components/marketing/mk";
 import { CountryCombobox, CountryMultiCombobox } from "@/components/marketing/CountryCombobox";
 import { PhoneInput } from "@/components/marketing/PhoneInput";
@@ -37,6 +37,10 @@ const NOT_SURE = { key: "not_sure", title: "Not sure, I want guidance" };
  *  hours and re-labelled here in the visitor's own time zone. */
 const FIRM_TZ = "Europe/Nicosia";
 
+/* The browser's zone never changes mid-session, so there is nothing to
+   subscribe to; the server snapshot keeps hydration consistent. */
+const NO_SUBSCRIBE = () => () => {};
+
 const STEP_LABELS = [
   "Step 1 of 4 · Who you are",
   "Step 2 of 4 · Your situation",
@@ -70,15 +74,16 @@ export function ContactBookingForm({ slots, inquiries, underForm }: { slots: str
 
   // Visitor time zone, applied after mount (SSR and first client render both
   // use Cyprus time, so hydration stays consistent).
-  const [tz, setTz] = useState(FIRM_TZ);
-  useEffect(() => {
-    try {
-      const detected = Intl.DateTimeFormat().resolvedOptions().timeZone;
-      if (detected) setTz(detected);
-    } catch {
-      /* keep firm time */
-    }
-  }, []);
+  // Detected zone, plus whatever the visitor picks instead. Deriving the
+  // default rather than setting it from an effect keeps hydration consistent
+  // without a cascading render.
+  const detectedTz = useSyncExternalStore(
+    NO_SUBSCRIBE,
+    () => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone || FIRM_TZ; } catch { return FIRM_TZ; } },
+    () => FIRM_TZ,
+  );
+  const [tzOverride, setTz] = useState<string | null>(null);
+  const tz = tzOverride ?? detectedTz;
   const slotFmt = useMemo(
     () =>
       new Intl.DateTimeFormat("en-GB", {

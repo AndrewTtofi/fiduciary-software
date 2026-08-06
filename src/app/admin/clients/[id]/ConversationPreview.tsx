@@ -11,9 +11,12 @@ export function ConversationPreview({
   clientId,
   messages,
   unreadCount,
+  portalOn = true,
 }: {
   clientId: string;
   messages: Message[];
+  /** With the portal off nothing sent here reaches the client. */
+  portalOn?: boolean;
   unreadCount?: number;
 }) {
   // Last 3 messages, newest first for preview legibility
@@ -33,7 +36,9 @@ export function ConversationPreview({
 
       {recent.length === 0 ? (
         <div className="py-8 text-center">
-          <p className="muted mb-2" style={{ fontSize: "0.9375rem" }}>No messages yet.</p>
+          <p className="muted mb-2" style={{ fontSize: "var(--fs-sm)" }}>
+            {portalOn ? "No messages yet." : "No messages yet — the client portal is off, so anything sent here is an internal record only."}
+          </p>
           <Link href={`?tab=conversation`} className="link-gold eyebrow">
             Send the first message →
           </Link>

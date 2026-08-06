@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { CompletenessChip } from "@/components/admin/CompletenessChip";
+import { DataTable, type DataRow } from "@/components/admin/DataTable";
 import { requireRole } from "@/lib/auth/guards";
 import { prisma } from "@/lib/db";
 import { ProspectStatus } from "@prisma/client";
@@ -38,21 +39,57 @@ function prettyAction(a: string) {
 export default async function AdminDashboardPage() {
   await requireRole("staff");
 
-  const [total, pending, approved, recent, activity] = await Promise.all([
+  // Trends compare the last 30 days against the 30 before it, so the arrow on
+  // a card means something specific rather than "up and to the right".
+  const now = new Date().getTime();
+  const WINDOW = 30 * 24 * 60 * 60 * 1000;
+  const thisPeriod = { gte: new Date(now - WINDOW) };
+  const lastPeriod = { gte: new Date(now - 2 * WINDOW), lt: new Date(now - WINDOW) };
+
+  const [
+    total, pending, approved, recent, activity,
+    newThis, newLast, okThis, okLast, pendingThis, pendingLast,
+  ] = await Promise.all([
     prisma.prospect.count(),
     prisma.prospect.count({ where: { status: ProspectStatus.pending } }),
     prisma.prospect.count({ where: { status: ProspectStatus.approved } }),
     prisma.prospect.findMany({ include: { user: true }, orderBy: { createdAt: "desc" }, take: 6 }),
     prisma.activityLog.findMany({ orderBy: { createdAt: "desc" }, take: 8, include: { actor: true } }),
+    prisma.prospect.count({ where: { createdAt: thisPeriod } }),
+    prisma.prospect.count({ where: { createdAt: lastPeriod } }),
+    prisma.prospect.count({ where: { status: ProspectStatus.approved, createdAt: thisPeriod } }),
+    prisma.prospect.count({ where: { status: ProspectStatus.approved, createdAt: lastPeriod } }),
+    prisma.prospect.count({ where: { status: ProspectStatus.pending, createdAt: thisPeriod } }),
+    prisma.prospect.count({ where: { status: ProspectStatus.pending, createdAt: lastPeriod } }),
   ]);
   const conversion = total ? Math.round((approved / total) * 100) : 0;
 
+  const delta = (a: number, b: number, unit = "") => {
+    const d = a - b;
+    return { text: d === 0 ? "=" : `${d > 0 ? "+" : "\u2212"}${Math.abs(d)}${unit}`, dir: d === 0 ? "flat" : d > 0 ? "up" : "down" };
+  };
+  const rate = (ok: number, all: number) => (all ? Math.round((ok / all) * 100) : 0);
+
   const kpis = [
-    { label: "Awaiting review", value: pending, icon: ICONS.clock },
-    { label: "Approved", value: approved, icon: ICONS.check },
-    { label: "Total submissions", value: total, icon: ICONS.docs },
-    { label: "Conversion", value: `${conversion}%`, icon: ICONS.scale },
+    { label: "Awaiting review", value: pending, icon: ICONS.clock, rail: "var(--st-wait-fg)", trend: delta(pendingThis, pendingLast) },
+    { label: "Approved", value: approved, icon: ICONS.check, rail: "var(--st-ok-fg)", trend: delta(okThis, okLast) },
+    { label: "Total submissions", value: total, icon: ICONS.docs, rail: "var(--brand)", trend: delta(newThis, newLast) },
+    { label: "Conversion", value: `${conversion}%`, icon: ICONS.scale, rail: "var(--accent-deep)", trend: delta(rate(okThis, newThis), rate(okLast, newLast), "pt") },
   ];
+
+  const recentRows: DataRow[] = recent.map((p) => {
+    const eff = (p.completenessOverride ?? p.completeness) as Completeness | null;
+    return {
+      key: p.id,
+      href: `/admin/submissions/${p.referenceNumber}`,
+      cells: [
+        <span className="mono" key="r">{p.referenceNumber}</span>,
+        <div key="a"><div style={{ fontWeight: 500 }}>{p.user.fullName}</div><div className="sub">{p.user.email}</div></div>,
+        eff ? <CompletenessChip value={eff} key="b" /> : <span className="muted" key="b">—</span>,
+        <span className={`badge ${statusClass(p.status)}`} key="s">{prettyStatus(p.status)}</span>,
+      ],
+    };
+  });
 
   return (
     <AdminShell active="dashboard">
@@ -63,36 +100,26 @@ export default async function AdminDashboardPage() {
 
       <div className="grid grid-4 mb-6">
         {kpis.map((k) => (
-          <div key={k.label} className="kpi">
+          <div key={k.label} className="kpi" style={{ "--kpi-rail": k.rail } as React.CSSProperties}>
             <div className="kpi-top"><span className="eyebrow">{k.label}</span><span className="kpi-tile">{k.icon}</span></div>
-            <div className="kpi-value">{k.value}</div>
+            <div className="kpi-value">
+              <span>{k.value}</span>
+              <span className={`kpi-trend ${k.trend.dir}`} title="Compared with the previous 30 days">{k.trend.text}</span>
+            </div>
           </div>
         ))}
       </div>
 
       <div className="twocol">
-        <div className="tbl-wrap">
-          <div className="tbl-toolbar"><strong>Recent submissions</strong><span className="muted right" style={{ fontSize: "var(--fs-xs)" }}>{total} total</span></div>
-          <table className="tbl">
-            <thead><tr><th>Ref</th><th>Applicant</th><th>Brief</th><th>Status</th></tr></thead>
-            <tbody>
-              {recent.length === 0 ? (
-                <tr><td colSpan={4}><div className="empty"><h3>No submissions yet</h3><p>Applications appear here as they arrive.</p></div></td></tr>
-              ) : recent.map((p) => {
-                const eff = (p.completenessOverride ?? p.completeness) as Completeness | null;
-                return (
-                  <tr key={p.id} className="crm-row" data-href={`/admin/submissions/${p.referenceNumber}`} style={{ cursor: "pointer" }}>
-                    <td className="mono">{p.referenceNumber}</td>
-                    <td><div style={{ fontWeight: 500 }}>{p.user.fullName}</div><div className="sub">{p.user.email}</div></td>
-                    <td>{eff ? <CompletenessChip value={eff} /> : <span className="muted">—</span>}</td>
-                    <td><span className={`badge ${statusClass(p.status)}`}>{prettyStatus(p.status)}</span></td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-          <div className="tbl-foot"><span>Showing {recent.length} of {total}</span><Link href="/admin/submissions" className="link-gold">View all →</Link></div>
-        </div>
+        <DataTable
+          title="Recent submissions"
+          count={`${total} total`}
+          columns={[{ label: "Ref" }, { label: "Applicant" }, { label: "Brief" }, { label: "Status" }]}
+          rows={recentRows}
+          emptyTitle="No submissions yet"
+          emptyBody="Applications appear here as they arrive."
+          foot={<><span>Showing {recent.length} of {total}</span><Link href="/admin/submissions" className="link-gold">View all →</Link></>}
+        />
 
         <div className="card">
           <h3 className="card-title">Recent activity</h3>
@@ -107,7 +134,6 @@ export default async function AdminDashboardPage() {
           </div>
         </div>
       </div>
-      <script dangerouslySetInnerHTML={{ __html: "document.querySelectorAll('tr.crm-row').forEach(function(r){r.addEventListener('click',function(){location.href=r.getAttribute('data-href')})})" }} />
     </AdminShell>
   );
 }

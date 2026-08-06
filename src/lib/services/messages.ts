@@ -2,6 +2,7 @@ import { prisma } from "@/lib/db";
 import { logActivity } from "@/lib/services/activity";
 import { email } from "@/lib/providers/email";
 import { getServerBranding } from "@/lib/services/branding-server";
+import { getClientLoginEnabled } from "@/lib/services/settings";
 
 export interface SendMessageInput {
   clientId: string;
@@ -22,15 +23,21 @@ export async function sendMessage(input: SendMessageInput) {
     data: { clientId: input.clientId, senderId: input.senderId, body: input.body },
   });
 
-  try {
-    const { brandName } = await getServerBranding();
-    await email().send({
-      to: client.user.email,
-      subject: `New message from ${brandName}`,
-      html: `<p>${escapeHtml(input.body).replace(/\n/g, "<br/>")}</p><p style="color:#888">Reply to this email to respond.</p>`,
-    });
-  } catch (e) {
-    console.error("[sendMessage] email failed:", (e as Error).message);
+  // With the client portal switched off the firm has no messaging relationship
+  // with this person — the deployment is a marketing site plus consultation
+  // booking, and booking is the only channel that should reach them. The
+  // message is still recorded for the staff-side history.
+  if (await getClientLoginEnabled()) {
+    try {
+      const { brandName } = await getServerBranding();
+      await email().send({
+        to: client.user.email,
+        subject: `New message from ${brandName}`,
+        html: `<p>${escapeHtml(input.body).replace(/\n/g, "<br/>")}</p><p style="color:#888">Reply to this email to respond.</p>`,
+      });
+    } catch (e) {
+      console.error("[sendMessage] email failed:", (e as Error).message);
+    }
   }
 
   await logActivity({

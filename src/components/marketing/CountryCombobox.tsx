@@ -96,12 +96,15 @@ function SingleBox({
     setOpen(false);
   }
 
+  const listId = `${id}-listbox`;
+
   return (
     <div className="cc-wrap" ref={wrapRef}>
       <input
         id={id}
         role="combobox"
         aria-expanded={open}
+        aria-controls={listId}
         aria-autocomplete="list"
         autoComplete="off"
         placeholder={placeholder}
@@ -123,7 +126,7 @@ function SingleBox({
         }}
       />
       {open && options.length > 0 && (
-        <div className="cc-list" role="listbox">
+        <div className="cc-list" role="listbox" id={listId}>
           {options.map((c, i) => (
             <button
               key={c}

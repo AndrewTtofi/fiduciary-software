@@ -31,6 +31,12 @@ vi.mock("@/lib/providers/email", () => ({
   }),
 }));
 
+// The portal switch decides whether the client is emailed at all.
+const portal = vi.hoisted(() => ({ on: true }));
+vi.mock("@/lib/services/settings", () => ({
+  getClientLoginEnabled: async () => portal.on,
+}));
+
 vi.mock("@/lib/services/branding-server", () => ({
   getServerBranding: async () => ({
     brandName: "Acme", legalName: "Acme Ltd", referencePrefix: "ACME",
@@ -54,5 +60,20 @@ describe("sendMessage", () => {
     await sendMessage({ clientId: "c1", senderId: "s1", body: "A" });
     await sendMessage({ clientId: "c1", senderId: "s1", body: "B" });
     expect(await listThread("c1")).toHaveLength(2);
+  });
+});
+
+describe("sendMessage with the client portal switched off", () => {
+  it("records the message but does not email the client", async () => {
+    const { sendMessage } = await import("../messages");
+    portal.on = false;
+    emailMock.sent.length = 0;
+    db.reset();
+
+    await sendMessage({ clientId: "c1", senderId: "s1", body: "Internal note to self" });
+
+    expect(db.messages).toHaveLength(1);        // still on the staff-side history
+    expect(emailMock.sent).toHaveLength(0);     // nothing reached the client
+    portal.on = true;
   });
 });

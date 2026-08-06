@@ -21,6 +21,7 @@ import { ClientTabs } from "./ClientTabs";
 import { tabFromParam } from "./tabs";
 import { ConversationView } from "./ConversationView";
 import { ConversationPreview } from "./ConversationPreview";
+import { getClientLoginEnabled } from "@/lib/services/settings";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Client profile" };
@@ -40,6 +41,7 @@ export default async function ClientProfilePage({
   const { planTier } = await getBranding();
   const fullWorkspace = tierAtLeast(planTier, "professional");
   const requested = tabFromParam(sp.tab);
+  const portalOn = await getClientLoginEnabled();
   const tab = !fullWorkspace && requested === "documents" ? "overview" : requested;
 
   const client = await prisma.client.findUnique({
@@ -147,7 +149,7 @@ export default async function ClientProfilePage({
                   status: kd.status,
                 }))}
               />
-              <ConversationPreview clientId={client.id} messages={messages} />
+              <ConversationPreview clientId={client.id} messages={messages} portalOn={portalOn} />
             </div>
           )}
 
@@ -200,6 +202,7 @@ export default async function ClientProfilePage({
               clientId={client.id}
               clientName={client.user.fullName}
               messages={messages}
+              portalOn={portalOn}
             />
           )}
 

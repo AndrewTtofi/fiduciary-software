@@ -7,6 +7,7 @@ import { createDocumentRequest } from "@/lib/services/document-requests";
 import { email } from "@/lib/providers/email";
 import { getServerBranding } from "@/lib/services/branding-server";
 import { env } from "@/lib/env";
+import { getClientLoginEnabled } from "@/lib/services/settings";
 
 export const runtime = "nodejs";
 
@@ -26,6 +27,17 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
 
   const client = await prisma.client.findUnique({ where: { id }, include: { user: { select: { email: true, fullName: true } } } });
   if (!client) return NextResponse.json({ error: "Client not found" }, { status: 404 });
+
+  // Requesting a document is a portal action: the client fulfils it by
+  // uploading. With the portal off they could never see or action it, and the
+  // email would tell them to log in somewhere they cannot. Refuse rather than
+  // create a request nobody will ever answer.
+  if (!(await getClientLoginEnabled())) {
+    return NextResponse.json(
+      { error: "The client portal is switched off, so clients cannot receive or fulfil document requests." },
+      { status: 409 },
+    );
+  }
 
   const created = await createDocumentRequest(id, body.data, me.id);
 

@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { RichTextEditor } from "@/components/admin/RichTextEditor";
+import { ImageField } from "@/components/admin/ImageField";
 
 export type ArticleRow = {
   id: string;
@@ -150,15 +152,7 @@ export function ArticlesManager({ initial }: { initial: ArticleRow[] }) {
                   </div>
                 </div>
                 <div className="row gap-2" style={{ flex: "none" }}>
-                  <span
-                    className="pill-badge"
-                    style={{
-                      fontSize: "0.6875rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: ".05em",
-                      padding: "4px 10px", borderRadius: 999,
-                      background: a.published ? "var(--brand-50)" : "var(--surface-2)",
-                      color: a.published ? "var(--brand)" : "var(--muted)",
-                    }}
-                  >
+                  <span className={`badge ${a.published ? "badge-approved" : "badge-draft"}`}>
                     {a.published ? "Published" : "Draft"}
                   </span>
                   <button type="button" className="btn btn-ghost btn-sm" disabled={busy} onClick={() => togglePublish(a)}>
@@ -206,20 +200,15 @@ export function ArticlesManager({ initial }: { initial: ArticleRow[] }) {
               <span className="flabel">Excerpt (card teaser and first sentence of the page)</span>
               <textarea className="input" rows={2} value={draft.excerpt} onChange={(e) => set("excerpt", e.target.value)} />
             </label>
-            <label className="field" style={{ marginBottom: 0 }}>
-              <span className="flabel">Card image URL (optional)</span>
-              <input className="input" value={draft.image ?? ""} onChange={(e) => set("image", e.target.value)} placeholder="/marketing/p1.jpg" />
-            </label>
-            <label className="field" style={{ marginBottom: 0 }}>
-              <span className="flabel">Body (markdown: ## headings, - lists, **bold**, [links](https://…))</span>
-              <textarea
-                className="input"
-                rows={18}
-                style={{ fontFamily: "var(--font-mono)", fontSize: "0.8125rem", lineHeight: 1.6 }}
-                value={draft.body}
-                onChange={(e) => set("body", e.target.value)}
-              />
-            </label>
+            <ImageField value={draft.image} onChange={(url) => set("image", url ?? "")} />
+            <div className="field" style={{ marginBottom: 0 }}>
+              <span className="flabel">Body</span>
+              <RichTextEditor value={draft.body} onChange={(md) => set("body", md)} />
+              <div className="help">
+                Write as you would in a document. Select text and use the buttons to make a heading,
+                bold it, add a bullet list, a link or a photo.
+              </div>
+            </div>
             <label className="row gap-2" style={{ cursor: "pointer", fontSize: "0.875rem", fontWeight: 500 }}>
               <input type="checkbox" checked={draft.published} onChange={(e) => set("published", e.target.checked)} />
               Published (visible on the public site)

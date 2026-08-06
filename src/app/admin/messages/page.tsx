@@ -1,9 +1,12 @@
 import Link from "next/link";
 import { AdminShell } from "@/components/admin/AdminShell";
+import { Flag } from "@/components/admin/Flag";
 import { ConversationView } from "@/app/admin/clients/[id]/ConversationView";
 import { requireRole } from "@/lib/auth/guards";
 import { prisma } from "@/lib/db";
 import { listThread } from "@/lib/services/messages";
+import { PortalOffNotice } from "@/components/admin/PortalOffNotice";
+import { getClientLoginEnabled } from "@/lib/services/settings";
 
 export const metadata = { title: "Messages" };
 export const dynamic = "force-dynamic";
@@ -11,6 +14,7 @@ export const dynamic = "force-dynamic";
 export default async function AdminMessagesPage({ searchParams }: { searchParams: Promise<{ c?: string }> }) {
   await requireRole("staff");
   const sp = await searchParams;
+  const portalOn = await getClientLoginEnabled();
 
   const clients = await prisma.client.findMany({
     include: {
@@ -31,37 +35,31 @@ export default async function AdminMessagesPage({ searchParams }: { searchParams
 
   return (
     <AdminShell active="messages">
+      <PortalOffNotice what="nothing you write here reaches them — it is recorded for your own history only." />
       <div className="mb-8">
-        <div className="eyebrow mb-2">Client inbox</div>
-        <h2 style={{ fontSize: "1.563rem", fontWeight: 700, letterSpacing: "-0.02em" }}>Messages</h2>
+        <div className="eyebrow mb-2">{portalOn ? "Client inbox" : "Email correspondence"}</div>
+        <h2 style={{ fontSize: "var(--fs-h3)", fontWeight: 700, letterSpacing: "-0.02em" }}>{portalOn ? "Messages" : "Client emails"}</h2>
       </div>
 
       {clients.length === 0 ? (
         <div className="empty"><h3>No client conversations yet</h3><p>Once a prospect is converted to a client, your conversation appears here.</p></div>
       ) : (
         <div className="tbl-wrap" style={{ padding: 0, overflow: "hidden" }}>
-          <div style={{ display: "grid", gridTemplateColumns: "300px 1fr", minHeight: 560 }}>
+          <div className="msg-grid">
             {/* Thread list */}
-            <div style={{ borderRight: "1px solid var(--admin-border)", overflow: "auto" }}>
+            <div className="msg-list">
               {clients.map((c) => {
                 const last = c.messages[0];
                 const active = c.id === selectedId;
                 const initials = c.user.fullName.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase();
                 return (
-                  <Link
-                    key={c.id}
-                    href={`/admin/messages?c=${c.id}`}
-                    className="row"
-                    style={{
-                      alignItems: "flex-start", gap: 10, padding: "12px 14px",
-                      borderBottom: "1px solid var(--admin-border)",
-                      background: active ? "var(--brand-50)" : "transparent",
-                      textDecoration: "none", color: "var(--text)",
-                    }}
-                  >
+                  <Link key={c.id} href={`/admin/messages?c=${c.id}`} className={`row${active ? " active" : ""}`}>
                     <div className="avatar" style={{ width: 32, height: 32, fontSize: 12 }}>{initials}</div>
                     <div style={{ minWidth: 0, flex: 1 }}>
-                      <div style={{ fontWeight: 600, fontSize: "var(--fs-sm)" }}>{c.user.fullName}</div>
+                      <div className="row" style={{ gap: 6, fontWeight: 600, fontSize: "var(--fs-sm)" }}>
+                        <span>{c.user.fullName}</span>
+                        {c.country && <Flag country={c.country} />}
+                      </div>
                       <div className="muted" style={{ fontSize: "var(--fs-xs)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                         {last ? last.body : "No messages yet"}
                       </div>
@@ -72,13 +70,14 @@ export default async function AdminMessagesPage({ searchParams }: { searchParams
             </div>
 
             {/* Conversation */}
-            <div style={{ padding: "var(--space-6)" }}>
+            <div className="msg-main">
               {selected ? (
-                <ConversationView clientId={selected.id} clientName={selected.user.fullName} messages={thread} />
+                <ConversationView clientId={selected.id} clientName={selected.user.fullName} messages={thread} portalOn={portalOn} />
               ) : (
                 <div className="empty"><h3>Select a conversation</h3><p>Pick a client on the left to view the thread.</p></div>
               )}
             </div>
+
           </div>
         </div>
       )}

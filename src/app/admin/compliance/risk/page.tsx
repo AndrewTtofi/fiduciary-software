@@ -7,6 +7,7 @@ import { requireRole } from "@/lib/auth/guards";
 import { getBranding, tierAtLeast } from "@/lib/services/branding";
 import { prisma } from "@/lib/db";
 import { prospectToSub, riskScore, jurById } from "@/lib/services/compliance-intel";
+import { RowNavigation } from "@/components/admin/RowNavigation";
 
 export const metadata = { title: "Client risk" };
 export const dynamic = "force-dynamic";
@@ -48,7 +49,7 @@ export default async function ClientRiskPage() {
               const sub = prospects.find((p) => p.referenceNumber === r.ref);
               const jId = sub ? prospectToSub({ ...sub }).jurisdictionId : "cy";
               return (
-                <tr key={r.ref} className="crm-row" data-href={`/admin/submissions/${r.ref}`} style={{ cursor: "pointer" }}>
+                <tr key={r.ref} tabIndex={0} data-href={`/admin/submissions/${r.ref}`} style={{ cursor: "pointer" }}>
                   <td><div style={{ fontWeight: 500 }}>{r.name}</div><div className="sub mono">{r.ref}</div></td>
                   <td>{svcLabel(prospectToSub({ ...sub! }).serviceId)}</td>
                   <td>{jurById(jId).flag} {jurById(jId).name}</td>
@@ -62,7 +63,7 @@ export default async function ClientRiskPage() {
           </tbody>
         </table>
       </div>
-      <script dangerouslySetInnerHTML={{ __html: "document.querySelectorAll('tr.crm-row').forEach(function(r){r.addEventListener('click',function(){location.href=r.getAttribute('data-href')})})" }} />
+      <RowNavigation />
     </AdminShell>
   );
 }

@@ -5,6 +5,7 @@ import { requireRole } from "@/lib/auth/guards";
 import { getBranding, tierAtLeast } from "@/lib/services/branding";
 import { amlResult } from "@/lib/services/aml";
 import { prisma } from "@/lib/db";
+import { RowNavigation } from "@/components/admin/RowNavigation";
 
 export const metadata = { title: "AML screening" };
 export const dynamic = "force-dynamic";
@@ -76,7 +77,7 @@ export default async function AmlPage() {
             <thead><tr><th>Applicant</th><th>Sanctions</th><th>PEP</th><th>Adverse media</th><th>Risk</th></tr></thead>
             <tbody>
               {rows.map((r) => (
-                <tr key={r.ref} className="crm-row" data-href={`/admin/submissions/${r.ref}`} style={{ cursor: "pointer" }}>
+                <tr key={r.ref} tabIndex={0} data-href={`/admin/submissions/${r.ref}`} style={{ cursor: "pointer" }}>
                   <td>
                     <div className="cell-entity">
                       <div className="avatar" style={{ width: 28, height: 28, fontSize: 11 }}>{r.name.split(" ").map((w) => w[0]).join("").slice(0, 2)}</div>
@@ -96,7 +97,7 @@ export default async function AmlPage() {
       <p className="muted mt-4" style={{ fontSize: "var(--fs-xs)" }}>
         Open an applicant to review their full party-level KYC file.
       </p>
-      <script dangerouslySetInnerHTML={{ __html: "document.querySelectorAll('tr.crm-row').forEach(function(r){r.addEventListener('click',function(){location.href=r.getAttribute('data-href')})})" }} />
+      <RowNavigation />
     </AdminShell>
   );
 }

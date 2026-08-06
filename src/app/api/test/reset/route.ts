@@ -21,6 +21,18 @@ export async function POST(req: Request) {
   );
   const url = new URL(req.url);
   if (url.searchParams.get("seed") === "1") {
+    // Declare the plan tier the e2e suite exercises rather than inheriting the
+    // schema default. That default is "starter" (a deployment nobody
+    // configured should get the entry product), which turns onboarding into
+    // two steps and hides the documents workspace — so leaving it implicit
+    // made a product decision about defaults fail the onboarding and
+    // document-request journeys.
+    await prisma.orgSettings.upsert({
+      where: { id: "singleton" },
+      update: { planTier: "scale" },
+      create: { id: "singleton", planTier: "scale" },
+    });
+
     const hash = await argon2.hash("oroDemo!1", { type: argon2.argon2id });
     await prisma.user.upsert({
       where: { email: "staff@oro.local" },

@@ -7,6 +7,7 @@ import { requireRole } from "@/lib/auth/guards";
 import { getBranding, tierAtLeast } from "@/lib/services/branding";
 import { prisma } from "@/lib/db";
 import { prospectToSub, kycResult, countryFlag } from "@/lib/services/compliance-intel";
+import { RowNavigation } from "@/components/admin/RowNavigation";
 
 export const metadata = { title: "KYC / ID verification" };
 export const dynamic = "force-dynamic";
@@ -46,7 +47,7 @@ export default async function KycPage({ searchParams }: { searchParams: Promise<
             <thead><tr><th>Applicant</th><th>Document</th><th className="t-num">Face-match</th><th>Status</th></tr></thead>
             <tbody>
               {rows.map(({ s, k }) => (
-                <tr key={s.ref} className="crm-row" data-href={`/admin/compliance/kyc?ref=${s.ref}`} style={{ cursor: "pointer", background: selected?.ref === s.ref ? "var(--brand-50)" : undefined }}>
+                <tr key={s.ref} tabIndex={0} data-href={`/admin/compliance/kyc?ref=${s.ref}`} style={{ cursor: "pointer", background: selected?.ref === s.ref ? "var(--brand-50)" : undefined }}>
                   <td><div style={{ fontWeight: 500 }}>{s.name}</div><div className="sub">{countryFlag(k.docCountry)} {k.docCountry}</div></td>
                   <td>{k.docType}</td>
                   <td className="t-num">{k.faceMatch}%</td>
@@ -75,7 +76,7 @@ export default async function KycPage({ searchParams }: { searchParams: Promise<
           ) : <div className="empty"><h3>No applicants</h3><p>Verifications appear here as applicants submit.</p></div>}
         </div>
       </div>
-      <script dangerouslySetInnerHTML={{ __html: "document.querySelectorAll('tr.crm-row').forEach(function(r){r.addEventListener('click',function(){location.href=r.getAttribute('data-href')})})" }} />
+      <RowNavigation />
     </AdminShell>
   );
 }

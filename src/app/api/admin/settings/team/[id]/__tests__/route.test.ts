@@ -18,6 +18,9 @@ vi.mock("@/lib/auth/guards", () => ({
     if (!_allowed.includes(sessionState.user.role)) throw new Error("FORBIDDEN");
     return sessionState.user;
   },
+  // The route refuses to let a firm admin deactivate the platform operator.
+  // Nobody here is one, so this keeps the existing cases exercising the rest.
+  isSuperAdmin: () => false,
 }));
 vi.mock("@/lib/providers/email", () => ({
   email: () => ({ send: async () => ({ ok: true }) }),

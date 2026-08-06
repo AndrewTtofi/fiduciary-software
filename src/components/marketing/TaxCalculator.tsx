@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import {
   COMPARE_COUNTRIES,
+  effectiveRate,
   DEFAULT_COMPARE,
   CY_CORPORATE_RATE,
   CY_IP_BOX_EFFECTIVE_RATE,
@@ -24,7 +25,11 @@ import {
 const eur = (n: number) => "€" + Math.round(n).toLocaleString("en-US");
 const pct = (n: number) => (n * 100).toFixed(2) + "%";
 
-export function TaxCalculator({ brandName }: { brandName?: string }) {
+export function TaxCalculator({}: {
+  /** Accepted but unused: the comparison is plain Cyprus tax, not a
+   *  firm-specific outcome. Kept so the two call sites need no change. */
+  brandName?: string;
+}) {
   const [profit, setProfit] = useState(1_000_000);
   const [country, setCountry] = useState(DEFAULT_COMPARE);
   const [ipOn, setIpOn] = useState(false);
@@ -39,7 +44,8 @@ export function TaxCalculator({ brandName }: { brandName?: string }) {
   const eff = total / profit;
 
   const cmp = COMPARE_COUNTRIES[country];
-  const otherCost = profit * cmp.rate;
+  const cmpRate = effectiveRate(cmp);
+  const otherCost = profit * cmpRate;
   const keep = otherCost - total;
 
   return (
@@ -121,11 +127,22 @@ export function TaxCalculator({ brandName }: { brandName?: string }) {
         </div>
 
         <div className="tc-compare">
-          <div className="row"><span>{cmp.label}</span><span>{eur(otherCost)} ({pct(cmp.rate)})</span></div>
+          <div className="row"><span>{cmp.label}</span><span>{eur(otherCost)} ({pct(cmpRate)})</span></div>
           <div className="bar-track"><div className="bar-fill other" style={{ width: "100%" }}>{cmp.label}</div></div>
-          <div className="row"><span>Cyprus with {brandName ?? "us"}</span><span>{eur(total)} ({pct(eff)})</span></div>
-          <div className="bar-track"><div className="bar-fill cy" style={{ width: `${Math.max(8, (eff / cmp.rate) * 100).toFixed(0)}%` }}>Cyprus</div></div>
+          {/* Was "Cyprus with {brandName}". Two problems: with the neutral
+              white-label default it read "Cyprus with the platform", and more
+              importantly the figure is plain Cyprus corporate tax plus GESY —
+              nothing about it depends on who you engage. Implying the firm
+              changes the tax outcome is a claim the maths does not support. */}
+          <div className="row"><span>Cyprus</span><span>{eur(total)} ({pct(eff)})</span></div>
+          <div className="bar-track"><div className="bar-fill cy" style={{ width: `${Math.max(8, (eff / cmpRate) * 100).toFixed(0)}%` }}>Cyprus</div></div>
           <div className="keep">You keep <b>{eur(keep)}</b> more every year</div>
+          {/* The comparison is a modelled figure, so show how it is built
+              rather than asserting a bare percentage. */}
+          <p className="fine mt-3">
+            {cmp.label}: {cmp.basis}{" "}
+            <a href={cmp.sourceUrl} target="_blank" rel="noreferrer noopener" className="link-gold">Source ↗</a>
+          </p>
         </div>
 
         <div className="calc-cta">

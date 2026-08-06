@@ -20,6 +20,18 @@ export async function getTestPrisma(): Promise<PrismaClient> {
     stdio: "inherit",
   });
   prismaClient = new PrismaClient({ adapter: pgAdapter(url) });
+
+  // Declare the plan tier the suite exercises rather than inheriting whatever
+  // the schema default happens to be. The default is "starter" (a deployment
+  // nobody configured should get the entry product), but these tests cover the
+  // compliance and document features, which are tier-gated — leaving it
+  // implicit meant a product decision about defaults silently 403'd 111 tests.
+  await prismaClient.orgSettings.upsert({
+    where: { id: "singleton" },
+    update: { planTier: "scale" },
+    create: { id: "singleton", planTier: "scale" },
+  });
+
   return prismaClient;
 }
 

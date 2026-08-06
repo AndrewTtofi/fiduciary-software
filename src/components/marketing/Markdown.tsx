@@ -6,25 +6,35 @@ import type { ReactNode } from "react";
    nothing is injected as raw HTML. */
 
 function inline(text: string, keyBase: string): ReactNode[] {
-  // links first, then bold, then italic — each pass splits the remaining strings
+  // images first (![alt](src) contains a link pattern), then links, then
+  // bold, then italic — each pass splits the remaining strings
   const out: ReactNode[] = [];
-  const linkRe = /\[([^\]]+)\]\(([^)\s]+)\)/g;
+  const linkRe = /(!?)\[([^\]]*)\]\(([^)\s]+)\)/g;
   let last = 0;
   let m: RegExpExecArray | null;
   let i = 0;
   while ((m = linkRe.exec(text))) {
     if (m.index > last) out.push(...emphasis(text.slice(last, m.index), `${keyBase}-t${i}`));
-    out.push(
-      <a key={`${keyBase}-l${i}`} href={m[2]} target={m[2].startsWith("http") ? "_blank" : undefined} rel="noopener">
-        {m[1]}
-      </a>,
-    );
+    const [, bang, label, href] = m;
+    if (bang) {
+      // eslint-disable-next-line @next/next/no-img-element -- author-supplied URL, no next/image loader for it
+      out.push(<img key={`${keyBase}-img${i}`} src={href} alt={label} loading="lazy" />);
+    } else {
+      out.push(
+        <a key={`${keyBase}-l${i}`} href={href} target={href.startsWith("http") ? "_blank" : undefined} rel="noopener">
+          {label}
+        </a>,
+      );
+    }
     last = m.index + m[0].length;
     i++;
   }
   if (last < text.length) out.push(...emphasis(text.slice(last), `${keyBase}-t${i}`));
   return out;
 }
+
+/** A block that is nothing but an image renders standalone, not inside a <p>. */
+const LONE_IMAGE = /^!\[([^\]]*)\]\(([^)\s]+)\)$/;
 
 function emphasis(text: string, keyBase: string): ReactNode[] {
   return text.split(/\*\*([^*]+)\*\*/g).map((seg, i) =>
@@ -46,6 +56,16 @@ export function Markdown({ text }: { text: string }) {
         if (b.startsWith("### ")) return <h3 key={bi}>{inline(b.slice(4), `h${bi}`)}</h3>;
         if (b.startsWith("## ")) return <h2 key={bi}>{inline(b.slice(3), `h${bi}`)}</h2>;
         if (b.startsWith("# ")) return <h2 key={bi}>{inline(b.slice(2), `h${bi}`)}</h2>;
+        const lone = b.match(LONE_IMAGE);
+        if (lone) {
+          return (
+            <figure key={bi} className="article-figure">
+              {/* eslint-disable-next-line @next/next/no-img-element -- author-supplied URL, no next/image loader for it */}
+              <img src={lone[2]} alt={lone[1]} loading="lazy" />
+              {lone[1] && <figcaption>{lone[1]}</figcaption>}
+            </figure>
+          );
+        }
         const lines = b.split("\n");
         if (lines.every((l) => /^[-*] /.test(l.trim()))) {
           return (

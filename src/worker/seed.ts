@@ -42,11 +42,15 @@ export async function runSeed() {
   await prisma.prospectDetail.createMany({
     skipDuplicates: true,
     data: [
+      // Field names must match what the onboarding form posts (DetailsForm
+      // input names) — the admin queue, analytics and jurisdiction flags all
+      // read `residenceCountry` / `nationality`, so seeding `residence` or
+      // `expected_turnover` leaves those columns blank on demo data.
       { prospectId: pendingProspect.id, fieldName: "nationality", fieldValue: "Russia" },
-      { prospectId: pendingProspect.id, fieldName: "residence", fieldValue: "United Arab Emirates" },
-      { prospectId: pendingProspect.id, fieldName: "expected_turnover", fieldValue: "EUR 200K - 500K" },
-      { prospectId: pendingProspect.id, fieldName: "timeline", fieldValue: "Within 1 month" },
-      { prospectId: pendingProspect.id, fieldName: "business_description", fieldValue: "Software development agency focusing on fintech solutions for the EU market. Planning to hire 3 developers in Cyprus within the first year." },
+      { prospectId: pendingProspect.id, fieldName: "residenceCountry", fieldValue: "United Arab Emirates" },
+      { prospectId: pendingProspect.id, fieldName: "expectedTurnover", fieldValue: "200K-500K" },
+      { prospectId: pendingProspect.id, fieldName: "timeline", fieldValue: "within_1_month" },
+      { prospectId: pendingProspect.id, fieldName: "businessDescription", fieldValue: "Software development agency focusing on fintech solutions for the EU market. Planning to hire 3 developers in Cyprus within the first year." },
     ],
   });
   await prisma.document.deleteMany({ where: { prospectId: pendingProspect.id } });
@@ -64,10 +68,18 @@ export async function runSeed() {
     update: {},
     create: { email: "david@cohen-tech.io", passwordHash: password, fullName: "David Cohen", role: Role.prospect, emailVerified: new Date() },
   });
-  await prisma.prospect.upsert({
+  const niProspect = await prisma.prospect.upsert({
     where: { userId: niUser.id },
     update: {},
     create: { userId: niUser.id, referenceNumber: "ORO-2026-00140", status: ProspectStatus.needs_info, servicesSelected: ["banking", "licensing"] },
+  });
+  await prisma.prospectDetail.deleteMany({ where: { prospectId: niProspect.id } });
+  await prisma.prospectDetail.createMany({
+    data: [
+      { prospectId: niProspect.id, fieldName: "nationality", fieldValue: "Israel, United States" },
+      { prospectId: niProspect.id, fieldName: "residenceCountry", fieldValue: "Israel" },
+      { prospectId: niProspect.id, fieldName: "businessDescription", fieldValue: "EMI licence enquiry. Regulatory scope needs pinning down before we quote." },
+    ],
   });
 
   // Approved prospect (ready to book)
@@ -81,6 +93,16 @@ export async function runSeed() {
     update: {},
     create: { userId: approvedUser.id, referenceNumber: "ORO-2026-00141", status: ProspectStatus.approved, servicesSelected: ["tax_residency"], reviewedAt: new Date(), reviewedById: staff.id },
   });
+  await prisma.prospectDetail.deleteMany({ where: { prospectId: approvedProspect.id } });
+  await prisma.prospectDetail.createMany({
+    data: [
+      { prospectId: approvedProspect.id, fieldName: "nationality", fieldValue: "Greece, Cyprus" },
+      { prospectId: approvedProspect.id, fieldName: "residenceCountry", fieldValue: "Greece" },
+      { prospectId: approvedProspect.id, fieldName: "currentTaxResidency", fieldValue: "Greece" },
+      { prospectId: approvedProspect.id, fieldName: "businessDescription", fieldValue: "Non-dom application; already spends most of the year in Limassol." },
+    ],
+  });
+
   // Cleared compliance file so the "Convert from Prospect" flow works on the
   // seeded data (onboarding normally creates the file; the seed bypasses it).
   const approvedFile = await prisma.complianceFile.upsert({
@@ -112,8 +134,10 @@ export async function runSeed() {
   });
   const client = await prisma.client.upsert({
     where: { userId: clientUser.id },
-    update: {},
-    create: { userId: clientUser.id, prospectId: clientProspect.id, companyName: "Meridian Trading Ltd", status: ClientStatus.active, primaryStaffId: staff.id, createdAt: new Date("2026-01-15") },
+    // Backfill the jurisdiction on databases seeded before it was added —
+    // an empty `update` would leave existing demo rows without a country.
+    update: { country: "Cyprus", taxResidency: "Cyprus" },
+    create: { userId: clientUser.id, prospectId: clientProspect.id, companyName: "Meridian Trading Ltd", country: "Cyprus", taxResidency: "Cyprus", status: ClientStatus.active, primaryStaffId: staff.id, createdAt: new Date("2026-01-15") },
   });
   await prisma.clientService.deleteMany({ where: { clientId: client.id } });
   await prisma.clientService.createMany({

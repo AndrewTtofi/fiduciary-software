@@ -11,10 +11,14 @@ export function ConversationView({
   clientId,
   clientName,
   messages,
+  portalOn = true,
 }: {
   clientId: string;
   clientName: string;
   messages: Message[];
+  /** With the portal switched off a client can only ever receive the email
+   *  copy, so promising they will see it in their portal would be a lie. */
+  portalOn?: boolean;
 }) {
   return (
     <div className="grid grid-cols-1 xl:grid-cols-[1fr_280px] gap-10 max-w-[1100px]">
@@ -39,8 +43,10 @@ export function ConversationView({
             <div className="text-center py-12">
               <div className="mb-3" style={{ fontSize: "1.25rem", fontWeight: 600 }}>No correspondence yet.</div>
               <p className="muted text-[14px] max-w-[42ch] mx-auto">
-                Send the first message below. The client will receive it in
-                their portal and via email.
+                Send the first message below.{" "}
+                {portalOn
+                  ? "The client receives it in their portal and by email."
+                  : "With the portal switched off this is recorded for your history only — the client is not notified."}
               </p>
             </div>
           )}
@@ -73,8 +79,9 @@ export function ConversationView({
             <li className="flex gap-3">
               <span className="mt-0.5" style={{ color: "var(--accent)" }}>·</span>
               <span>
-                The client sees every staff message in their portal and via
-                email.
+                {portalOn
+                  ? "The client sees every staff message in their portal and by email."
+                  : "The portal is off, so nothing here is sent — messages are an internal record until it is switched back on."}
               </span>
             </li>
             <li className="flex gap-3">

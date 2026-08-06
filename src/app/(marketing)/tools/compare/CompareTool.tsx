@@ -3,8 +3,21 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { JURISDICTIONS, RATES_REVIEWED } from "@/lib/data/jurisdictions";
+import { Flag } from "@/components/admin/Flag";
 
 type SortKey = "corpTax" | "vat" | "days" | "treaties";
+
+/* Module scope: a component defined during render is a fresh type each time,
+   which remounts the header and loses focus mid-sort. */
+function SortTh({ k, label, sort, onSort }: {
+  k: SortKey; label: string; sort: SortKey; onSort: (k: SortKey) => void;
+}) {
+  return (
+    <th className="t-num" style={{ cursor: "pointer" }} onClick={() => onSort(k)}>
+      {label}{sort === k ? " ↓" : ""}
+    </th>
+  );
+}
 
 export function CompareTool({ applyHref = "/login" }: { applyHref?: string }) {
   const [selected, setSelected] = useState<string[]>(["cy", "mt", "ee"]);
@@ -28,24 +41,29 @@ export function CompareTool({ applyHref = "/login" }: { applyHref?: string }) {
     setSelected((s) => (s.includes(id) ? s.filter((x) => x !== id) : [...s, id]));
   }
 
-  const Th = ({ k, label }: { k: SortKey; label: string }) => (
-    <th className="t-num" style={{ cursor: "pointer" }} onClick={() => setSort(k)}>
-      {label}{sort === k ? " ↓" : ""}
-    </th>
-  );
 
   return (
     <>
-      <div className="jchips">
-        {JURISDICTIONS.map((j) => {
-          const on = selected.includes(j.id);
-          return (
-            <button key={j.id} className={`jchip${on ? " on" : ""}`} onClick={() => toggle(j.id)}>
-              {j.flag} {j.name}{on ? " ✓" : ""}
-            </button>
-          );
-        })}
-      </div>
+      {/* Grouped: a flat wall of 30-odd chips is unreadable, and "EU or not"
+          is the first cut most people make. */}
+      {([
+        { title: "EU / EEA", list: JURISDICTIONS.filter((j) => j.eu) },
+        { title: "Rest of world", list: JURISDICTIONS.filter((j) => !j.eu) },
+      ]).map((group) => (
+        <div key={group.title} className="mb-4">
+          <div className="eyebrow mb-2">{group.title}</div>
+          <div className="jchips">
+            {group.list.map((j) => {
+              const on = selected.includes(j.id);
+              return (
+                <button key={j.id} className={`jchip${on ? " on" : ""}`} onClick={() => toggle(j.id)}>
+                  <Flag country={j.iso} /> {j.name}{on ? " ✓" : ""}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      ))}
 
       {chosen.length ? (
         <div className="tbl-wrap">
@@ -53,11 +71,11 @@ export function CompareTool({ applyHref = "/login" }: { applyHref?: string }) {
             <thead>
               <tr>
                 <th>Jurisdiction</th>
-                <Th k="corpTax" label="Corp tax" />
-                <Th k="vat" label="VAT" />
-                <Th k="days" label="Formation" />
+                <SortTh k="corpTax" label="Corp tax" sort={sort} onSort={setSort} />
+                <SortTh k="vat" label="VAT" sort={sort} onSort={setSort} />
+                <SortTh k="days" label="Formation" sort={sort} onSort={setSort} />
                 <th className="t-num">Min capital</th>
-                <Th k="treaties" label="Tax treaties" />
+                <SortTh k="treaties" label="Tax treaties" sort={sort} onSort={setSort} />
                 <th>Source</th>
                 <th></th>
               </tr>
@@ -71,7 +89,7 @@ export function CompareTool({ applyHref = "/login" }: { applyHref?: string }) {
                 return (
                   <tr key={j.id} style={{ cursor: "default" }}>
                     <td>
-                      <span style={{ fontSize: 18 }}>{j.flag}</span>{" "}
+                      <Flag country={j.iso} />{" "}
                       <strong title={j.note}>{j.name}</strong>
                       {j.note && <span className="muted" title={j.note} style={{ cursor: "help", marginLeft: 4 }}>ⓘ</span>}
                       {j.eu && <span className="tag" style={{ marginLeft: 6 }}>EU</span>}
@@ -85,6 +103,15 @@ export function CompareTool({ applyHref = "/login" }: { applyHref?: string }) {
                       <a href={j.sourceUrl} target="_blank" rel="noreferrer noopener" className="link-gold" style={{ fontSize: "var(--fs-xs)", whiteSpace: "nowrap" }} title="PwC Worldwide Tax Summaries">
                         PwC ↗
                       </a>
+                      {j.pendingReview && (
+                        <span
+                          className="tag"
+                          style={{ marginLeft: 6, color: "var(--warning)", borderColor: "#E9D3A4" }}
+                          title="Added recently and not yet reconciled against the source — check before relying on it."
+                        >
+                          unchecked
+                        </span>
+                      )}
                     </td>
                     <td style={{ textAlign: "right" }}>
                       <Link href={applyHref} className="btn btn-ghost btn-sm">Apply →</Link>

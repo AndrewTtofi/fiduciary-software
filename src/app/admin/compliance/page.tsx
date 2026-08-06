@@ -8,6 +8,7 @@ import { getBranding, tierAtLeast, type PlanTier } from "@/lib/services/branding
 import { prisma } from "@/lib/db";
 import { prospectToSub, kycResult, ownershipFor, ownStats, aiScreen, complianceItems } from "@/lib/services/compliance-intel";
 import { amlResult } from "@/lib/services/aml";
+import { RowNavigation } from "@/components/admin/RowNavigation";
 
 export const metadata = { title: "Compliance hub" };
 export const dynamic = "force-dynamic";
@@ -89,7 +90,7 @@ export default async function ComplianceHubPage() {
                 : cases.map((s) => {
                   const a = amlResult(s.ref); const k = kycResult(s);
                   return (
-                    <tr key={s.ref} className="crm-row" data-href={`/admin/submissions/${s.ref}`} style={{ cursor: "pointer" }}>
+                    <tr key={s.ref} tabIndex={0} data-href={`/admin/submissions/${s.ref}`} style={{ cursor: "pointer" }}>
                       <td><div style={{ fontWeight: 500 }}>{s.name}</div><div className="sub mono">{s.ref}</div></td>
                       <td><span className={`badge ${k.status === "verified" ? "badge-approved" : "badge-pending"}`}>{k.status === "verified" ? "Verified" : "Review"}</span></td>
                       <td><span className={`badge ${a.pep === "match" || a.adverse === "flag" ? "badge-danger" : "badge-approved"}`}>{a.pep === "match" ? "PEP" : a.adverse === "flag" ? "Adverse" : "Clear"}</span></td>
@@ -110,7 +111,7 @@ export default async function ComplianceHubPage() {
           </dl>
         </div>
       </div>
-      <script dangerouslySetInnerHTML={{ __html: "document.querySelectorAll('tr.crm-row').forEach(function(r){r.addEventListener('click',function(){location.href=r.getAttribute('data-href')})})" }} />
+      <RowNavigation />
     </AdminShell>
   );
 }

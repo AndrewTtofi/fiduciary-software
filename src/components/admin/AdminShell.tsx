@@ -1,6 +1,9 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import { signOut } from "@/lib/auth";
+import { AdminSearch } from "@/components/admin/AdminSearch";
 import { getBranding, tierAtLeast } from "@/lib/services/branding";
+import { getClientLoginEnabled } from "@/lib/services/settings";
 import { currentIsSuperAdmin } from "@/lib/auth/guards";
 import { Icon } from "@/components/Icon";
 import { BrandMark } from "@/components/BrandMark";
@@ -10,7 +13,7 @@ type AdminTab =
   | "kyc" | "aml" | "kyb" | "ai-screening" | "ownership-map" | "client-risk" | "aml-reporting" | "compliance-calendar"
   | "leads" | "clients" | "messages"
   | "documents" | "bookings" | "client-dashboard" | "status-stages" | "branding" | "users" | "analytics" | "content" | "insights"
-  | "integrations" | "settings";
+  | "integrations" | "settings" | "account";
 
 const I = {
   dashboard: <svg className="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="9" rx="1" /><rect x="14" y="3" width="7" height="5" rx="1" /><rect x="14" y="12" width="7" height="9" rx="1" /><rect x="3" y="16" width="7" height="5" rx="1" /></svg>,
@@ -35,9 +38,21 @@ const TITLES: Record<AdminTab, string> = {
   kyc: "KYC / ID verification", aml: "AML screening", kyb: "KYB verification", "ai-screening": "AI screening",
   "ownership-map": "Ownership map", "client-risk": "Client risk", "aml-reporting": "AML reporting", "compliance-calendar": "Compliance calendar",
   leads: "Leads / CRM", clients: "Clients", messages: "Messages",
-  documents: "Documents & e-sign", bookings: "Bookings", "client-dashboard": "Client dashboard", "status-stages": "Status stages", branding: "Branding", users: "Users", analytics: "Analytics", content: "Content", insights: "Insights articles",
-  integrations: "Connect & API", settings: "Settings",
+  documents: "Documents & e-sign", bookings: "Bookings", "client-dashboard": "Client dashboard", "status-stages": "What clients see", branding: "Branding", users: "Users", analytics: "Analytics", content: "Content", insights: "Insights articles",
+  integrations: "Connect & API", settings: "Settings", account: "My account",
 };
+
+function NavItem({ id, href, icon, label, active, dim, title }: {
+  id: AdminTab; href: string; icon: React.ReactNode; label: string; active: AdminTab;
+  /** Reachable, but currently has no effect (e.g. the client portal is off). */
+  dim?: boolean; title?: string;
+}) {
+  return (
+    <Link href={href} title={title} className={`sb-item${active === id ? " active" : ""}${dim ? " dimmed" : ""}`}>
+      {icon}<span>{label}</span>
+    </Link>
+  );
+}
 
 export async function AdminShell({
   children,
@@ -54,9 +69,9 @@ export async function AdminShell({
 }) {
   const { brandName, brandMark, planTier, logo } = await getBranding();
   const superAdmin = await currentIsSuperAdmin();
-  const Item = ({ id, href, icon, label }: { id: AdminTab; href: string; icon: React.ReactNode; label: string }) => (
-    <Link href={href} className={`sb-item${active === id ? " active" : ""}`}>{icon}<span>{label}</span></Link>
-  );
+  // Portal-only screens stay reachable when the portal is off — you may well be
+  // setting them up before switching it on — but say so rather than look normal.
+  const portalOn = await getClientLoginEnabled();
 
   return (
     <div className="shell shell-admin">
@@ -72,58 +87,75 @@ export async function AdminShell({
           {superAdmin ? (
             <>
               <div className="sb-group">Configuration</div>
-              <Item id="settings" href="/admin/settings" icon={I.settings} label="Settings" />
+              <NavItem id="settings" href="/admin/settings" icon={I.settings} label="Settings" active={active} />
             </>
           ) : (
             <>
               <div className="sb-group">Overview</div>
-              <Item id="dashboard" href="/admin" icon={I.dashboard} label="Dashboard" />
-              <Item id="submissions" href="/admin/submissions" icon={I.submissions} label="Submissions" />
+              <NavItem id="dashboard" href="/admin" icon={I.dashboard} label="Dashboard" active={active} />
+              <NavItem id="submissions" href="/admin/submissions" icon={I.submissions} label="Submissions" active={active} />
               {tierAtLeast(planTier, "professional") && (
                 <>
-                  <Item id="compliance-hub" href="/admin/compliance" icon={<Icon name="shield" />} label="Compliance hub" />
+                  <NavItem id="compliance-hub" href="/admin/compliance" icon={<Icon name="shield" />} label="Compliance hub" active={active} />
                   <div className="sb-group">Compliance</div>
                   {tierAtLeast(planTier, "scale") && (
                     <>
-                      <Item id="kyc" href="/admin/compliance/kyc" icon={<Icon name="passport" />} label="KYC / ID verification" />
-                      <Item id="aml" href="/admin/compliance/aml" icon={<Icon name="shield" />} label="AML screening" />
-                      <Item id="kyb" href="/admin/compliance/kyb" icon={<Icon name="building" />} label="KYB verification" />
-                      <Item id="ai-screening" href="/admin/compliance/ai-screening" icon={<Icon name="sparkles" />} label="AI screening" />
-                      <Item id="ownership-map" href="/admin/compliance/ownership" icon={<Icon name="sitemap" />} label="Ownership map" />
-                      <Item id="client-risk" href="/admin/compliance/risk" icon={<Icon name="scale" />} label="Client risk" />
-                      <Item id="aml-reporting" href="/admin/compliance/reporting" icon={<Icon name="documents" />} label="AML reporting" />
+                      <NavItem id="kyc" href="/admin/compliance/kyc" icon={<Icon name="passport" />} label="KYC / ID verification" active={active} />
+                      <NavItem id="aml" href="/admin/compliance/aml" icon={<Icon name="shield" />} label="AML screening" active={active} />
+                      <NavItem id="kyb" href="/admin/compliance/kyb" icon={<Icon name="building" />} label="KYB verification" active={active} />
+                      <NavItem id="ai-screening" href="/admin/compliance/ai-screening" icon={<Icon name="sparkles" />} label="AI screening" active={active} />
+                      <NavItem id="ownership-map" href="/admin/compliance/ownership" icon={<Icon name="sitemap" />} label="Ownership map" active={active} />
+                      <NavItem id="client-risk" href="/admin/compliance/risk" icon={<Icon name="scale" />} label="Client risk" active={active} />
+                      <NavItem id="aml-reporting" href="/admin/compliance/reporting" icon={<Icon name="documents" />} label="AML reporting" active={active} />
                     </>
                   )}
-                  <Item id="compliance-calendar" href="/admin/compliance/calendar" icon={<Icon name="calendar" />} label="Compliance calendar" />
+                  <NavItem id="compliance-calendar" href="/admin/compliance/calendar" icon={<Icon name="calendar" />} label="Compliance calendar" active={active} />
                 </>
               )}
               <div className="sb-group">Relationships</div>
-              <Item id="leads" href="/admin/crm" icon={I.users} label="Leads / CRM" />
-              <Item id="clients" href="/admin/clients" icon={I.clients} label="Clients" />
-              <Item id="messages" href="/admin/messages" icon={I.message} label="Messages" />
-              <div className="sb-group">Engagement</div>
+              <NavItem id="leads" href="/admin/crm" icon={I.users} label="Leads / CRM" active={active} />
+              <NavItem id="clients" href="/admin/clients" icon={I.clients} label="Clients" active={active} />
+              {/* Messaging is a portal channel. With the portal off nothing a
+                  staff member writes reaches the client, so the section leaves
+                  the nav; the route stays reachable for reading history. */}
+              {portalOn && <NavItem id="messages" href="/admin/messages" icon={I.message} label="Messages" active={active} />}
+                            <div className="sb-group">Engagement</div>
               {tierAtLeast(planTier, "professional") && (
-                <Item id="documents" href="/admin/documents" icon={<Icon name="pen" />} label="Documents & e-sign" />
+                <NavItem id="documents" href="/admin/documents" icon={<Icon name="pen" />} label="Documents & e-sign" active={active} />
               )}
-              <Item id="bookings" href="/admin/bookings" icon={I.bookings} label="Bookings" />
-              <Item id="client-dashboard" href="/admin/client-dashboard" icon={I.dashboard} label="Client dashboard" />
-              <Item id="status-stages" href="/admin/status-stages" icon={I.submissions} label="Status stages" />
-              <div className="sb-group">Firm</div>
-              <Item id="branding" href="/admin/branding" icon={I.image} label="Branding" />
-              <Item id="users" href="/admin/users" icon={I.users} label="Users" />
-              <Item id="analytics" href="/admin/analytics" icon={I.analytics} label="Analytics" />
-              <Item id="content" href="/admin/content" icon={I.content} label="Content" />
-              <Item id="insights" href="/admin/insights" icon={I.insights} label="Insights articles" />
+              <NavItem id="bookings" href="/admin/bookings" icon={I.bookings} label="Bookings" active={active} />
+              {/* These two only configure the client portal. With it switched
+                  off they do nothing, so they leave the nav entirely rather
+                  than sit there greyed out. The routes stay reachable so you
+                  can set them up before turning the portal on. */}
+              {portalOn && (
+                <>
+                  <NavItem id="client-dashboard" href="/admin/client-dashboard" icon={I.dashboard} label="Client dashboard" active={active} />
+                  <NavItem id="status-stages" href="/admin/status-stages" icon={I.submissions} label="What clients see" active={active} />
+                </>
+              )}
+                                          <div className="sb-group">Firm</div>
+              <NavItem id="branding" href="/admin/branding" icon={I.image} label="Branding" active={active} />
+              <NavItem id="users" href="/admin/users" icon={I.users} label="Users" active={active} />
+              <NavItem id="analytics" href="/admin/analytics" icon={I.analytics} label="Analytics" active={active} />
+              <NavItem id="content" href="/admin/content" icon={I.content} label="Content" active={active} />
+              <NavItem id="insights" href="/admin/insights" icon={I.insights} label="Insights articles" active={active} />
               {tierAtLeast(planTier, "scale") && (
                 <>
                   <div className="sb-group">Configure</div>
-                  <Item id="integrations" href="/admin/integrations" icon={<Icon name="plug" />} label="Connect & API" />
+                  <NavItem id="integrations" href="/admin/integrations" icon={<Icon name="plug" />} label="Connect & API" active={active} />
                 </>
               )}
             </>
           )}
         </nav>
         <div className="sb-foot">
+          <Link href="/admin/account" className={`sb-item${active === "account" ? " active" : ""}`}>
+            <svg className="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="8" r="4" /><path d="M4 21v-1a6 6 0 0 1 6-6h4a6 6 0 0 1 6 6v1" />
+            </svg>
+            <span>My account</span>
+          </Link>
           <form action={async () => { "use server"; await signOut({ redirectTo: "/" }); }}>
             <button type="submit" className="sb-item w-full" style={{ background: "transparent", border: 0 }}>{I.logout}<span>Log out</span></button>
           </form>
@@ -134,7 +166,11 @@ export async function AdminShell({
         <div className="appbar">
           <h1>{title ?? TITLES[active]}</h1>
           <div className="appbar-right">
-            {search && <div className="searchbox">{I.search}<input placeholder={search.placeholder} /></div>}
+            {search && (
+              <Suspense fallback={<div className="searchbox">{I.search}<input placeholder={search.placeholder} readOnly /></div>}>
+                <AdminSearch placeholder={search.placeholder} />
+              </Suspense>
+            )}
             {topRight}
             <div className="bell">{I.bell}<span className="dot" /></div>
             <div className="avatar">AD</div>
