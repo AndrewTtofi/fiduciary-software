@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getService, SERVICES } from "@/components/marketing/ServiceIcons";
 import { CtaBand } from "@/components/marketing/CtaBand";
@@ -17,33 +18,33 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
   if (!svc) notFound();
   return (
     <main>
-      <section className="phero grid-bg">
+      <section className="phero">
         <div className="mk-container">
-          <span className="kicker">{svc.title}</span>
+          <span className="kicker">Service</span>
           <h1>{svc.title}</h1>
           <p className="sub">{svc.sub}</p>
         </div>
       </section>
       <section className="ivory sec">
-        <div className="mk-container split" style={{ alignItems: "flex-start" }}>
-          <div className="reveal">
-            <span className="kicker">What&apos;s included</span>
-            <div className="sd-list">
-              {svc.included.map((item, i) => (
-                <div className="sd-item" key={i}>{CheckIc}{item}</div>
-              ))}
-            </div>
+        <div className="mk-container" style={{ maxWidth: 820 }}>
+          <h2>What is included</h2>
+          <div className="sd-list" style={{ marginBottom: 34 }}>
+            {svc.included.map((item, i) => (
+              <div className="sd-item" key={i}>{CheckIc}{item}</div>
+            ))}
           </div>
-          <div className="reveal">
-            <span className="kicker">How it works</span>
-            <div className="steps">
-              {svc.steps.map((st, i) => (
-                <div className="step" key={i}>
-                  <h3>{st.t}</h3>
-                  <p>{st.d}</p>
-                </div>
-              ))}
-            </div>
+          <h2>How it works</h2>
+          <div className="cards3" style={{ marginTop: 18 }}>
+            {svc.steps.map((st, i) => (
+              <div className="how-card" key={i}>
+                <div className="n">0{i + 1}</div>
+                <h3>{st.t}</h3>
+                <p>{st.d}</p>
+              </div>
+            ))}
+          </div>
+          <div style={{ textAlign: "center", marginTop: 38 }}>
+            <Link href="/contact" className="pill">Book Your Free 30-Minute Consultation</Link>
           </div>
         </div>
       </section>

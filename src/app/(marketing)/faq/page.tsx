@@ -1,6 +1,7 @@
+import Link from "next/link";
 import { getSiteContent } from "@/lib/services/content";
 import { CtaBand } from "@/components/marketing/CtaBand";
-import { ChevronIc } from "@/components/marketing/mk";
+import { FaqAccordion } from "@/components/marketing/FaqAccordion";
 
 export const metadata = { title: "FAQ" };
 
@@ -8,24 +9,30 @@ export default async function FaqPage() {
   const { faq } = await getSiteContent();
   return (
     <main>
-      <section className="phero grid-bg">
+      <section className="phero">
         <div className="mk-container">
-          <span className="kicker">Questions</span>
-          <h1>Frequently <span className="gold">Asked</span></h1>
-          <p className="sub">Straight answers on structuring, timelines, banking and compliance, before you commit to anything.</p>
+          <span className="kicker">FAQ</span>
+          <h1>Questions We Get <span className="gold">Every Week</span></h1>
+          <p className="sub">If your question is not here, ask it on the call. There is no charge for asking.</p>
         </div>
       </section>
 
-      <section className="ivory sec" style={{ paddingTop: 90 }}>
-        <div className="mk-container" style={{ maxWidth: 820 }}>
-          <div className="acc reveal">
-            {faq.map((item, i) => (
-              <details key={i} className="acc-item">
-                <summary className="acc-q">{item.q}{ChevronIc}</summary>
-                <div className="acc-a">{item.a}</div>
-              </details>
-            ))}
+      <section className="sec">
+        <div className="mk-container" style={{ maxWidth: 1080 }}>
+          <div className="faq4-head">
+            <div className="l">
+              <span className="faq-badge">/ FAQs</span>
+              <h2>Frequently asked questions</h2>
+              <p>
+                Everything people usually want to know before they book, from timelines and travel
+                to what it costs and who actually takes the call.
+              </p>
+            </div>
+            <div style={{ flex: "none" }}>
+              <Link href="/contact" className="pill">Book Your Free 30-Minute Consultation</Link>
+            </div>
           </div>
+          <FaqAccordion faqs={faq} />
         </div>
       </section>
 

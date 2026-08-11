@@ -1,8 +1,8 @@
-import Link from "next/link";
 import { getSiteContent } from "@/lib/services/content";
 import { ServiceIcons, SERVICES } from "@/components/marketing/ServiceIcons";
 import { CtaBand } from "@/components/marketing/CtaBand";
-import { ArrowIc } from "@/components/marketing/mk";
+import { ServicesCarousel } from "@/components/marketing/ServicesCarousel";
+import { Marquee } from "@/components/marketing/Marquee";
 
 export const metadata = { title: "Our Services" };
 
@@ -10,25 +10,28 @@ export default async function ServicesMarketingPage() {
   const { servicesIntro } = await getSiteContent();
   return (
     <main>
-      <section className="phero grid-bg">
+      <section className="phero">
         <div className="mk-container">
           <span className="kicker">{servicesIntro.eyebrow}</span>
           <h1>Everything Your Structure Needs, <span className="gold">Under One Roof</span></h1>
           <p className="sub">{servicesIntro.body}</p>
         </div>
       </section>
-      <section className="ivory sec" style={{ paddingTop: 90 }}>
+      <section className="sec-tight" style={{ paddingTop: 8, paddingBottom: 0 }}>
         <div className="mk-container">
-          <div className="svc-grid" style={{ marginTop: 0 }}>
-            {SERVICES.map((s) => (
-              <Link key={s.key} href={`/services/${s.key}`} className="svc-card reveal">
-                <div className="sic">{ServiceIcons[s.key]}</div>
-                <h3>{s.title}</h3>
-                <p>{s.longBlurb}</p>
-                <span className="lm">Learn more {ArrowIc}</span>
-              </Link>
-            ))}
-          </div>
+          <Marquee items={SERVICES.map((s) => s.title)} />
+        </div>
+      </section>
+      <section className="sec">
+        <div className="mk-container">
+          <ServicesCarousel
+            services={SERVICES.map((s) => ({
+              key: s.key,
+              title: s.title,
+              blurb: s.longBlurb,
+              icon: ServiceIcons[s.key],
+            }))}
+          />
         </div>
       </section>
       <CtaBand />

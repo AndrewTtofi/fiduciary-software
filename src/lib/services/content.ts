@@ -36,7 +36,15 @@ export type Consultation = {
 };
 
 export type SiteContent = {
-  hero: { eyebrow: string; headline: string; lead: string; primaryCta: string; secondaryCta: string };
+  hero: {
+    eyebrow: string;
+    headline: string;
+    lead: string;
+    primaryCta: string;
+    secondaryCta: string;
+    /** Prototype-v2 full-height hero display line (per-character reveal). */
+    display: string;
+  };
   about: { body1: string; body2: string };
   why: { kicker: string; features: Feature[] };
   servicesIntro: { eyebrow: string; heading: string; body: string };
@@ -55,6 +63,7 @@ export const DEFAULT_CONTENT: SiteContent = {
     lead: "We help international entrepreneurs and investors relocate, structure and operate in Cyprus. Founder to founder, start to finish, with no guesswork.",
     primaryCta: "Book Your Free 30-Minute Consultation",
     secondaryCta: "Explore Services",
+    display: "Structured in Cyprus,\n*built to last.*",
   },
   about: {
     body1: "Our team brings **decades of combined expertise** in corporate law, accounting and compliance to the formation and administration of Cyprus entities. Founded in **2024** and based in Nicosia, we serve international entrepreneurs with **transparent, compliant structures** from incorporation to banking, tax residency and beyond.",

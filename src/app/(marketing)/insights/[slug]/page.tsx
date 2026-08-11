@@ -24,15 +24,11 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
 
   return (
     <main>
-      <section className="phero grid-bg">
-        <div className="mk-container">
-          <span className="kicker">{article.keyword}</span>
-          <h1 style={{ maxWidth: "26ch" }}>{article.title}</h1>
-        </div>
-      </section>
       <section className="sec" style={{ paddingTop: 48 }}>
         <div className="mk-container article">
           <Link href="/insights" className="back">← All insights</Link>
+          <span className="kicker" style={{ display: "block" }}>{article.keyword}</span>
+          <h1 style={{ maxWidth: "26ch", fontSize: "clamp(1.8rem,3.6vw,2.6rem)" }}>{article.title}</h1>
           <div className="article-body">
             <p className="lead">{article.excerpt}</p>
             <Markdown text={article.body} />

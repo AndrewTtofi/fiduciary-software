@@ -80,7 +80,6 @@ export function HeaderNav({ services, clientLogin }: { services: NavService[]; c
             </span>
           )}
         </span>
-        <Link href="/contact" className={cls("/contact")}>Contact</Link>
         {clientLogin && <Link href="/login">Client Login</Link>}
       </nav>
       <button

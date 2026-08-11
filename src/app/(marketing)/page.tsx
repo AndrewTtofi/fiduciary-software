@@ -5,7 +5,27 @@ import { getPublishedArticles } from "@/lib/services/articles";
 import { SERVICES, ServiceIcons } from "@/components/marketing/ServiceIcons";
 import { CtaBand } from "@/components/marketing/CtaBand";
 import { TaxCalculator } from "@/components/marketing/TaxCalculator";
-import { ArrowIc, BoldText, CheckIc, GoldHeading, KineticHeading, parseStatValue, waLink } from "@/components/marketing/mk";
+import { VHero } from "@/components/marketing/VHero";
+import { ServicesCarousel } from "@/components/marketing/ServicesCarousel";
+import { Marquee } from "@/components/marketing/Marquee";
+import { InsightCard } from "@/components/marketing/InsightCard";
+import { ConsultBlock } from "@/components/marketing/ConsultBlock";
+import { ArrowIc, BoldText, GoldHeading, parseStatValue } from "@/components/marketing/mk";
+
+/* Marquee keywords: the service lines plus the evergreen topics they cover. */
+const MARQUEE_TOPICS = [
+  "Company formation",
+  "Tax residency",
+  "Non-Dom status",
+  "Accounting and VAT",
+  "Licensing",
+  "Banking and EMI",
+  "Immigration permits",
+  "Permanent residency",
+  "60-day rule",
+  "IP Box",
+  "VAT and VIES",
+];
 
 export default async function LandingPage() {
   const [{ brandName }, { hero, servicesIntro, stats, insights, contact, consultation }, articles] = await Promise.all([
@@ -16,14 +36,25 @@ export default async function LandingPage() {
 
   return (
     <main>
-      {/* ── Hero + tax calculator ────────────────────────────── */}
+      {/* ── Full-height hero (per-character reveal) ──────────── */}
+      <VHero
+        eyebrow={hero.eyebrow}
+        headline={hero.display}
+        sub={hero.lead}
+        primaryCta={hero.primaryCta}
+        secondaryCta={hero.secondaryCta}
+        stats={stats}
+        tagWords={["Formation", "Tax", "Relocation"]}
+      />
+
+      {/* ── Headline + tax calculator ────────────────────────── */}
       <section className="hero grid-bg">
-        <div className="mk-container">
-          <div className="hero-copy">
+        <div className="mk-container hero-g">
+          <div>
             <span className="kicker">{hero.eyebrow}</span>
-            <h1><KineticHeading text={hero.headline} /></h1>
-            <p className="sub">{hero.lead}</p>
-            <div className="trust-row">
+            <h1 style={{ fontSize: "clamp(2rem,4.4vw,3.2rem)" }}><GoldHeading text={hero.headline} /></h1>
+            <p className="lead" style={{ marginTop: 18 }}>{hero.lead}</p>
+            <div className="trust-row" style={{ opacity: 1, animation: "none" }}>
               {stats.map((s, i) => (
                 <div className="ti" key={i}>
                   <span className="dot" />
@@ -31,27 +62,35 @@ export default async function LandingPage() {
                 </div>
               ))}
             </div>
-            <div className="ctas">
+            <div className="ctas" style={{ opacity: 1, animation: "none" }}>
               <Link href="/contact" className="pill">{hero.primaryCta}</Link>
               <Link href="/services" className="pill ghost">{hero.secondaryCta}</Link>
             </div>
           </div>
-          <div className="hero-calc">
+          <div>
             <TaxCalculator brandName={brandName} />
           </div>
         </div>
       </section>
 
-      {/* ── Positioning strip ────────────────────────────────── */}
+      {/* ── Positioning strip (with self-drawing emblem) ─────── */}
       <section className="strip">
+        <svg className="knot-draw" id="knotDraw" viewBox="0 0 240 240" aria-hidden />
         <div className="wrap-in">
           <h2><BoldText text={consultation.stripHeading} /></h2>
           <p>{consultation.stripBody}</p>
         </div>
       </section>
 
+      {/* ── Keyword marquee ──────────────────────────────────── */}
+      <section className="sec-tight" style={{ paddingTop: 34, paddingBottom: 0 }}>
+        <div className="mk-container">
+          <Marquee items={MARQUEE_TOPICS} />
+        </div>
+      </section>
+
       {/* ── Stats ────────────────────────────────────────────── */}
-      <section className="sec-tight">
+      <section className="sec-tight" style={{ paddingTop: 26 }}>
         <div className="mk-container">
           <div className="stats">
             {stats.map((s, i) => {
@@ -69,89 +108,52 @@ export default async function LandingPage() {
         </div>
       </section>
 
-      {/* ── Services ─────────────────────────────────────────── */}
+      {/* ── Services (3D carousel) ───────────────────────────── */}
       <section className="sec" id="services">
         <div className="mk-container">
-          <div style={{ textAlign: "center", marginBottom: 12 }}>
-            <span className="kicker reveal">{servicesIntro.eyebrow}</span>
-            <h2 className="reveal">{servicesIntro.heading}</h2>
-            <p className="lead reveal" style={{ margin: "10px auto 0" }}>{servicesIntro.body}</p>
+          <div className="sec-center" style={{ textAlign: "center", marginBottom: 40 }}>
+            <span className="kicker">{servicesIntro.eyebrow}</span>
+            <h2>{servicesIntro.heading}</h2>
+            <p className="lead" style={{ margin: "8px auto 0" }}>{servicesIntro.body}</p>
           </div>
-          <div className="svc-grid">
-            {SERVICES.map((s) => (
-              <Link key={s.key} href={`/services/${s.key}`} className="svc-card reveal">
-                <div className="sic">{ServiceIcons[s.key]}</div>
-                <h3>{s.title}</h3>
-                <p>{s.blurb}</p>
-                <span className="lm">Learn more {ArrowIc}</span>
-              </Link>
-            ))}
-          </div>
+          <ServicesCarousel
+            services={SERVICES.map((s) => ({
+              key: s.key,
+              title: s.title,
+              blurb: s.longBlurb,
+              icon: ServiceIcons[s.key],
+            }))}
+          />
         </div>
       </section>
 
       {/* ── Insights ─────────────────────────────────────────── */}
       <section className="insights sec">
         <div className="mk-container">
-          <div className="top">
-            <div className="reveal">
+          <div className="ins4-head">
+            <div>
               <span className="kicker">{insights.kicker}</span>
               <h2><GoldHeading text={insights.heading} /></h2>
             </div>
-            <div className="rh reveal">
-              <h3>{insights.rhHeading}</h3>
+            <div className="ins4-side">
               <p>{insights.rhBody}</p>
+              <Link href="/insights" className="ins4-all">
+                Browse all insights {ArrowIc}
+              </Link>
             </div>
           </div>
-          <div className="post-grid">
-            {articles.slice(0, 3).map((a) => (
-              <Link key={a.slug} href={`/insights/${a.slug}`} className="post reveal">
-                <div className="ph" style={a.image ? { backgroundImage: `url(${a.image})` } : undefined} />
-                <div className="pb">
-                  <div className="date">{a.keyword}</div>
-                  <h3>{a.title}</h3>
-                </div>
-              </Link>
+          <div className="ins4-grid">
+            {articles.slice(0, 3).map((a, i) => (
+              <InsightCard key={a.slug} article={a} index={i} />
             ))}
           </div>
         </div>
       </section>
 
       {/* ── Who takes your call ──────────────────────────────── */}
-      <section className="wtc sec" id="consultation">
-        <div className="mk-container wtc-grid">
-          <div className="wtc-photo reveal" style={consultation.photoUrl ? { backgroundImage: `url(${consultation.photoUrl})` } : undefined}>
-            {!consultation.photoUrl && <div className="ph-note">[ {consultation.photoNote} ]</div>}
-            <div className="name">
-              <b>{consultation.personName}</b>
-              <span>{consultation.personTitle}, {brandName}</span>
-            </div>
-          </div>
-          <div className="reveal">
-            <span className="kicker">{consultation.kicker}</span>
-            <h2><GoldHeading text={consultation.heading} /></h2>
-            <p className="body">{consultation.body}</p>
-            <ul className="pts">
-              {consultation.points.map((p, i) => (
-                <li key={i}>{CheckIc}{p}</li>
-              ))}
-            </ul>
-            <div style={{ marginTop: 26, display: "flex", gap: 12, flexWrap: "wrap" }}>
-              <Link href="/contact" className="pill">Book Your Free 30-Minute Consultation</Link>
-              {contact.whatsapp && (
-                <a href={waLink(contact.whatsapp)} target="_blank" rel="noopener" className="pill ghost">
-                  Message on WhatsApp
-                </a>
-              )}
-            </div>
-            <p style={{ fontSize: ".82rem", color: "var(--mk-grey)", marginTop: 16 }}>
-              {consultation.underForm}
-            </p>
-          </div>
-        </div>
-      </section>
+      <ConsultBlock consultation={consultation} contact={contact} brandName={brandName} />
 
-      {/* ── Final CTA band ───────────────────────────────────── */}
+      {/* ── Final CTA ────────────────────────────────────────── */}
       <CtaBand />
     </main>
   );

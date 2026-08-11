@@ -1,5 +1,3 @@
-import Link from "next/link";
-import { getBranding } from "@/lib/services/branding";
 import { getSiteContent } from "@/lib/services/content";
 import { listPublicAvailability } from "@/lib/services/booking";
 import { SERVICES } from "@/components/marketing/ServiceIcons";
@@ -12,8 +10,7 @@ export const metadata = { title: "Book Your Consultation" };
 export const dynamic = "force-dynamic";
 
 export default async function ContactPage() {
-  const [{ brandName }, { contact, consultation }, slotDates] = await Promise.all([
-    getBranding(),
+  const [{ contact, consultation }, slotDates] = await Promise.all([
     getSiteContent(),
     listPublicAvailability().catch(() => [] as Date[]),
   ]);
@@ -22,7 +19,7 @@ export default async function ContactPage() {
 
   return (
     <main>
-      <section className="phero grid-bg" style={{ paddingBottom: 40 }}>
+      <section className="phero">
         <div className="mk-container">
           <span className="kicker">Start here</span>
           <h1>Map Your Cyprus Structure in <span className="gold">30 Minutes</span></h1>
@@ -32,37 +29,19 @@ export default async function ContactPage() {
           </p>
         </div>
       </section>
-      <section>
-        <div className="mk-container c-grid">
-          <div className="c-info">
-            {/* Short version of the Who Takes Your Call page, directly above the form */}
-            <div className="form-card" style={{ marginBottom: 26 }}>
-              <span className="kicker">{consultation.kicker}</span>
-              <h2 style={{ fontSize: "1.4rem" }}>{consultation.personName}</h2>
-              <p style={{ color: "var(--mk-grey)", fontSize: ".9rem", margin: "6px 0 0" }}>
-                {consultation.personTitle}, {brandName}
-              </p>
-              <p className="body" style={{ fontSize: ".92rem" }}>{consultation.body}</p>
-              <Link href="/your-consultation" style={{ color: "var(--mk-gold)", fontWeight: 600, fontSize: ".9rem" }}>
-                Read who takes your call →
-              </Link>
-            </div>
-            <div className="c-meta">
-              {contact.address && <div><b>Office:</b> {contact.address}</div>}
-              {contact.phone && (
-                <div><b>Phone:</b> <a href={telLink(contact.phone)}>{contact.phone}</a></div>
-              )}
-              {contact.whatsapp && (
-                <div><b>WhatsApp:</b> <a href={waLink(contact.whatsapp)}>{contact.whatsapp}</a></div>
-              )}
-              {contact.email && (
-                <div><b>Email:</b> <a href={`mailto:${contact.email}`}>{contact.email}</a></div>
-              )}
-            </div>
-          </div>
-          <ContactBookingForm slots={slots} inquiries={inquiries} underForm={consultation.underForm} />
-        </div>
-      </section>
+      <div className="book">
+        <ContactBookingForm slots={slots} inquiries={inquiries} underForm={consultation.underForm} />
+        <p style={{ textAlign: "center", fontSize: ".88rem", color: "var(--mk-grey)", marginTop: 22 }}>
+          Prefer to talk first?{" "}
+          {contact.phone && <a href={telLink(contact.phone)} style={{ color: "var(--mk-gold)", fontWeight: 600 }}>{contact.phone}</a>}
+          {contact.phone && contact.whatsapp && " · "}
+          {contact.whatsapp && (
+            <a href={waLink(contact.whatsapp)} target="_blank" rel="noopener" style={{ color: "var(--mk-gold)", fontWeight: 600 }}>
+              {contact.whatsapp} (WhatsApp)
+            </a>
+          )}
+        </p>
+      </div>
     </main>
   );
 }

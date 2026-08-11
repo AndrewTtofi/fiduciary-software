@@ -212,6 +212,9 @@ export function ContactBookingForm({ slots, inquiries, underForm }: { slots: str
       <div className="fstep-label">{STEP_LABELS[step]}</div>
       <h2>Book Your Free 30-Minute Consultation</h2>
 
+      {/* keyed by step so every step change remounts and replays the
+          prototype's slide-in (.mo-step) */}
+      <div key={step} className="mo-step">
       {step === 0 && (
         <div className="fc-grid">
           <div className="fld full">
@@ -336,6 +339,7 @@ export function ContactBookingForm({ slots, inquiries, underForm }: { slots: str
       )}
 
       {stepErr && <div className="err-note">{stepErr}</div>}
+      </div>
 
       <div className="fnav">
         {step > 0 ? (
