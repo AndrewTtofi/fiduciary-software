@@ -1029,7 +1029,10 @@
 .shell-marketing .aslider:active .thumb b { transform: scale(.94); }
 .shell-marketing .aslider input[type="range"] { position: absolute; inset: 0; width: 100%; height: 52px; opacity: 0; cursor: pointer; z-index: 50; margin: 0; -webkit-appearance: none; appearance: none; background: none; }
 .shell-marketing .aslider input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 52px; height: 52px; }
-.shell-marketing .animnum { display: inline-flex; overflow: hidden; will-change: transform; }
+/* No overflow mask: it clipped the last digit of wide figures (the serif
+   glyphs overrun the flex box at large sizes, e.g. the "You keep" amount).
+   The digit pop-in reads fine without masking the travel. */
+.shell-marketing .animnum { display: inline-flex; will-change: transform; }
 .shell-marketing .animnum span { display: inline-block; }
 @keyframes mk-digit-in { from { opacity: 0; transform: translateY(-.55em) scale(.92); } to { opacity: 1; transform: none; } }
 .shell-marketing .animnum span.pop { animation: mk-digit-in .3s var(--mk-ease2); }
