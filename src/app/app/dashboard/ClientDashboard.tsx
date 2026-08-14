@@ -29,6 +29,8 @@ export function ClientDashboard({
   unreadMessageCount,
   recentActivity,
   hasUpcomingBookingWithin14Days,
+  showDocuments,
+  whatsapp,
 }: {
   sections: SectionVisibility;
   name: string;
@@ -42,6 +44,8 @@ export function ClientDashboard({
   unreadMessageCount: number;
   recentActivity: Activity[];
   hasUpcomingBookingWithin14Days: boolean;
+  showDocuments: boolean;
+  whatsapp: string;
 }) {
   // A section renders only when staff have left it enabled for this plan.
   const show = (k: keyof SectionVisibility) => sections[k] !== false;
@@ -135,9 +139,21 @@ export function ClientDashboard({
 
         {/* Right column */}
         <div className="flex flex-col gap-6">
+          {/* Starter tier keeps documents on the channels the firm already
+              uses — say so instead of showing a hole where Documents was. */}
+          {!showDocuments && (
+            <div className="pbox-navy">
+              <h3>Documents stay where they are</h3>
+              <p>
+                Nothing to upload here. We keep documents on WhatsApp and email, exactly as we do
+                today. This portal is for tracking the progress of your order.
+              </p>
+            </div>
+          )}
+
           {show("consultation") && (
           <div className="card">
-            <div className="card-title">Consultation</div>
+            <div className="card-title">Need to talk?</div>
             {hasUpcomingBookingWithin14Days ? (
               <>
                 <p className="text-muted" style={{ fontSize: "0.875rem" }}>You have an upcoming consultation booked.</p>
@@ -145,9 +161,19 @@ export function ClientDashboard({
               </>
             ) : (
               <>
-                <p className="text-muted" style={{ fontSize: "0.875rem" }}>Book a consultation with your advisor — pick a slot in the next 14 days.</p>
+                <p className="text-muted" style={{ fontSize: "0.875rem" }}>Message your adviser directly, or book a follow-up call.</p>
                 <Link href="/app/booking" className="btn btn-primary btn-block mt-4">Book a meeting →</Link>
               </>
+            )}
+            {whatsapp && (
+              <a
+                href={`https://wa.me/${whatsapp.replace(/[^\d]/g, "")}`}
+                target="_blank"
+                rel="noopener"
+                className="btn btn-secondary btn-block mt-2"
+              >
+                WhatsApp {whatsapp}
+              </a>
             )}
           </div>
           )}

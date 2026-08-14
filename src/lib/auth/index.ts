@@ -46,11 +46,8 @@ const providers = [
       if (user.deactivatedAt) return null;
       const ok = await argon2.verify(user.passwordHash, parsed.data.password);
       if (!ok) return null;
-      if (!user.emailVerified) {
-        // We deliberately don't leak the difference between "wrong password" and
-        // "unverified" — callers should hit /api/auth/resend-verification.
-        throw new Error("EMAIL_NOT_VERIFIED");
-      }
+      // No email-verification gate: the deployment has no outbound email
+      // connected, so accounts are created pre-verified and sign in directly.
       // Portal off-switch: when client login is disabled the deployment only
       // offers consultation booking — staff/partner sign-in stays open.
       if ((user.role === "client" || user.role === "prospect") && !(await getClientLoginEnabled())) {
@@ -91,7 +88,6 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
   pages: {
     signIn: "/login",
     error: "/login",
-    verifyRequest: "/verify-sent",
   },
   callbacks: {
     async signIn({ user }) {

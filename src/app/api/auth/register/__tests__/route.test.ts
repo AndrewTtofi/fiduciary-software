@@ -95,7 +95,9 @@ describe("auth/register route", () => {
     });
   });
 
-  it("new email, production → 200, User created with emailVerified: null, VerificationToken created", async () => {
+  // No outbound email is connected on this deployment, so accounts are
+  // created pre-verified in every environment and no token is issued.
+  it("new email, production → 200, User created pre-verified, no VerificationToken", async () => {
     envState.NODE_ENV = "production";
     await inRollbackTx(prisma, async (tx) => {
       const { POST } = await loadRoute(wrapTx(tx));
@@ -106,15 +108,15 @@ describe("auth/register route", () => {
 
       const user = await tx.user.findUnique({ where: { email: validBody.email } });
       expect(user).not.toBeNull();
-      expect(user!.emailVerified).toBeNull();
+      expect(user!.emailVerified).not.toBeNull();
       expect(user!.passwordHash).toBe("hash");
 
       const token = await tx.verificationToken.findFirst({ where: { userId: user!.id } });
-      expect(token).not.toBeNull();
+      expect(token).toBeNull();
     });
   });
 
-  it("new email, development → 200, User created with emailVerified set (auto-verify)", async () => {
+  it("new email, development → 200, User created pre-verified", async () => {
     envState.NODE_ENV = "development";
     await inRollbackTx(prisma, async (tx) => {
       const { POST } = await loadRoute(wrapTx(tx));

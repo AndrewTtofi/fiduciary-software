@@ -6,7 +6,6 @@ import { auth } from "@/lib/auth";
 import { getBranding, tierAtLeast } from "@/lib/services/branding";
 import { PortalOffNotice } from "@/components/admin/PortalOffNotice";
 import { prisma } from "@/lib/db";
-import { VerifyButton } from "./VerifyButton";
 import { CreateUserForm } from "./CreateUserForm";
 import { TeamManager, type Member } from "./TeamManager";
 
@@ -35,19 +34,17 @@ export default async function AdminUsersPage({ searchParams }: { searchParams: P
   const users = await prisma.user.findMany({
     select: {
       id: true, email: true, fullName: true, role: true,
-      emailVerified: true, createdAt: true, deactivatedAt: true,
+      createdAt: true, deactivatedAt: true,
       clientAccount: { select: { id: true } },
       prospect: { select: { referenceNumber: true } },
     },
-    orderBy: [{ emailVerified: "asc" }, { createdAt: "desc" }],
+    orderBy: { createdAt: "desc" },
   });
 
   const isTeam = (r: string) => (TEAM_ROLES as readonly string[]).includes(r);
   const team = users.filter((u) => isTeam(u.role));
   const logins = users.filter((u) => !isTeam(u.role));
   const shown = tab === "team" ? team : logins;
-
-  const unverified = shown.filter((u) => !u.emailVerified).length;
 
   const teamMembers: Member[] = team.map((u) => ({
     id: u.id,
@@ -60,8 +57,7 @@ export default async function AdminUsersPage({ searchParams }: { searchParams: P
 
   const rows: DataRow[] = shown.map((u) => ({
     key: u.id,
-    // Unverified first — the only row here that needs an action.
-    sort: [u.fullName, u.email, ROLE_LABEL[u.role] ?? u.role, u.emailVerified ? 1 : 0, u.createdAt.getTime()],
+    sort: [u.fullName, u.email, ROLE_LABEL[u.role] ?? u.role, u.createdAt.getTime()],
     cells: [
       <div className="cell-entity" key="n">
         <div className="avatar" style={{ width: 26, height: 26, fontSize: 11 }}>{initialsOf(u.fullName)}</div>
@@ -69,9 +65,6 @@ export default async function AdminUsersPage({ searchParams }: { searchParams: P
       </div>,
       <span className="mono" style={{ fontSize: "var(--fs-xs)" }} key="e">{u.email}</span>,
       <span className="tag" key="r">{ROLE_LABEL[u.role] ?? u.role}</span>,
-      u.emailVerified
-        ? <span className="badge badge-approved" key="v">Verified</span>
-        : <span className="badge badge-pending" key="v">Awaiting email</span>,
       <span className="mono muted" key="c">
         {u.createdAt.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}
       </span>,
@@ -82,7 +75,6 @@ export default async function AdminUsersPage({ searchParams }: { searchParams: P
         : u.prospect
           ? <Link href={`/admin/submissions/${u.prospect.referenceNumber}`} className="link-gold" key="l">Submission →</Link>
           : <span className="muted" key="l">—</span>,
-      u.emailVerified ? <span className="muted" key="a">—</span> : <VerifyButton userId={u.id} key="a" />,
     ],
   }));
 
@@ -115,13 +107,6 @@ export default async function AdminUsersPage({ searchParams }: { searchParams: P
         ))}
       </div>
 
-      {unverified > 0 && (
-        <p className="note mb-6">
-          {unverified} account{unverified === 1 ? "" : "s"} on this tab {unverified === 1 ? "is" : "are"} awaiting
-          email verification. Use <strong>Verify</strong> to confirm one manually.
-        </p>
-      )}
-
       {tab === "team" ? (
         <TeamManager
           members={teamMembers}
@@ -140,10 +125,8 @@ export default async function AdminUsersPage({ searchParams }: { searchParams: P
               { label: "Name", sortable: true },
               { label: "Email", sortable: true },
               { label: "Role", sortable: true },
-              { label: "Verified", sortable: true },
               { label: "Created", sortable: true },
               { label: "Their file" },
-              { label: "Action" },
             ]}
             rows={rows}
             emptyTitle="No client logins yet"

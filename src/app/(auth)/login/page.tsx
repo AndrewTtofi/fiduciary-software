@@ -24,10 +24,12 @@ export default async function LoginPage({
 
         <div className="auth-card">
           <div className="mb-6">
+            {/* Prototype fix #1: the portal is status-only — no "documents"
+                in the login copy. */}
             <h2 style={{ fontSize: "1.563rem", fontWeight: 700, letterSpacing: "-0.02em" }}>Welcome back</h2>
             <p className="text-muted mt-1" style={{ fontSize: "0.875rem" }}>
               {clientLogin
-                ? "Sign in to access your engagements, documents and messages."
+                ? "Sign in to track the progress of your order and message your adviser."
                 : "Team and partner sign-in."}
             </p>
           </div>

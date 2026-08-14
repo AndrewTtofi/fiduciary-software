@@ -2,7 +2,6 @@
 
 import { useState, useTransition, use, useEffect } from "react";
 import { signIn, getSession } from "next-auth/react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 type Tab = "signin" | "signup";
@@ -83,8 +82,8 @@ export function AuthTabs({
         setError(body.error ?? "Registration failed. Please try again.");
         return;
       }
-      // Dev auto-verifies; try to sign in immediately. If that fails (prod
-      // requires the email link), fall through to the verify-sent page.
+      // Accounts are created pre-verified (no outbound email on this
+      // deployment) — sign straight in.
       const signin = await signIn("credentials", {
         email: formData.get("email"),
         password: formData.get("password"),
@@ -95,7 +94,7 @@ export function AuthTabs({
         router.refresh();
         return;
       }
-      router.push("/verify-sent");
+      setError(friendlyAuthError(signin?.code ?? signin?.error ?? ""));
     });
   }
 
@@ -131,13 +130,9 @@ export function AuthTabs({
           <Field label="Email Address">
             <input name="email" type="email" required autoComplete="email" placeholder="e.g. alex@example.com" className="input" />
           </Field>
-          <div className="flex flex-col gap-1.5">
-            <div className="flex justify-between items-center">
-              <span className="flabel" style={{ marginBottom: 0 }}>Password</span>
-              <Link href="/forgot" className="text-brand" style={{ fontSize: "0.75rem" }}>Forgot?</Link>
-            </div>
+          <Field label="Password">
             <input name="password" type="password" required autoComplete="current-password" className="input" />
-          </div>
+          </Field>
           <button type="submit" disabled={pending} className="btn btn-primary w-full mt-3 disabled:opacity-50">
             {pending ? "Signing in…" : "Sign In →"}
           </button>
@@ -176,8 +171,6 @@ export function AuthTabs({
 
 function friendlyAuthError(code: string): string {
   switch (code) {
-    case "EMAIL_NOT_VERIFIED":
-      return "Please verify your email. Check your inbox for the link.";
     case "CLIENT_LOGIN_DISABLED":
     case "AccessDenied":
       return "Client sign-in is currently disabled. Please book a consultation instead.";

@@ -1029,9 +1029,8 @@
 .shell-marketing .aslider:active .thumb b { transform: scale(.94); }
 .shell-marketing .aslider input[type="range"] { position: absolute; inset: 0; width: 100%; height: 52px; opacity: 0; cursor: pointer; z-index: 50; margin: 0; -webkit-appearance: none; appearance: none; background: none; }
 .shell-marketing .aslider input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 52px; height: 52px; }
-/* No overflow mask: it clipped the last digit of wide figures (the serif
-   glyphs overrun the flex box at large sizes, e.g. the "You keep" amount).
-   The digit pop-in reads fine without masking the travel. */
+/* No overflow mask: an ancestor that constrains the box (as the .kv grid
+   collision once did) must never be able to clip the last digit again. */
 .shell-marketing .animnum { display: inline-flex; will-change: transform; }
 .shell-marketing .animnum span { display: inline-block; }
 @keyframes mk-digit-in { from { opacity: 0; transform: translateY(-.55em) scale(.92); } to { opacity: 1; transform: none; } }
@@ -1040,8 +1039,11 @@
 .shell-marketing .calc .crow b { font-family: var(--font-mono); font-weight: 500; white-space: nowrap; }
 .shell-marketing .keepbox { margin-top: 16px; padding-top: 15px; border-top: 1px solid rgba(255, 255, 255, .14); text-align: center; }
 .shell-marketing .keepbox .kl { font-size: .72rem; letter-spacing: .14em; text-transform: uppercase; color: rgba(255, 255, 255, .55); font-family: var(--font-mono); }
-.shell-marketing .keepbox .kv { font-family: var(--font-display), Georgia, serif; font-size: 2.5rem; font-weight: 700; line-height: 1.05; color: var(--mk-gold-bright); justify-content: center; margin: 3px 0; }
-@media (max-width: 420px) { .shell-marketing .keepbox .kv { font-size: 2rem; } }
+/* "keep-val", not "kv": the admin skin owns a global .kv key-value grid
+   (grid-template-columns: 132px 1fr) which squeezed this figure into a
+   132px column — clipping its last digit and pinning it left. */
+.shell-marketing .keepbox .keep-val { font-family: var(--font-display), Georgia, serif; font-size: 2.5rem; font-weight: 700; line-height: 1.05; color: var(--mk-gold-bright); margin: 3px 0; }
+@media (max-width: 420px) { .shell-marketing .keepbox .keep-val { font-size: 2rem; } }
 
 /* ── booking (prototype .book column + step motion) ───────────────── */
 .shell-marketing .book { max-width: 660px; margin: 0 auto; padding: 34px 24px 70px; }
@@ -1705,3 +1707,85 @@ table.tbl tbody tr:focus-visible { outline: 2px solid var(--brand); outline-offs
 /* Nav entry that still works but currently has no effect (portal switched off) */
 .sb-item.dimmed { opacity: .55; }
 .sb-item.dimmed:hover { opacity: 1; }
+
+/* =====================================================================
+   Client portal — prototype-v2 skin. Scoped entirely to .shell-client so
+   the admin and partner shells keep the "Quiet Authority" chrome. The
+   token remap re-skins every shared component (.card, .btn, .badge, .kpi,
+   .tbl…) the same way .ivory does on the marketing site; below it are the
+   portal-specific pieces: navy-deep sidebar with the gold active item,
+   the animated order-status timeline, and the navy info box.
+   ===================================================================== */
+.shell-client {
+  --brand: #A8853D; --brand-dark: #8F6F2E; --brand-50: rgba(196, 158, 84, .14);
+  --accent: #C49E54; --accent-deep: #A8853D; --accent-soft: #F2E9DF;
+  --bg: #FAF8F5; --surface: #FFFFFF; --surface-2: #F2E9DF;
+  --fg: #1A273F; --ink: #1A273F; --muted: #5C6672;
+  --border: #E7E2DB; --hairline: #ECE7E0; --border-strong: #D9D2C7;
+  --text: var(--fg); --text-muted: var(--muted);
+  --border-color: var(--border); --border-strong-color: var(--border-strong);
+  --client-bg: #FAF8F5; --client-surface: #FFFFFF; --client-fg: #1A273F;
+  --client-muted: #5C6672; --client-border: #E7E2DB;
+  --shadow-sm: 0 1px 2px rgba(26, 39, 63, .04), 0 4px 14px rgba(26, 39, 63, .05);
+  --shadow-md: 0 2px 4px rgba(26, 39, 63, .05), 0 12px 32px rgba(26, 39, 63, .08);
+}
+
+/* ── sidebar: navy-deep, gold active item (prototype .pside/.pnav) ── */
+.shell-client .sidebar { background: #111B2C; border-right: 0; color: #cfd6e2; }
+.shell-client .sb-org { border-bottom: 1px solid rgba(255, 255, 255, .08); }
+.shell-client .sb-org .nm { color: #fff; }
+.shell-client .sb-org .rl { color: rgba(255, 255, 255, .45); }
+.shell-client .sb-org .mk { background: var(--accent); color: #1A273F; }
+.shell-client .sb-org img { filter: brightness(0) invert(1); opacity: .92; }
+.shell-client .sb-group { color: rgba(255, 255, 255, .38); }
+.shell-client .sb-item { color: rgba(255, 255, 255, .62); }
+.shell-client .sb-item svg { color: rgba(255, 255, 255, .45); }
+.shell-client .sb-item:hover { background: rgba(255, 255, 255, .05); color: #fff; }
+.shell-client .sb-item:hover svg { color: #fff; }
+.shell-client .sb-item.active { background: var(--accent); color: #1A273F; font-weight: 600; }
+.shell-client .sb-item.active svg { color: #1A273F; }
+.shell-client .sb-item.active::before { content: none; }
+.shell-client .sb-item.locked { opacity: .4; }
+.shell-client .sb-foot { border-top: 1px solid rgba(255, 255, 255, .08); }
+.shell-client .sb-foot .sb-item:last-child, .shell-client .sb-foot form .sb-item { color: #e78b83; }
+
+/* ── appbar + main pane on the warm ground ── */
+.shell-client .appbar { background: rgba(250, 248, 245, .92); backdrop-filter: blur(8px); }
+.shell-client .appbar h1 { font-family: var(--font-display), Georgia, serif; }
+.shell-client .page-head h2 { font-family: var(--font-display), Georgia, serif; font-size: 1.8rem; }
+.shell-client .card, .shell-client .surface { border-radius: 13px; }
+.shell-client .card-title { font-family: var(--font-display), Georgia, serif; }
+.shell-client .btn-primary { background: var(--accent); border-color: var(--accent); color: #1A273F; font-weight: 600; }
+.shell-client .btn-primary:hover { background: #D8B368; border-color: #D8B368; }
+.shell-client ::selection { background: rgba(196, 158, 84, .25); color: #1A273F; }
+
+/* ── order-status timeline (prototype .tl/.ti): spine draws itself,
+      items slide in, the active dot pulses ── */
+.shell-client .ptl { position: relative; padding-left: 32px; display: flex; flex-direction: column; gap: 26px; list-style: none; margin: 0; }
+.shell-client .ptl::before { content: ""; position: absolute; left: 8px; top: 5px; bottom: 5px; width: 2px; background: var(--border); transform-origin: top; animation: ptl-spine 1.3s cubic-bezier(.22, 1, .36, 1) .2s backwards; }
+@keyframes ptl-spine { from { transform: scaleY(0); } }
+.shell-client .pti { position: relative; animation: pti-in .6s cubic-bezier(.22, 1, .36, 1) backwards; }
+.shell-client .pti:nth-child(2) { animation-delay: .35s; }
+.shell-client .pti:nth-child(3) { animation-delay: .55s; }
+.shell-client .pti:nth-child(4) { animation-delay: .75s; }
+@keyframes pti-in { from { opacity: 0; transform: translateX(-14px); } }
+.shell-client .pti .d { position: absolute; left: -32px; top: 2px; width: 18px; height: 18px; border-radius: 50%; background: var(--surface); border: 2px solid var(--border); }
+.shell-client .pti.done .d { background: var(--accent); border-color: var(--accent); }
+.shell-client .pti.act .d { border-color: var(--accent); animation: pti-pulse 2s infinite; }
+@keyframes pti-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(196, 158, 84, .45); }
+  70% { box-shadow: 0 0 0 9px rgba(196, 158, 84, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(196, 158, 84, 0); }
+}
+.shell-client .pti h3 { font-size: .94rem; font-weight: 600; margin: 0 0 3px; letter-spacing: 0; }
+.shell-client .pti p { font-size: .83rem; color: var(--muted); margin: 0; }
+.shell-client .pti.pend h3, .shell-client .pti.pend p { opacity: .5; }
+
+/* ── navy info box ("Documents stay where they are") ── */
+.shell-client .pbox-navy { background: #1A273F; color: #fff; border: 0; border-radius: 13px; padding: 24px; }
+.shell-client .pbox-navy h3 { color: #D8B368; font-family: var(--font-display), Georgia, serif; font-size: 1.1rem; font-weight: 600; margin: 0 0 8px; }
+.shell-client .pbox-navy p { font-size: .88rem; color: rgba(255, 255, 255, .72); margin: 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  .shell-client .ptl::before, .shell-client .pti, .shell-client .pti.act .d { animation: none; }
+}

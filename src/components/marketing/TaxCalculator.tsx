@@ -207,7 +207,7 @@ export function TaxCalculator({}: {
           <div className="bar-track"><div className="bar-fill cy" style={{ width: `${Math.max(8, (eff / cmpRate) * 100).toFixed(0)}%` }}>Cyprus</div></div>
           <div className="keepbox">
             <div className="kl">You keep</div>
-            <div className="kv"><AnimNum value={eur(keep)} /></div>
+            <div className="keep-val"><AnimNum value={eur(keep)} /></div>
             <div className="kl">more every year</div>
           </div>
           {/* The comparison is a modelled figure, so show how it is built

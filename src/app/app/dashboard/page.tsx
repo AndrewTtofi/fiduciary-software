@@ -5,6 +5,7 @@ import { requireUser } from "@/lib/auth/guards";
 import { prisma } from "@/lib/db";
 import { getProspectForUser } from "@/lib/services/client-view";
 import { getBranding, tierAtLeast } from "@/lib/services/branding";
+import { getSiteContent } from "@/lib/services/content";
 import { getVisibleDashboardSections } from "@/lib/services/dashboard-sections";
 import { getStageLabels, DEFAULT_STAGE_LABELS } from "@/lib/services/settings";
 import { ClientDashboard } from "./ClientDashboard";
@@ -65,8 +66,10 @@ export default async function ClientDashboardPage() {
 
   const sections = await getVisibleDashboardSections();
   const { brandName, planTier } = await getBranding();
+  const { contact } = await getSiteContent();
   // Starter is a plain status tracker: no compliance wording reaches clients.
   const showCompliance = tierAtLeast(planTier, "professional");
+  const showDocuments = tierAtLeast(planTier, "professional");
   // Stage wording is firm-editable (Admin → Status stages).
   const stageLabels = await getStageLabels();
 
@@ -99,6 +102,8 @@ export default async function ClientDashboardPage() {
         unreadMessageCount={recentStaffMessages}
         recentActivity={recentActivity.map((a) => ({ id: a.id, action: a.action, createdAt: a.createdAt }))}
         hasUpcomingBookingWithin14Days={hasUpcomingBooking}
+        showDocuments={showDocuments}
+        whatsapp={contact.whatsapp}
       />
     </ClientShell>
   );
@@ -151,9 +156,7 @@ function LegacyProspectDashboard({
         <div className="flex flex-col gap-8">
           <section className="surface rounded-card p-8">
             <h2 className="text-lg font-semibold mb-6">Application Progress</h2>
-            <ol className="relative pl-8 flex flex-col gap-8 before:absolute before:left-[7px] before:top-0 before:bottom-0 before:w-px"
-                style={{ ["--tw" as never]: "" }}>
-              <span aria-hidden className="absolute left-[7px] top-0 bottom-0 w-px" style={{ background: "var(--border)" }} />
+            <ol className="ptl">
               <TimelineItem done active={false} title="Submitted" body={`Application and initial documents received on ${prospect.createdAt.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}.`} />
               <TimelineItem done={status !== "pending" && status !== "needs_info"} active={status === "pending" || status === "needs_info"} title="Under Review" body="Our compliance team is verifying your details. This usually takes 24-48 hours." />
               <TimelineItem done={isApproved} active={false} title="Final Approval" body="Once approved, you will be invited to book your consultation." />
@@ -247,21 +250,14 @@ function LegacyProspectDashboard({
   );
 }
 
+/* Prototype-v2 timeline item: gold dot states (done / pulsing active /
+   dimmed pending); the spine and entrance motion live in the .ptl CSS. */
 function TimelineItem({ done, active, title, body }: { done: boolean; active: boolean; title: string; body: string }) {
   return (
-    <li className="relative">
-      <span
-        className={`absolute left-[-32px] top-1 w-4 h-4 rounded-full border-2 z-10 ${active ? "animate-pulse-accent" : ""}`}
-        style={
-          done
-            ? { background: "var(--brand)", borderColor: "var(--brand)" }
-            : active
-              ? { background: "var(--surface)", borderColor: "var(--brand)" }
-              : { background: "var(--surface)", borderColor: "var(--border)" }
-        }
-      />
-      <h3 className="text-meta font-semibold mb-1">{title}</h3>
-      <p className="text-meta text-muted">{body}</p>
+    <li className={`pti${done ? " done" : active ? " act" : " pend"}`}>
+      <span className="d" aria-hidden />
+      <h3>{title}</h3>
+      <p>{body}</p>
     </li>
   );
 }
