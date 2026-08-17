@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState , useSyncExternalStore } from "react";
+import { useMemo, useState, useSyncExternalStore } from "react";
+import Link from "next/link";
 import { ArrowIc } from "@/components/marketing/mk";
 import { CountryCombobox, CountryMultiCombobox } from "@/components/marketing/CountryCombobox";
 import { PhoneInput } from "@/components/marketing/PhoneInput";
@@ -9,6 +10,7 @@ import { SlotPicker } from "./SlotPicker";
 export type InquiryOption = { key: string; title: string };
 
 const HEARD_OPTIONS = ["Google search", "LinkedIn", "Facebook", "Referral", "Other"];
+const NOT_SAID = "";
 const BRIEF_MAX = 500;
 
 const RELOCATE_OPTIONS = [
@@ -34,8 +36,10 @@ const TIMELINE_OPTIONS = [
 const NOT_SURE = { key: "not_sure", title: "Not sure, I want guidance" };
 
 /** The firm operates on Cyprus time; slots are generated inside its working
- *  hours and re-labelled here in the visitor's own time zone. */
-const FIRM_TZ = "Europe/Nicosia";
+ *  hours and re-labelled here in the visitor's own time zone. The picker
+ *  auto-detects the visitor's zone from the browser and falls back to
+ *  Asia/Nicosia (the canonical IANA name for Cyprus). */
+const FIRM_TZ = "Asia/Nicosia";
 
 /* The browser's zone never changes mid-session, so there is nothing to
    subscribe to; the server snapshot keeps hydration consistent. */
@@ -53,7 +57,7 @@ const STEP_LABELS = [
  *  lead — every answer lands on the lead record so staff read the whole case
  *  in one view — and hard-books the picked slot: reserved internally and
  *  mirrored into the staff calendar (docs/booking-flow.md). */
-export function ContactBookingForm({ slots, inquiries, underForm }: { slots: string[]; inquiries: InquiryOption[]; underForm?: string }) {
+export function ContactBookingForm({ slots, inquiries }: { slots: string[]; inquiries: InquiryOption[] }) {
   const [step, setStep] = useState(0);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -65,7 +69,9 @@ export function ContactBookingForm({ slots, inquiries, underForm }: { slots: str
   const [timeline, setTimeline] = useState("");
   const [services, setServices] = useState<string[]>([]);
   const [brief, setBrief] = useState("");
-  const [heard, setHeard] = useState(HEARD_OPTIONS[0]);
+  const [consent, setConsent] = useState(false);
+  const [heard, setHeard] = useState(NOT_SAID);
+  const [heardSent, setHeardSent] = useState(false);
   const [slot, setSlot] = useState<string | null>(null);
   const [booked, setBooked] = useState(false);
   const [reloadToken, setReloadToken] = useState(0);
@@ -123,6 +129,10 @@ export function ContactBookingForm({ slots, inquiries, underForm }: { slots: str
       setStepErr("Please add your name and a valid email to continue.");
       return;
     }
+    if (step === 0 && !consent) {
+      setStepErr("Please agree to the Privacy Policy so we can process your details.");
+      return;
+    }
     if (step === 1 && (citizenships.length === 0 || !country.trim() || !relocate || !property || !timeline)) {
       setStepErr("Please answer the required questions to continue.");
       return;
@@ -172,7 +182,7 @@ export function ContactBookingForm({ slots, inquiries, underForm }: { slots: str
             ...(property && { property }),
             ...(timeline && { timeline }),
             ...(serviceTitles.length > 0 && { services: serviceTitles.join(", ") }),
-            ...(heard && { heardFrom: heard }),
+            gdprConsent: "yes",
             ...(slot && {
               preferredSlot: slot,
               preferredSlotLabel: cyFmt.format(new Date(slot)),
@@ -229,6 +239,15 @@ export function ContactBookingForm({ slots, inquiries, underForm }: { slots: str
             <label htmlFor="cf-wa">WhatsApp Number</label>
             <PhoneInput id="cf-wa" value={whatsapp} onChange={setWhatsapp} />
             <div className="charcount" style={{ textAlign: "left" }}>Optional, and the fastest way to reach us.</div>
+          </div>
+          <div className="fld full">
+            <label className="consent">
+              <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} />
+              <span>
+                I agree to my details being used to arrange and prepare for this consultation, as
+                described in the <Link href="/privacy" target="_blank">Privacy Policy</Link>.
+              </span>
+            </label>
           </div>
         </div>
       )}
@@ -313,14 +332,6 @@ export function ContactBookingForm({ slots, inquiries, underForm }: { slots: str
       {step === 3 && (
         <div className="fc-grid">
           <div className="fld full">
-            <label htmlFor="cf-heard">How Did You Hear About Us?</label>
-            <select id="cf-heard" value={heard} onChange={(e) => setHeard(e.target.value)}>
-              {HEARD_OPTIONS.map((o) => (
-                <option key={o}>{o}</option>
-              ))}
-            </select>
-          </div>
-          <div className="fld full">
             <label>Pick Your Slot</label>
             <div className="charcount" style={{ textAlign: "left", marginBottom: 4 }}>
               Shown in your own time zone, offered only within our Cyprus working hours. Every
@@ -360,18 +371,48 @@ export function ContactBookingForm({ slots, inquiries, underForm }: { slots: str
         )}
       </div>
 
-      {underForm && <p className="under-form">{underForm}</p>}
-
       {state === "done" && (
         <div className="ok-note">
           {booked && slot ? (
             <>Your consultation is booked for <b>{slotFmt.format(new Date(slot))}</b>. A calendar
-            invite is on its way to your email, and your adviser reads your answers before the call.</>
+            invite is on its way to your email, and your answers are read before the call.</>
           ) : (
-            <>Request received. We will confirm your slot on WhatsApp and email shortly, with an
-            adviser already briefed on your needs.</>
+            <>Request received. We will confirm your slot on WhatsApp and email shortly, having
+            read your answers first.</>
           )}
         </div>
+      )}
+      {/* Asked only after the booking is confirmed — the least important
+          question in the flow, so it no longer sits in front of the calendar. */}
+      {state === "done" && !heardSent && (
+        <div className="fld full" style={{ marginTop: 18 }}>
+          <label htmlFor="cf-heard">One last thing - how did you hear about us?</label>
+          <div className="optlist" role="radiogroup">
+            {HEARD_OPTIONS.map((o) => (
+              <button
+                key={o}
+                type="button"
+                role="radio"
+                aria-checked={heard === o}
+                className={`optb${heard === o ? " sel" : ""}`}
+                onClick={() => {
+                  setHeard(o);
+                  setHeardSent(true);
+                  fetch("/api/leads/referral", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ email: email.trim(), heardFrom: o }),
+                  }).catch(() => {});
+                }}
+              >
+                {o}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+      {state === "done" && heardSent && (
+        <p className="charcount" style={{ textAlign: "left", marginTop: 12 }}>Thank you - noted.</p>
       )}
       {state === "error" && (
         <div className="err-note">

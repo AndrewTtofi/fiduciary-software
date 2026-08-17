@@ -1,4 +1,5 @@
-/* Country-comparison figures for the effective-tax-rate calculator.
+/* Country-comparison figures for the effective-tax-rate and Non-Dom savings
+   calculators.
 
    Each country's number is the effective TOTAL tax on the same fully
    distributed profit the Cyprus engine models: the company pays corporate tax,
@@ -6,15 +7,16 @@
 
        effective = corporate + (1 − corporate) × dividend
 
-   These used to be four opaque percentages marked "PLACEHOLDERS pending the
-   confirmed per-country model". Storing the two components instead makes every
-   figure reproducible and checkable against its `sourceUrl`, and means adding a
-   country is a sourced fact rather than an invented total. The model reproduces
-   the firm's published Germany claim of "more than 48%" (48.5%).
+   Storing the two components makes every figure reproducible and checkable
+   against its `sourceUrl`, and the dividend rate on its own drives the
+   Non-Dom savings calculator.
 
-   Rates checked against PwC Worldwide Tax Summaries, August 2026. The dividend
-   figure is the rate a resident individual owner pays on a distribution, top
-   bracket where the country uses brackets.
+   The list is deliberately the FIFTEEN countries that matter to the firm's
+   clients (Tools spec) so the annual update is manageable — the firm owns
+   that review each January. Rates checked against PwC Worldwide Tax
+   Summaries, August 2026. The dividend figure is the rate a resident
+   individual owner pays on a distribution, top bracket where the country
+   uses brackets.
 
    Deliberately excluded: Ireland, Switzerland and Australia, whose imputation,
    partial-taxation and franking systems this simple two-step model would
@@ -116,10 +118,5 @@ export const COMPARE_COUNTRIES: Record<string, CompareCountry> = {
   },
 };
 
-export const DEFAULT_COMPARE = "DE";
-
-/* Cyprus engine constants (2026 rules) */
-export const CY_CORPORATE_RATE = 0.15;
-export const CY_IP_BOX_EFFECTIVE_RATE = 0.025; // 2.5% effective on qualifying IP under the 80% deemed deduction
-export const CY_GESY_RATE = 0.0265;
-export const CY_GESY_CAP = 180_000; // max GESY contribution = €4,770/yr
+/** Default comparison country: the United Kingdom (review, 3.2). */
+export const DEFAULT_COMPARE = "GB";

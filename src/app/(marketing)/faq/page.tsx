@@ -9,7 +9,7 @@ export default async function FaqPage() {
   const { faq } = await getSiteContent();
   return (
     <main>
-      <section className="phero">
+      <section className="phero phero-short">
         <div className="mk-container">
           <span className="kicker">FAQ</span>
           <h1>Questions We Get <span className="gold">Every Week</span></h1>
@@ -29,7 +29,7 @@ export default async function FaqPage() {
               </p>
             </div>
             <div style={{ flex: "none" }}>
-              <Link href="/contact" className="pill">Book Your Free 30-Minute Consultation</Link>
+              <Link href="/book" className="pill">Book Your Free 30-Minute Consultation</Link>
             </div>
           </div>
           <FaqAccordion faqs={faq} />

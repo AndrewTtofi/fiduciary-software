@@ -36,7 +36,7 @@ export async function generateMetadata(): Promise<Metadata> {
       template: `%s · ${brandName}`,
     },
     description:
-      "A qualify-first onboarding platform for corporate-services and fiduciary firms: educate prospects, gate consultations behind KYC, and run the whole client relationship from one branded platform.",
+      "Relocate to Cyprus without the guesswork: tax residency and Non-Dom, immigration and work permits, citizenship, company formation and accounting, with the route mapped before you commit to anything.",
     icons: { icon: "/favicon.ico" },
     robots: { index: true, follow: true },
   };

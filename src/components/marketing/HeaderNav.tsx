@@ -6,23 +6,30 @@ import { usePathname } from "next/navigation";
 import { ChevronIc } from "@/components/marketing/mk";
 
 export type NavService = { key: string; title: string };
+export type NavTool = { slug: string; name: string };
 
-const RESOURCES: { href: string; label: string }[] = [
-  { href: "/pricing", label: "Packages" },
-  { href: "/faq", label: "FAQ" },
-  { href: "/tools/compare", label: "Compare Jurisdictions" },
-  { href: "/marketplace", label: "Partner Network" },
-  { href: "/advisor", label: "AI Advisor" },
-];
-
-/** Desktop nav links + mobile hamburger panel. Client-side so the active link
- *  and the mobile toggle work; branding stays in the server-rendered header.
- *  Dropdowns are state-controlled (not CSS :hover) so they close as soon as a
- *  destination is picked instead of lingering over the new page. */
-export function HeaderNav({ services, clientLogin }: { services: NavService[]; clientLogin: boolean }) {
+/** Desktop nav links + mobile hamburger panel. The bar is site navigation,
+ *  not a list of services: Services · Tools · Insights · About · Contact,
+ *  with the service pages inside the Services dropdown and the ten tools
+ *  inside Tools. Client-side so the active link and the mobile toggle work;
+ *  branding stays in the server-rendered header.
+ *
+ *  Dropdown behaviour (kept from the previous build, per the review):
+ *  hovering opens the list, clicking an item opens that page, clicking the
+ *  label itself opens the landing page. State-controlled (not CSS :hover) so
+ *  menus close as soon as a destination is picked. */
+export function HeaderNav({
+  services,
+  tools,
+  clientLogin,
+}: {
+  services: NavService[];
+  tools: NavTool[];
+  clientLogin: boolean;
+}) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
-  const [drop, setDrop] = useState<"services" | "more" | null>(null);
+  const [drop, setDrop] = useState<"services" | "tools" | null>(null);
 
   // Route changed: whatever menu was used to get here is done. Adjusting
   // state during render (not in an effect) avoids a flash of the open menu.
@@ -54,33 +61,23 @@ export function HeaderNav({ services, clientLogin }: { services: NavService[]; c
             </span>
           )}
         </span>
-        <Link href="/tools/calculator" className={cls("/tools/calculator")}>Tax Calculator</Link>
-        <Link href="/insights" className={cls("/insights")}>Insights</Link>
-        <Link href="/your-consultation" className={cls("/your-consultation")}>Your Call</Link>
         <span
           className="drop"
-          onMouseEnter={() => setDrop("more")}
-          onMouseLeave={() => setDrop((d) => (d === "more" ? null : d))}
+          onMouseEnter={() => setDrop("tools")}
+          onMouseLeave={() => setDrop((d) => (d === "tools" ? null : d))}
         >
-          <a
-            role="button"
-            tabIndex={0}
-            aria-expanded={drop === "more"}
-            onClick={() => setDrop((d) => (d === "more" ? null : "more"))}
-            onKeyDown={(e) => e.key === "Enter" && setDrop((d) => (d === "more" ? null : "more"))}
-          >
-            More {ChevronIc}
-          </a>
-          {drop === "more" && (
+          <Link href="/tools" className={cls("/tools")} onClick={close}>Tools {ChevronIc}</Link>
+          {drop === "tools" && (
             <span className="dmenu">
-              <Link href="/about" onClick={close}>About Us</Link>
-              {RESOURCES.map((r) => (
-                <Link key={r.href} href={r.href} onClick={close}>{r.label}</Link>
+              {tools.map((t) => (
+                <Link key={t.slug} href={`/tools/${t.slug}`} onClick={close}>{t.name}</Link>
               ))}
             </span>
           )}
         </span>
-        {clientLogin && <Link href="/login">Client Login</Link>}
+        <Link href="/insights" className={cls("/insights")}>Insights</Link>
+        <Link href="/about" className={cls("/about")}>About</Link>
+        <Link href="/contact" className={cls("/contact")}>Contact</Link>
       </nav>
       <button
         className="mnav-btn"
@@ -99,15 +96,15 @@ export function HeaderNav({ services, clientLogin }: { services: NavService[]; c
           {services.map((s) => (
             <Link key={s.key} href={`/services/${s.key}`} className="sub">{s.title}</Link>
           ))}
-          <Link href="/tools/calculator">Tax Calculator</Link>
-          <Link href="/insights">Insights</Link>
-          <Link href="/your-consultation">Your Call</Link>
-          <Link href="/about">About Us</Link>
-          {RESOURCES.map((r) => (
-            <Link key={r.href} href={r.href}>{r.label}</Link>
+          <Link href="/tools">Tools</Link>
+          {tools.map((t) => (
+            <Link key={t.slug} href={`/tools/${t.slug}`} className="sub">{t.name}</Link>
           ))}
+          <Link href="/insights">Insights</Link>
+          <Link href="/about">About</Link>
           <Link href="/contact">Contact</Link>
           {clientLogin && <Link href="/login">Client Login</Link>}
+          <Link href="/book" className="mnav-cta">Book a Free Consultation</Link>
         </div>
       )}
     </>

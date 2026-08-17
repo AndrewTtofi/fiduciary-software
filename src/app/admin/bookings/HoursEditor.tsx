@@ -252,7 +252,7 @@ export function HoursEditor({ initial }: { initial: ConsultationHours }) {
         <button type="button" className="btn btn-primary" onClick={save} disabled={pending || !cfg.days.length || !generated.length}>
           {pending ? "Saving…" : "Save hours"}
         </button>
-        <a href="/contact" target="_blank" rel="noreferrer" className="btn btn-secondary">
+        <a href="/book" target="_blank" rel="noreferrer" className="btn btn-secondary">
           View booking form ↗
         </a>
         {msg && (

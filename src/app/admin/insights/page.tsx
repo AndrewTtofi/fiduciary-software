@@ -16,9 +16,17 @@ export default async function AdminInsightsPage() {
     slug: a.slug,
     title: a.title,
     keyword: a.keyword,
+    category: a.category,
     excerpt: a.excerpt,
     body: a.body,
     image: a.image,
+    author: a.author,
+    authorRole: a.authorRole,
+    authorBio: a.authorBio,
+    correctAsAt: a.correctAsAt ? a.correctAsAt.toISOString().slice(0, 10) : "",
+    metaTitle: a.metaTitle,
+    metaDesc: a.metaDesc,
+    serviceKey: a.serviceKey,
     published: a.published,
   }));
   return (
@@ -27,9 +35,11 @@ export default async function AdminInsightsPage() {
         <div className="eyebrow mb-2">Marketing site</div>
         <h2 style={{ fontSize: "1.563rem", fontWeight: 700, letterSpacing: "-0.02em" }}>Insights articles</h2>
         <p className="mt-2 max-w-[62ch] text-muted" style={{ fontSize: "0.9375rem", lineHeight: 1.6 }}>
-          Write, edit and publish the articles on the public Insights pages yourself. Each
-          article targets one search phrase: put the phrase in the title, the URL slug and the
-          first sentence. Published articles appear at /insights/&lt;slug&gt; immediately.
+          Write, edit and publish the articles on the public Insights pages yourself — one at a
+          time, as they are ready. Each article answers one question: put the search phrase in
+          the title, the URL slug and the first sentence. Every article needs a named author and
+          a &ldquo;correct as at&rdquo; date before it can be published. Published articles appear at
+          /insights/&lt;slug&gt; and in the sitemap immediately.
         </p>
       </div>
       <ArticlesManager initial={articles} />

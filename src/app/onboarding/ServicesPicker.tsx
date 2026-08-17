@@ -2,16 +2,21 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { ServiceIcons, SERVICES, type ServiceKey as IconKey } from "@/components/marketing/ServiceIcons";
+import { ServiceIcons } from "@/components/marketing/ServiceIcons";
+import type { ServiceKey } from "@/lib/schema/onboarding";
 
-const KEY_MAP: Record<IconKey, string> = {
-  formation: "company_formation",
-  accounting: "accounting",
-  tax: "tax_residency",
-  immigration: "immigration",
-  licensing: "licensing",
-  banking: "banking",
-};
+/* The onboarding picker lists the PLATFORM service lines (the keys the
+   application, lead flags and client services key on — lib/schema/onboarding),
+   not the public marketing catalogue, so a copy change on the website never
+   breaks an in-flight application. Icons are borrowed from the marketing set. */
+const PLATFORM_SERVICES: { key: ServiceKey; title: string; blurb: string; icon: keyof typeof ServiceIcons }[] = [
+  { key: "company_formation", title: "Company Formation", blurb: "Full incorporation and registered office setup.", icon: "company-formation" },
+  { key: "accounting", title: "Accounting and VAT", blurb: "Ongoing bookkeeping, VAT and annual filings.", icon: "accounting-vat" },
+  { key: "tax_residency", title: "Tax Residency and Non-Dom", blurb: "Non-Dom status and individual tax planning.", icon: "tax-residency" },
+  { key: "immigration", title: "Immigration and Work Permits", blurb: "Residency permits, work permits and citizenship.", icon: "immigration" },
+  { key: "licensing", title: "International Companies and Licensing", blurb: "Company formation and licensing abroad.", icon: "international" },
+  { key: "banking", title: "Business Accounts", blurb: "Business account applications, prepared and submitted.", icon: "company-formation" },
+];
 
 export function ServicesPicker({
   initialSelected,
@@ -50,8 +55,8 @@ export function ServicesPicker({
         Application: <span className="text-fg">{reference}</span>
       </p>
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {SERVICES.map((s) => {
-          const k = KEY_MAP[s.key];
+        {PLATFORM_SERVICES.map((s) => {
+          const k = s.key;
           const isSel = selected.has(k);
           return (
             <button
@@ -82,10 +87,10 @@ export function ServicesPicker({
                     : { background: "var(--bg)", color: "var(--fg)" }
                 }
               >
-                <span className="w-5 h-5 block">{ServiceIcons[s.key]}</span>
+                <span className="w-5 h-5 block">{ServiceIcons[s.icon]}</span>
               </span>
               <h3 className="font-display text-xl">{s.title}</h3>
-              <p className="text-meta text-muted">{s.pickerBlurb}</p>
+              <p className="text-meta text-muted">{s.blurb}</p>
             </button>
           );
         })}

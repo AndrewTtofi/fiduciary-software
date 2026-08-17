@@ -10,8 +10,12 @@ test("complete 3-step onboarding wizard → success page with reference number",
 
   // ── Step 1: Select service ────────────────────────────────────────────────
   await page.waitForURL(/\/onboarding$/, { timeout: 15000 });
-  // Click the Corporate Services (company-formation) card (aria-pressed button with that text)
-  await page.getByRole("button", { name: /corporate services/i }).click();
+  // Click the Company Formation (company_formation) card — match on the card
+  // heading, not the whole accessible name: the International Companies card's
+  // blurb also contains "company formation".
+  await page
+    .locator("button[aria-pressed]", { has: page.getByRole("heading", { name: "Company Formation", exact: true }) })
+    .click();
   // The "Continue" button at the bottom of the service picker
   await page.getByRole("button", { name: /^continue$/i }).click();
 

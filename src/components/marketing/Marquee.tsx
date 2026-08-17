@@ -1,17 +1,15 @@
-/* Infinite keyword marquee (prototype-v2). Pure CSS animation over a
-   duplicated row, so it renders on the server with no client JS. */
+/* Services ticker, rebuilt as a static centred row: the scrolling version
+   moved too quickly to read and clipped the first and last items at both
+   edges (review, 4.4 / Services 1.5). Renders on the server, no JS. */
 export function Marquee({ items }: { items: string[] }) {
-  const row = [...items, ...items];
   return (
-    <div className="mo-marquee" aria-hidden>
-      <div className="row">
-        {row.map((t, i) => (
-          <span className="it" key={i}>
-            <b>◆</b>
-            {t}
-          </span>
-        ))}
-      </div>
+    <div className="mo-ticker" aria-label="Our services">
+      {items.map((t, i) => (
+        <span className="it" key={i}>
+          <b aria-hidden>◆</b>
+          {t}
+        </span>
+      ))}
     </div>
   );
 }

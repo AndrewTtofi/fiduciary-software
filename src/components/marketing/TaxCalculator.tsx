@@ -2,29 +2,29 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import {
-  COMPARE_COUNTRIES,
-  effectiveRate,
-  DEFAULT_COMPARE,
-  CY_CORPORATE_RATE,
-  CY_IP_BOX_EFFECTIVE_RATE,
-  CY_GESY_RATE,
-  CY_GESY_CAP,
-} from "@/lib/data/tax-compare";
+import { COMPARE_COUNTRIES, effectiveRate, DEFAULT_COMPARE } from "@/lib/data/tax-compare";
+import { WhatsAppButton } from "@/components/marketing/mk";
 
-/* Effective-tax-rate calculator, leading with the country comparison:
-   Cyprus vs [country] on the same fully distributed profit, showing the
-   savings — not just the rate. Pure client-side; comparison figures live
-   in lib/data/tax-compare.ts (config, not code).
+/* Effective-tax-rate calculator: Cyprus vs [country] on the same fully
+   distributed profit, showing the savings — not just the rate. Pure
+   client-side; the Cyprus rates arrive as props from the editable tool
+   settings, the comparison figures live in lib/data/tax-compare.ts.
 
-   Cyprus engine (2026 rules): 15% corporate tax, 2.5% effective on
-   qualifying IP under the IP Box regime, 2.65% GESY capped at €180,000.
-   Verified: €1,000,000 profit, IP off → €150,000 + €4,770 = €154,770,
-   effective 15.48%.
+   Cyprus engine: corporate tax on profit, GESY on the distribution capped at
+   the GESY income cap, nothing else — a Non-Dom owner pays 0% Special
+   Defence Contribution on dividends. Director salary and personal income
+   tax are outside the model, and the headline says so.
 
-   Prototype-v2 UI: adaptive pill sliders (fill + thumb smoothed by CSS
-   transitions, colour shifting with the position) and per-character
-   animated figures — only changed digits re-animate. */
+   Rebuilt per the review: default €200,000 (not €1,000,000), default
+   comparison United Kingdom, no IP Box toggle (IP Box is its own tool), and
+   a `compact` variant for the homepage hero — slider, country, result, one
+   button — with the full breakdown on the dedicated tool page. */
+
+export type CalcRates = {
+  corporateTax: number;
+  gesyRate: number;
+  gesyCap: number;
+};
 
 const eur = (n: number) => "€" + Math.round(n).toLocaleString("en-US");
 const pct = (n: number) => (n * 100).toFixed(2) + "%";
@@ -39,12 +39,12 @@ function sliderColor(p: number): string {
 
 /** Per-character animated number: a changed character remounts its span
  *  (position+char key), replaying the pop-in animation. */
-function AnimNum({ value }: { value: string }) {
+export function AnimNum({ value }: { value: string }) {
   return (
     <span className="animnum">
       {[...value].map((c, i) => (
         <span key={`${i}:${c}`} className="pop">
-          {c === " " ? " " : c}
+          {c === " " ? " " : c}
         </span>
       ))}
     </span>
@@ -52,7 +52,7 @@ function AnimNum({ value }: { value: string }) {
 }
 
 /** Adaptive pill slider (ported from the prototype's AdaptiveSlider). */
-function ASlider({
+export function ASlider({
   id,
   min,
   max,
@@ -98,21 +98,22 @@ function ASlider({
   );
 }
 
-export function TaxCalculator({}: {
-  /** Accepted but unused: the comparison is plain Cyprus tax, not a
-   *  firm-specific outcome. Kept so the two call sites need no change. */
-  brandName?: string;
+export function TaxCalculator({
+  rates,
+  compact = false,
+  whatsapp = "",
+}: {
+  rates: CalcRates;
+  /** Homepage hero variant: slider, country, result, one button. */
+  compact?: boolean;
+  whatsapp?: string;
 }) {
-  const [profit, setProfit] = useState(1_000_000);
+  const [profit, setProfit] = useState(200_000);
   const [country, setCountry] = useState(DEFAULT_COMPARE);
-  const [ipOn, setIpOn] = useState(false);
-  const [ipShare, setIpShare] = useState(100);
 
-  const share = ipOn ? ipShare / 100 : 0;
-  const ipProfit = profit * share;
-  const stdProfit = profit - ipProfit;
-  const corp = stdProfit * CY_CORPORATE_RATE + ipProfit * CY_IP_BOX_EFFECTIVE_RATE;
-  const gesy = Math.min(profit, CY_GESY_CAP) * CY_GESY_RATE;
+  const corp = profit * rates.corporateTax;
+  const distributed = profit - corp;
+  const gesy = Math.min(distributed, rates.gesyCap) * rates.gesyRate;
   const total = corp + gesy;
   const eff = total / profit;
 
@@ -120,20 +121,24 @@ export function TaxCalculator({}: {
   const cmpRate = effectiveRate(cmp);
   const otherCost = profit * cmpRate;
   const keep = otherCost - total;
+  const corpPct = Math.round(rates.corporateTax * 1000) / 10;
+  const gesyPct = Math.round(rates.gesyRate * 10000) / 100;
+
+  const idp = compact ? "hc" : "tc";
 
   return (
-    <div className="calc">
+    <div className={`calc${compact ? " calc-compact" : ""}`}>
       <div className="calc-head">
         <span className="eyebrow">Effective Tax Rate</span>
-        <h3>Your effective tax rate in Cyprus</h3>
+        <h3>{compact ? "What would your company pay in Cyprus?" : "Your effective tax rate in Cyprus"}</h3>
       </div>
       <div className="calc-body">
         <div className="cfield">
-          <label htmlFor="tc-profit">
+          <label htmlFor={`${idp}-profit`}>
             Annual company profit <span className="val"><AnimNum value={profit.toLocaleString("en-US")} /></span>
           </label>
           <ASlider
-            id="tc-profit"
+            id={`${idp}-profit`}
             min={50_000}
             max={5_000_000}
             step={10_000}
@@ -143,94 +148,80 @@ export function TaxCalculator({}: {
           />
         </div>
         <div className="cfield">
-          <label htmlFor="tc-country">Compare against</label>
-          <select id="tc-country" value={country} onChange={(e) => setCountry(e.target.value)}>
+          <label htmlFor={`${idp}-country`}>Compare against</label>
+          <select id={`${idp}-country`} value={country} onChange={(e) => setCountry(e.target.value)}>
             {Object.entries(COMPARE_COUNTRIES).map(([key, c]) => (
               <option key={key} value={key}>{c.label}</option>
             ))}
           </select>
         </div>
-        <div className="cfield">
-          <label className="toggle">
-            <input
-              type="checkbox"
-              checked={ipOn}
-              onChange={(e) => setIpOn(e.target.checked)}
-            />
-            <span className="switch" aria-hidden />
-            <span>Include IP Box regime</span>
-          </label>
-          {ipOn && (
-            <div style={{ marginTop: 12 }}>
-              <label htmlFor="tc-ipshare" style={{ display: "flex", justifyContent: "space-between", fontSize: ".82rem", fontWeight: 600, marginBottom: 8 }}>
-                Share of profit from qualifying IP <span className="val"><AnimNum value={`${ipShare}%`} /></span>
-              </label>
-              <ASlider
-                id="tc-ipshare"
-                min={0}
-                max={100}
-                step={5}
-                value={ipShare}
-                onChange={setIpShare}
-                label="Share of profit from qualifying IP"
-              />
+
+        <div className="result">
+          <div className="big"><AnimNum value={(eff * 100).toFixed(2)} /><small>%</small></div>
+          <div className="cap">effective tax on distributed profit - Non-Dom resident, no salary drawn</div>
+          {!compact && (
+            <div className="breakdown">
+              <div className="r"><span>Corporate tax ({corpPct}%)</span><span>{eur(corp)}</span></div>
+              <div className="r"><span>GESY ({gesyPct}% on the distribution, capped at {eur(rates.gesyCap)})</span><span>{eur(gesy)}</span></div>
+              <div className="r total"><span>Total tax</span><span>{eur(total)}</span></div>
+            </div>
+          )}
+          {compact && (
+            <div className="crow" style={{ marginTop: 12, color: "var(--mk-grey)" }}>
+              <span>{cmp.label} on the same profit</span><b>{pct(cmpRate)}</b>
             </div>
           )}
         </div>
 
-        <div className="result">
-          <div className="big"><AnimNum value={(eff * 100).toFixed(2)} /><small>%</small></div>
-          <div className="cap">effective tax on fully distributed profit</div>
-          <div className="breakdown">
-            {ipOn ? (
-              <>
-                <div className="r"><span>Corporate tax (15% on {eur(stdProfit)})</span><span>{eur(stdProfit * CY_CORPORATE_RATE)}</span></div>
-                <div className="r"><span>IP Box (2.5% on {eur(ipProfit)})</span><span>{eur(ipProfit * CY_IP_BOX_EFFECTIVE_RATE)}</span></div>
-              </>
-            ) : (
-              <div className="r"><span>Corporate tax (15%)</span><span>{eur(corp)}</span></div>
-            )}
-            <div className="r"><span>GESY (2.65%, capped)</span><span>{eur(gesy)}</span></div>
-            <div className="r total"><span>Total tax</span><span>{eur(total)}</span></div>
-          </div>
-        </div>
+        {compact ? (
+          <>
+            <div className="keepbox keep-light">
+              <div className="kl">You keep</div>
+              <div className="keep-val"><AnimNum value={eur(keep)} /></div>
+              <div className="kl">more every year than in {cmp.label}</div>
+            </div>
+            <div className="calc-cta">
+              <Link href={"/tools/effective-tax-rate-calculator"} className="pill">See the full breakdown</Link>
+            </div>
+            <p className="fine">Illustrative estimate, not advice. Excludes director salary and personal income tax.</p>
+          </>
+        ) : (
+          <>
+            <div className="tc-compare">
+              <div className="crow"><span>{cmp.label}</span><b>{eur(otherCost)} ({pct(cmpRate)})</b></div>
+              <div className="bar-track"><div className="bar-fill other" style={{ width: "100%" }}>{cmp.label}</div></div>
+              {/* The figure is plain Cyprus corporate tax plus GESY — nothing about
+                  it depends on who you engage, so it is labelled "Cyprus", not
+                  "Cyprus with us". */}
+              <div className="crow" style={{ marginTop: 9 }}><span>Cyprus</span><b>{eur(total)} ({pct(eff)})</b></div>
+              <div className="bar-track"><div className="bar-fill cy" style={{ width: `${Math.max(8, (eff / cmpRate) * 100).toFixed(0)}%` }}>Cyprus</div></div>
+              <div className="keepbox">
+                <div className="kl">You keep</div>
+                <div className="keep-val"><AnimNum value={eur(keep)} /></div>
+                <div className="kl">more every year</div>
+              </div>
+              {/* The comparison is a modelled figure, so show how it is built
+                  rather than asserting a bare percentage. */}
+              <p className="fine mt-3">
+                {cmp.label}: {cmp.basis}{" "}
+                <a href={cmp.sourceUrl} target="_blank" rel="noreferrer noopener" className="link-gold">Source ↗</a>
+              </p>
+            </div>
 
-        <div className="tc-compare">
-          <div className="crow"><span>{cmp.label}</span><b>{eur(otherCost)} ({pct(cmpRate)})</b></div>
-          <div className="bar-track"><div className="bar-fill other" style={{ width: "100%" }}>{cmp.label}</div></div>
-          {/* Was "Cyprus with {brandName}". Two problems: with the neutral
-              white-label default it read "Cyprus with the platform", and more
-              importantly the figure is plain Cyprus corporate tax plus GESY —
-              nothing about it depends on who you engage. Implying the firm
-              changes the tax outcome is a claim the maths does not support. */}
-          <div className="crow" style={{ marginTop: 9 }}><span>Cyprus</span><b>{eur(total)} ({pct(eff)})</b></div>
-          <div className="bar-track"><div className="bar-fill cy" style={{ width: `${Math.max(8, (eff / cmpRate) * 100).toFixed(0)}%` }}>Cyprus</div></div>
-          <div className="keepbox">
-            <div className="kl">You keep</div>
-            <div className="keep-val"><AnimNum value={eur(keep)} /></div>
-            <div className="kl">more every year</div>
-          </div>
-          {/* The comparison is a modelled figure, so show how it is built
-              rather than asserting a bare percentage. */}
-          <p className="fine mt-3">
-            {cmp.label}: {cmp.basis}{" "}
-            <a href={cmp.sourceUrl} target="_blank" rel="noreferrer noopener" className="link-gold">Source ↗</a>
-          </p>
-        </div>
-
-        <div className="calc-cta">
-          <Link href="/contact" className="pill">Book Your Free 30-Minute Consultation</Link>
-        </div>
-        <p className="fine">
-          GESY (General Healthcare System) is Cyprus&apos;s national health contribution, charged at
-          2.65% on dividends for Non-Dom residents. It is capped at €180,000 of annual income,
-          meaning a maximum contribution of €4,770 per year. The more you earn above the cap, the
-          lower your effective rate becomes.
-        </p>
-        <p className="fine">
-          Illustrative estimate based on 2026 Cyprus tax rules. Your exact rate depends on your
-          structure, residency, and income type. Your final structure is confirmed on a call.
-        </p>
+            <div className="calc-cta">
+              <Link href="/book" className="pill">Book a Free Consultation</Link>
+              <WhatsAppButton number={whatsapp} />
+            </div>
+            <p className="fine">
+              This is an estimate, not advice. The figure is corporate tax plus GESY on the
+              distributed profit for a Non-Dom resident who draws no salary. It excludes director
+              salary and personal income tax, which change the picture. Non-Dom status can only be
+              obtained after Cyprus tax residency is established. GESY is charged at {gesyPct}% on
+              dividends, capped at {eur(rates.gesyCap)} of annual income, so it can never exceed{" "}
+              {eur(rates.gesyCap * rates.gesyRate)} a year. Your exact position is confirmed on a call.
+            </p>
+          </>
+        )}
       </div>
     </div>
   );

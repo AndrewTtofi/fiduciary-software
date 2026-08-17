@@ -1,10 +1,10 @@
 import Link from "next/link";
-import type { Consultation } from "@/lib/services/content";
-import { CheckIc, GoldHeading, waLink } from "@/components/marketing/mk";
+import { paragraphs, type Consultation } from "@/lib/services/content";
+import { CheckIc, WhatsAppButton } from "@/components/marketing/mk";
 
-/* "Who takes your call" block (prototype-v2): the reveal team card — social
-   rail slides in from the right edge on hover, hidden bio text fades in —
-   next to the consultation pitch. All copy is content-managed. */
+/* "Who takes your call" — first-person pitch beside the team card. All copy
+   is content-managed. No eyebrow (it duplicated the heading), no line
+   beneath the buttons. */
 
 export function ConsultBlock({
   consultation,
@@ -15,6 +15,7 @@ export function ConsultBlock({
   contact: { whatsapp: string; email: string };
   brandName: string;
 }) {
+  const paras = paragraphs(consultation.body);
   return (
     <section className="wtc sec" id="consultation">
       <div className="mk-container wtc-grid">
@@ -26,7 +27,7 @@ export function ConsultBlock({
           {!consultation.photoUrl && <div className="ph-note">[ {consultation.photoNote} ]</div>}
           <div className="gcard-soc">
             {contact.whatsapp && (
-              <a href={waLink(contact.whatsapp)} target="_blank" rel="noopener" title="Message on WhatsApp" aria-label="Message on WhatsApp">
+              <a href={`https://wa.me/${contact.whatsapp.replace(/[^\d]/g, "")}`} target="_blank" rel="noopener" title="Message on WhatsApp" aria-label="Message on WhatsApp">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
                   <path d="M21 11.5a8.4 8.4 0 0 1-12.6 7.3L3 20.5l1.8-5.3A8.4 8.4 0 1 1 21 11.5z" />
                 </svg>
@@ -44,29 +45,22 @@ export function ConsultBlock({
           <div className="gcard-txt">
             <b>{consultation.personName}</b>
             <span className="role">{consultation.personTitle}, {brandName}</span>
-            <span className="reveal-txt">{consultation.points[0]}</span>
           </div>
         </div>
         <div>
-          <span className="kicker">{consultation.kicker}</span>
-          <h2><GoldHeading text={consultation.heading} /></h2>
-          <p className="body">{consultation.body}</p>
+          <h2>{consultation.heading}</h2>
+          {paras.map((p, i) => (
+            <p className={i === 0 ? "lead" : "body"} key={i} style={i === 0 ? { marginTop: 14 } : { marginTop: 12 }}>{p}</p>
+          ))}
           <ul className="pts">
             {consultation.points.map((p, i) => (
               <li key={i}>{CheckIc}{p}</li>
             ))}
           </ul>
           <div style={{ marginTop: 26, display: "flex", gap: 12, flexWrap: "wrap" }}>
-            <Link href="/contact" className="pill">Book Your Free 30-Minute Consultation</Link>
-            {contact.whatsapp && (
-              <a href={waLink(contact.whatsapp)} target="_blank" rel="noopener" className="pill ghost">
-                Message on WhatsApp
-              </a>
-            )}
+            <Link href="/book" className="pill">Book Your Free 30-Minute Consultation</Link>
+            <WhatsAppButton number={contact.whatsapp} />
           </div>
-          <p style={{ fontSize: ".82rem", color: "var(--mk-grey)", marginTop: 16 }}>
-            {consultation.underForm}
-          </p>
         </div>
       </div>
     </section>

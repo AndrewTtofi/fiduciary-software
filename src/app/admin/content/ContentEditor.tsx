@@ -13,8 +13,8 @@ const TABS: { key: TabKey; label: string }[] = [
   { key: "home", label: "Homepage" },
   { key: "about", label: "About page" },
   { key: "insights", label: "Insights & FAQ" },
-  { key: "consult", label: "Consultation" },
-  { key: "contact", label: "Contact" },
+  { key: "consult", label: "Who takes your call" },
+  { key: "contact", label: "Contact & footer" },
 ];
 
 export function ContentEditor({ initial }: { initial: SiteContent }) {
@@ -28,13 +28,13 @@ export function ContentEditor({ initial }: { initial: SiteContent }) {
 
   // Generic immutable updaters.
   const setHero = (k: keyof SiteContent["hero"], v: string) => setC((p) => ({ ...p, hero: { ...p.hero, [k]: v } }));
-  const setAbout = (k: keyof SiteContent["about"], v: string) => setC((p) => ({ ...p, about: { ...p.about, [k]: v } }));
-  const setWhy = (k: "kicker", v: string) => setC((p) => ({ ...p, why: { ...p.why, [k]: v } }));
   const setIntro = (k: keyof SiteContent["servicesIntro"], v: string) => setC((p) => ({ ...p, servicesIntro: { ...p.servicesIntro, [k]: v } }));
+  const setHow = (k: "heading" | "sub", v: string) => setC((p) => ({ ...p, how: { ...p.how, [k]: v } }));
   const setCta = (k: keyof SiteContent["cta"], v: string) => setC((p) => ({ ...p, cta: { ...p.cta, [k]: v } }));
-  const setInsights = (k: "kicker" | "heading" | "rhHeading" | "rhBody", v: string) => setC((p) => ({ ...p, insights: { ...p.insights, [k]: v } }));
+  const setInsights = (k: keyof SiteContent["insights"], v: string) => setC((p) => ({ ...p, insights: { ...p.insights, [k]: v } }));
   const setContact = (k: keyof SiteContent["contact"], v: string) => setC((p) => ({ ...p, contact: { ...p.contact, [k]: v } }));
   const setConsult = (k: keyof Omit<SiteContent["consultation"], "points">, v: string) => setC((p) => ({ ...p, consultation: { ...p.consultation, [k]: v } }));
+  const setAbout = (k: "story" | "how" | "whatWeDoIntro", v: string) => setC((p) => ({ ...p, about: { ...p.about, [k]: v } }));
 
   function listSet<K extends "stats" | "faq">(key: K, i: number, field: string, v: string) {
     setC((p) => {
@@ -50,15 +50,22 @@ export function ContentEditor({ initial }: { initial: SiteContent }) {
     setC((p) => ({ ...p, [key]: (p[key] as unknown[]).filter((_, j) => j !== i) }));
   }
 
-  // Nested lists (why.features, insights.posts).
-  function featSet(i: number, field: "t" | "d", v: string) {
-    setC((p) => {
-      const features = p.why.features.map((f, j) => (j === i ? { ...f, [field]: v } : f));
-      return { ...p, why: { ...p.why, features } };
-    });
+  // Nested lists.
+  function stepSet(i: number, field: "t" | "d", v: string) {
+    setC((p) => ({ ...p, how: { ...p.how, steps: p.how.steps.map((s, j) => (j === i ? { ...s, [field]: v } : s)) } }));
   }
-  function featAdd() { setC((p) => ({ ...p, why: { ...p.why, features: [...p.why.features, { t: "", d: "" }] } })); }
-  function featRemove(i: number) { setC((p) => ({ ...p, why: { ...p.why, features: p.why.features.filter((_, j) => j !== i) } })); }
+  function stepAdd() { setC((p) => ({ ...p, how: { ...p.how, steps: [...p.how.steps, { t: "", d: "" }] } })); }
+  function stepRemove(i: number) { setC((p) => ({ ...p, how: { ...p.how, steps: p.how.steps.filter((_, j) => j !== i) } })); }
+  function whySet(i: number, field: "t" | "d", v: string) {
+    setC((p) => ({ ...p, about: { ...p.about, why: p.about.why.map((f, j) => (j === i ? { ...f, [field]: v } : f)) } }));
+  }
+  function whyAdd() { setC((p) => ({ ...p, about: { ...p.about, why: [...p.about.why, { t: "", d: "" }] } })); }
+  function whyRemove(i: number) { setC((p) => ({ ...p, about: { ...p.about, why: p.about.why.filter((_, j) => j !== i) } })); }
+  function personSet(i: number, field: "name" | "title" | "bio", v: string) {
+    setC((p) => ({ ...p, about: { ...p.about, people: p.about.people.map((x, j) => (j === i ? { ...x, [field]: v } : x)) } }));
+  }
+  function personAdd() { setC((p) => ({ ...p, about: { ...p.about, people: [...p.about.people, { name: "", title: "", bio: "" }] } })); }
+  function personRemove(i: number) { setC((p) => ({ ...p, about: { ...p.about, people: p.about.people.filter((_, j) => j !== i) } })); }
   function pointSet(i: number, v: string) {
     setC((p) => ({ ...p, consultation: { ...p.consultation, points: p.consultation.points.map((x, j) => (j === i ? v : x)) } }));
   }
@@ -98,121 +105,90 @@ export function ContentEditor({ initial }: { initial: SiteContent }) {
       </div>
 
       {tab === "hero" && (<>
-      {/* Hero */}
       <Card title="Hero" where={[{ href: "/", label: "Home" }]}>
-        <Field label="Eyebrow"><input className="input" value={c.hero.eyebrow} onChange={(e) => setHero("eyebrow", e.target.value)} /></Field>
-        <Field label="Headline"><input className="input" value={c.hero.headline} onChange={(e) => setHero("headline", e.target.value)} /></Field>
-        <Field label="Lead paragraph"><textarea className="input" rows={3} value={c.hero.lead} onChange={(e) => setHero("lead", e.target.value)} /></Field>
+        <Field label="Eyebrow (small line above the headline)"><input className="input" value={c.hero.eyebrow} onChange={(e) => setHero("eyebrow", e.target.value)} /></Field>
+        <Field label="Headline (H1 — carries the search weight)"><textarea className="input" rows={2} value={c.hero.display} onChange={(e) => setHero("display", e.target.value)} /></Field>
+        <Field label="Sub-heading"><textarea className="input" rows={3} value={c.hero.lead} onChange={(e) => setHero("lead", e.target.value)} /></Field>
         <div className="grid gap-3 sm:grid-cols-2">
-          <Field label="Primary button"><input className="input" value={c.hero.primaryCta} onChange={(e) => setHero("primaryCta", e.target.value)} /></Field>
-          <Field label="Secondary button"><input className="input" value={c.hero.secondaryCta} onChange={(e) => setHero("secondaryCta", e.target.value)} /></Field>
+          <Field label="Gold button (full wording — the header uses the short form)"><input className="input" value={c.hero.primaryCta} onChange={(e) => setHero("primaryCta", e.target.value)} /></Field>
+          <Field label="Outline button (opens WhatsApp)"><input className="input" value={c.hero.secondaryCta} onChange={(e) => setHero("secondaryCta", e.target.value)} /></Field>
         </div>
-        <p className="help">Headlines: new lines split the kinetic heading; text between *asterisks* renders gold italic. Body copy: **double asterisks** render bold.</p>
+        <p className="help">Headline: a new line splits the two lines; text between *asterisks* renders gold italic.</p>
       </Card>
-
-      </>)}
-      {tab === "about" && (<>
-      {/* About / who we are */}
-      <Card title="About / who we are" where={[{ href: "/about", label: "About" }]} note="This is the “Our story” text on the About page.">
-        <Field label="Body (home + about page)"><textarea className="input" rows={3} value={c.about.body1} onChange={(e) => setAbout("body1", e.target.value)} /></Field>
-        <Field label="Second paragraph (about page)"><textarea className="input" rows={2} value={c.about.body2} onChange={(e) => setAbout("body2", e.target.value)} /></Field>
-      </Card>
-
-      {/* Why choose us */}
-      <Card title="Why choose us" onAdd={featAdd} addLabel="Add feature" where={[{ href: "/about", label: "About" }]}>
-        <Field label="Kicker"><input className="input" value={c.why.kicker} onChange={(e) => setWhy("kicker", e.target.value)} /></Field>
-        <hr className="hairline" style={{ margin: "8px 0" }} />
-        {c.why.features.map((f, i) => (
-          <ListItem key={i} onRemove={() => featRemove(i)} index={i + 1}>
-            <Field label="Title"><input className="input" value={f.t} onChange={(e) => featSet(i, "t", e.target.value)} /></Field>
-            <Field label="Description"><textarea className="input" rows={2} value={f.d} onChange={(e) => featSet(i, "d", e.target.value)} /></Field>
-          </ListItem>
-        ))}
-      </Card>
-
-      </>)}
-      {tab === "home" && (<>
-      {/* Services intro */}
-      <Card title="Services section heading" where={[{ href: "/", label: "Home" }, { href: "/services", label: "Services" }]}>
-        <Field label="Eyebrow"><input className="input" value={c.servicesIntro.eyebrow} onChange={(e) => setIntro("eyebrow", e.target.value)} /></Field>
-        <Field label="Heading"><input className="input" value={c.servicesIntro.heading} onChange={(e) => setIntro("heading", e.target.value)} /></Field>
-        <Field label="Body"><textarea className="input" rows={2} value={c.servicesIntro.body} onChange={(e) => setIntro("body", e.target.value)} /></Field>
-        <p className="help">The service cards themselves are managed under <strong>Settings → Services</strong>.</p>
-      </Card>
-
-      {/* Stats */}
-      <Card title="Proof stats" onAdd={() => listAdd("stats", { v: "", l: "" })} addLabel="Add stat" where={[{ href: "/", label: "Home" }]}>
+      <Card title="Hero statistics (three, equal size)" onAdd={() => listAdd("stats", { v: "", l: "" })} addLabel="Add stat" where={[{ href: "/", label: "Home" }]}>
         {c.stats.map((s, i) => (
           <ListItem key={i} onRemove={() => listRemove("stats", i)} index={i + 1}>
             <div className="grid gap-3 sm:grid-cols-2">
-              <Field label="Value"><input className="input" value={s.v} onChange={(e) => listSet("stats", i, "v", e.target.value)} /></Field>
+              <Field label="Figure"><input className="input" value={s.v} onChange={(e) => listSet("stats", i, "v", e.target.value)} /></Field>
               <Field label="Label"><input className="input" value={s.l} onChange={(e) => listSet("stats", i, "l", e.target.value)} /></Field>
             </div>
           </ListItem>
         ))}
+        <p className="help">Keep these verifiable facts about Cyprus, not claims about the firm. The registration line beneath them comes from the legal name (Settings → Branding) and the registration number (Contact tab).</p>
       </Card>
-
       </>)}
+
       {tab === "home" && (<>
-      {/* CTA */}
-      <Card title="Call-to-action band" where={[{ href: "/", label: "Home" }, { href: "/services", label: "Services" }, { href: "/about", label: "About" }, { href: "/pricing", label: "Pricing" }, { href: "/faq", label: "FAQ" }]}>
-        <Field label="Heading"><input className="input" value={c.cta.heading} onChange={(e) => setCta("heading", e.target.value)} /></Field>
-        <Field label="Body"><textarea className="input" rows={2} value={c.cta.body} onChange={(e) => setCta("body", e.target.value)} /></Field>
-        <Field label="Button"><input className="input" value={c.cta.button} onChange={(e) => setCta("button", e.target.value)} /></Field>
-        <p className="help">Phone numbers shown in the band come from the Contact details below.</p>
+      <Card title="Services section heading" where={[{ href: "/", label: "Home" }, { href: "/services", label: "Services" }]}>
+        <Field label="Heading"><input className="input" value={c.servicesIntro.heading} onChange={(e) => setIntro("heading", e.target.value)} /></Field>
+        <Field label="Body"><textarea className="input" rows={2} value={c.servicesIntro.body} onChange={(e) => setIntro("body", e.target.value)} /></Field>
+        <p className="help">The eight service cards and pages are managed in code with the firm&rsquo;s agreed wording.</p>
       </Card>
-
-      </>)}
-      {tab === "insights" && (<>
-      {/* Insights */}
-      <Card title="Insights section heading" where={[{ href: "/", label: "Home" }, { href: "/insights", label: "Insights" }]}>
-        <Field label="Kicker"><input className="input" value={c.insights.kicker} onChange={(e) => setInsights("kicker", e.target.value)} /></Field>
-        <Field label="Heading"><textarea className="input" rows={2} value={c.insights.heading} onChange={(e) => setInsights("heading", e.target.value)} /></Field>
-        <Field label="Right-hand heading"><input className="input" value={c.insights.rhHeading} onChange={(e) => setInsights("rhHeading", e.target.value)} /></Field>
-        <Field label="Right-hand body"><textarea className="input" rows={2} value={c.insights.rhBody} onChange={(e) => setInsights("rhBody", e.target.value)} /></Field>
-        <p className="help">The article cards themselves are managed under <strong>Insights articles</strong> in the sidebar.</p>
-      </Card>
-
-      </>)}
-      {tab === "consult" && (<>
-      {/* Who takes your call */}
-      <Card title="Who takes your call" onAdd={pointAdd} addLabel="Add point" where={[{ href: "/your-consultation", label: "Book a consultation" }, { href: "/", label: "Home strip" }]}>
-        <div className="grid gap-3 sm:grid-cols-2">
-          <Field label="Kicker"><input className="input" value={c.consultation.kicker} onChange={(e) => setConsult("kicker", e.target.value)} /></Field>
-          <Field label="Heading"><input className="input" value={c.consultation.heading} onChange={(e) => setConsult("heading", e.target.value)} /></Field>
-          <Field label="Person name"><input className="input" value={c.consultation.personName} onChange={(e) => setConsult("personName", e.target.value)} /></Field>
-          <Field label="Person title"><input className="input" value={c.consultation.personTitle} onChange={(e) => setConsult("personTitle", e.target.value)} /></Field>
-        </div>
-        <Field label="Body"><textarea className="input" rows={3} value={c.consultation.body} onChange={(e) => setConsult("body", e.target.value)} /></Field>
-        <Field label="Photo URL (portrait of the person, 4:5)"><input className="input" value={c.consultation.photoUrl} onChange={(e) => setConsult("photoUrl", e.target.value)} placeholder="/marketing/georgia.jpg" /></Field>
-        <Field label="Photo note (shown while no photo is set)"><input className="input" value={c.consultation.photoNote} onChange={(e) => setConsult("photoNote", e.target.value)} /></Field>
-        <Field label="Positioning strip heading"><textarea className="input" rows={2} value={c.consultation.stripHeading} onChange={(e) => setConsult("stripHeading", e.target.value)} /></Field>
-        <Field label="Positioning strip body"><input className="input" value={c.consultation.stripBody} onChange={(e) => setConsult("stripBody", e.target.value)} /></Field>
-        <Field label="Line under the booking form"><input className="input" value={c.consultation.underForm} onChange={(e) => setConsult("underForm", e.target.value)} /></Field>
+      <Card title="How it works (dark band)" onAdd={stepAdd} addLabel="Add step" where={[{ href: "/", label: "Home" }]}>
+        <Field label="Heading"><input className="input" value={c.how.heading} onChange={(e) => setHow("heading", e.target.value)} /></Field>
+        <Field label="Sub-heading"><input className="input" value={c.how.sub} onChange={(e) => setHow("sub", e.target.value)} /></Field>
         <hr className="hairline" style={{ margin: "8px 0" }} />
-        {c.consultation.points.map((pt, i) => (
-          <ListItem key={i} onRemove={() => pointRemove(i)} index={i + 1}>
-            <Field label="Point"><input className="input" value={pt} onChange={(e) => pointSet(i, e.target.value)} /></Field>
+        {c.how.steps.map((s, i) => (
+          <ListItem key={i} onRemove={() => stepRemove(i)} index={i + 1}>
+            <Field label="Title"><input className="input" value={s.t} onChange={(e) => stepSet(i, "t", e.target.value)} /></Field>
+            <Field label="Text"><textarea className="input" rows={2} value={s.d} onChange={(e) => stepSet(i, "d", e.target.value)} /></Field>
           </ListItem>
         ))}
       </Card>
-
-      </>)}
-      {tab === "contact" && (<>
-      {/* Contact details */}
-      <Card title="Contact details" where={[{ href: "/contact", label: "Contact" }, { href: "/your-consultation", label: "Book a consultation" }, { href: "/", label: "Home + footer everywhere" }]}>
-        <div className="grid gap-3 sm:grid-cols-2">
-          <Field label="Office address"><input className="input" value={c.contact.address} onChange={(e) => setContact("address", e.target.value)} /></Field>
-          <Field label="Email"><input className="input" value={c.contact.email} onChange={(e) => setContact("email", e.target.value)} /></Field>
-          <Field label="Phone"><input className="input" value={c.contact.phone} onChange={(e) => setContact("phone", e.target.value)} /></Field>
-          <Field label="WhatsApp"><input className="input" value={c.contact.whatsapp} onChange={(e) => setContact("whatsapp", e.target.value)} /></Field>
-        </div>
-        <p className="help">Shown on the contact page, the footer and the phone band across the public site.</p>
+      <Card title="Closing call-to-action band" where={[{ href: "/", label: "Home" }, { href: "/services", label: "Services" }, { href: "/about", label: "About" }, { href: "/faq", label: "FAQ" }]}>
+        <Field label="Heading"><input className="input" value={c.cta.heading} onChange={(e) => setCta("heading", e.target.value)} /></Field>
+        <Field label="Body"><textarea className="input" rows={2} value={c.cta.body} onChange={(e) => setCta("body", e.target.value)} /></Field>
+        <Field label="Button"><input className="input" value={c.cta.button} onChange={(e) => setCta("button", e.target.value)} /></Field>
+        <p className="help">The WhatsApp button and the phone numbers in the band come from the Contact tab.</p>
       </Card>
-
       </>)}
+
+      {tab === "about" && (<>
+      <Card title="How it started" where={[{ href: "/about", label: "About" }]}>
+        <Field label="Story (blank line between paragraphs; {brand} is replaced by the firm name)"><textarea className="input" rows={6} value={c.about.story} onChange={(e) => setAbout("story", e.target.value)} /></Field>
+      </Card>
+      <Card title="How we work" where={[{ href: "/about", label: "About" }]}>
+        <Field label="Text (blank line between paragraphs)"><textarea className="input" rows={6} value={c.about.how} onChange={(e) => setAbout("how", e.target.value)} /></Field>
+        <Field label="Intro line above the eight services"><input className="input" value={c.about.whatWeDoIntro} onChange={(e) => setAbout("whatWeDoIntro", e.target.value)} /></Field>
+      </Card>
+      <Card title="Why clients stay" onAdd={whyAdd} addLabel="Add panel" where={[{ href: "/about", label: "About" }]}>
+        {c.about.why.map((f, i) => (
+          <ListItem key={i} onRemove={() => whyRemove(i)} index={i + 1}>
+            <Field label="Title"><input className="input" value={f.t} onChange={(e) => whySet(i, "t", e.target.value)} /></Field>
+            <Field label="Description"><textarea className="input" rows={2} value={f.d} onChange={(e) => whySet(i, "d", e.target.value)} /></Field>
+          </ListItem>
+        ))}
+      </Card>
+      <Card title="The people (no photographs)" onAdd={personAdd} addLabel="Add person" where={[{ href: "/about", label: "About" }]}>
+        {c.about.people.map((p, i) => (
+          <ListItem key={i} onRemove={() => personRemove(i)} index={i + 1}>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <Field label="Name"><input className="input" value={p.name} onChange={(e) => personSet(i, "name", e.target.value)} /></Field>
+              <Field label="Title"><input className="input" value={p.title} onChange={(e) => personSet(i, "title", e.target.value)} /></Field>
+            </div>
+            <Field label="Biography (three or four lines)"><textarea className="input" rows={3} value={p.bio} onChange={(e) => personSet(i, "bio", e.target.value)} /></Field>
+          </ListItem>
+        ))}
+      </Card>
+      </>)}
+
       {tab === "insights" && (<>
-      {/* FAQ */}
+      <Card title="Insights section heading" where={[{ href: "/", label: "Home" }, { href: "/insights", label: "Insights" }]}>
+        <Field label="Kicker"><input className="input" value={c.insights.kicker} onChange={(e) => setInsights("kicker", e.target.value)} /></Field>
+        <Field label="Heading"><textarea className="input" rows={2} value={c.insights.heading} onChange={(e) => setInsights("heading", e.target.value)} /></Field>
+        <Field label="Sub-heading"><textarea className="input" rows={2} value={c.insights.body} onChange={(e) => setInsights("body", e.target.value)} /></Field>
+        <p className="help">The articles themselves are managed under <strong>Insights articles</strong> in the sidebar.</p>
+      </Card>
       <Card title="FAQ" onAdd={() => listAdd("faq", { q: "", a: "" })} addLabel="Add question" where={[{ href: "/faq", label: "FAQ" }]}>
         {c.faq.map((f, i) => (
           <ListItem key={i} onRemove={() => listRemove("faq", i)} index={i + 1}>
@@ -221,7 +197,44 @@ export function ContentEditor({ initial }: { initial: SiteContent }) {
           </ListItem>
         ))}
       </Card>
+      </>)}
 
+      {tab === "consult" && (<>
+      <Card title="Who takes your call" onAdd={pointAdd} addLabel="Add point" where={[{ href: "/#consultation", label: "Home" }]}>
+        <div className="grid gap-3 sm:grid-cols-3">
+          <Field label="Heading"><input className="input" value={c.consultation.heading} onChange={(e) => setConsult("heading", e.target.value)} /></Field>
+          <Field label="Name"><input className="input" value={c.consultation.personName} onChange={(e) => setConsult("personName", e.target.value)} /></Field>
+          <Field label="Title"><input className="input" value={c.consultation.personTitle} onChange={(e) => setConsult("personTitle", e.target.value)} /></Field>
+        </div>
+        <Field label="Text, in the first person (blank line between paragraphs)"><textarea className="input" rows={8} value={c.consultation.body} onChange={(e) => setConsult("body", e.target.value)} /></Field>
+        <Field label="Photo URL (portrait, 4:5)"><input className="input" value={c.consultation.photoUrl} onChange={(e) => setConsult("photoUrl", e.target.value)} placeholder="/marketing/georgia.jpg" /></Field>
+        <Field label="Note shown while no photo is set"><input className="input" value={c.consultation.photoNote} onChange={(e) => setConsult("photoNote", e.target.value)} /></Field>
+        <hr className="hairline" style={{ margin: "8px 0" }} />
+        {c.consultation.points.map((pt, i) => (
+          <ListItem key={i} onRemove={() => pointRemove(i)} index={i + 1}>
+            <Field label="Point"><input className="input" value={pt} onChange={(e) => pointSet(i, e.target.value)} /></Field>
+          </ListItem>
+        ))}
+      </Card>
+      </>)}
+
+      {tab === "contact" && (<>
+      <Card title="Contact details" where={[{ href: "/contact", label: "Contact" }, { href: "/", label: "Home + footer everywhere" }]}>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <Field label="Office address (the office, not the registered address)"><input className="input" value={c.contact.address} onChange={(e) => setContact("address", e.target.value)} /></Field>
+          <Field label="Email"><input className="input" value={c.contact.email} onChange={(e) => setContact("email", e.target.value)} /></Field>
+          <Field label="Landline"><input className="input" value={c.contact.phone} onChange={(e) => setContact("phone", e.target.value)} /></Field>
+          <Field label="WhatsApp"><input className="input" value={c.contact.whatsapp} onChange={(e) => setContact("whatsapp", e.target.value)} /></Field>
+          <Field label="Company registration number (e.g. HE 461330)"><input className="input" value={c.contact.regNo} onChange={(e) => setContact("regNo", e.target.value)} /></Field>
+          <Field label="VAT number"><input className="input" value={c.contact.vatNo} onChange={(e) => setContact("vatNo", e.target.value)} /></Field>
+          <Field label="Office hours (Contact page)"><input className="input" value={c.contact.hours} onChange={(e) => setContact("hours", e.target.value)} placeholder="Monday to Friday, 9:00 to 17:00" /></Field>
+          <Field label="A line on parking (Contact page)"><input className="input" value={c.contact.parking} onChange={(e) => setContact("parking", e.target.value)} placeholder="Where visitors can park" /></Field>
+          <Field label="LinkedIn page URL"><input className="input" value={c.contact.linkedin} onChange={(e) => setContact("linkedin", e.target.value)} placeholder="https://www.linkedin.com/company/…" /></Field>
+          <Field label="Facebook page URL"><input className="input" value={c.contact.facebook} onChange={(e) => setContact("facebook", e.target.value)} placeholder="https://www.facebook.com/…" /></Field>
+        </div>
+        <Field label="Footer description"><textarea className="input" rows={2} value={c.contact.footerAbout} onChange={(e) => setContact("footerAbout", e.target.value)} /></Field>
+        <p className="help">The legal entity name in the statutory line comes from Settings → Branding (legal name). Social icons appear in the footer once a URL is set.</p>
+      </Card>
       </>)}
     </div>
 

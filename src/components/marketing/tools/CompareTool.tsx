@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { JURISDICTIONS, RATES_REVIEWED } from "@/lib/data/jurisdictions";
+import { JURISDICTIONS } from "@/lib/data/jurisdictions";
 import { Flag } from "@/components/admin/Flag";
 
 type SortKey = "corpTax" | "vat" | "days" | "treaties";
@@ -19,8 +19,12 @@ function SortTh({ k, label, sort, onSort }: {
   );
 }
 
-export function CompareTool({ applyHref = "/login" }: { applyHref?: string }) {
-  const [selected, setSelected] = useState<string[]>(["cy", "mt", "ee"]);
+/* Tool 10 — Compare Jurisdictions. Fifteen rows (the jurisdictions our
+   clients weigh up), PwC source link on every row and the "unchecked"
+   marking on rows not yet reconciled — proper citations that build trust.
+   Cyprus opens against the United Kingdom and the United States. */
+export function CompareTool() {
+  const [selected, setSelected] = useState<string[]>(["cy", "uk", "us"]);
   const [sort, setSort] = useState<SortKey>("corpTax");
 
   const chosen = useMemo(() => {
@@ -44,8 +48,7 @@ export function CompareTool({ applyHref = "/login" }: { applyHref?: string }) {
 
   return (
     <>
-      {/* Grouped: a flat wall of 30-odd chips is unreadable, and "EU or not"
-          is the first cut most people make. */}
+      {/* Grouped: "EU or not" is the first cut most people make. */}
       {([
         { title: "EU / EEA", list: JURISDICTIONS.filter((j) => j.eu) },
         { title: "Rest of world", list: JURISDICTIONS.filter((j) => !j.eu) },
@@ -114,7 +117,7 @@ export function CompareTool({ applyHref = "/login" }: { applyHref?: string }) {
                       )}
                     </td>
                     <td style={{ textAlign: "right" }}>
-                      <Link href={applyHref} className="btn btn-ghost btn-sm">Apply →</Link>
+                      {j.id === "cy" && <Link href="/book" className="btn btn-ghost btn-sm">Talk to us →</Link>}
                     </td>
                   </tr>
                 );

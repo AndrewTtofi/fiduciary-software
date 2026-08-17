@@ -42,8 +42,10 @@ export function computeLeadFlags(input: {
   const prInterest = property.startsWith("Yes, for permanent residency") || property.startsWith("Maybe");
   if (prInterest) flags.push("PR by investment opportunity");
 
+  // "licensing" is the platform key; "international" is the public service
+  // page (International Companies and Licensing) the booking form sends.
   const licensing =
-    input.serviceKey === "licensing" || /licensing/i.test(m.services ?? "");
+    input.serviceKey === "licensing" || input.serviceKey === "international" || /licensing/i.test(m.services ?? "");
   if (licensing) flags.push("High value licensing lead");
 
   return { flags, highValue: prInterest || licensing };

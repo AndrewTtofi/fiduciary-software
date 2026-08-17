@@ -3,7 +3,7 @@
  * Replace with a Redis-backed limiter when the stack scales to multiple web
  * containers. API is intentionally trivial so the swap is mechanical.
  */
-type Bucket = "register" | "login" | "forgot" | "upload" | "draft" | "lead" | "slots";
+type Bucket = "register" | "login" | "forgot" | "upload" | "draft" | "lead" | "lead-referral" | "slots";
 
 interface Hit {
   count: number;

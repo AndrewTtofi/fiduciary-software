@@ -3,13 +3,17 @@
 import Link from "next/link";
 import { useEffect, useState, type ReactNode } from "react";
 import type { Stat } from "@/lib/services/content";
+import { TaxCalculator, type CalcRates } from "@/components/marketing/TaxCalculator";
+import { WhatsAppButton } from "@/components/marketing/mk";
 
-/* Full-height home hero (prototype-v2 "vhero"): per-character headline
-   reveal, staggered fades, stats rail. Content-managed copy comes in via
-   props using the usual conventions ("\n" line breaks, *gold* spans).
-   Rendered as a client component so the character spans are produced
-   deterministically on both server and client (hydration-safe); the
-   entrance simply adds .go classes after mount. */
+/* Full-height home hero: per-character headline reveal, staggered fades,
+   the compact tax calculator on the right (so the visitor has something to
+   engage with immediately instead of a blank half), and a stats rail of
+   three equal figures on one baseline with the registration line beneath.
+   Content-managed copy comes in via props using the usual conventions
+   ("\n" line breaks, *gold* spans). Rendered as a client component so the
+   character spans are produced deterministically on both server and client
+   (hydration-safe); the entrance simply adds .go classes after mount. */
 
 const CH_DELAY = 26; // ms per character
 
@@ -56,17 +60,20 @@ export function VHero({
   headline,
   sub,
   primaryCta,
-  secondaryCta,
   stats,
-  tagWords,
+  registration,
+  whatsapp,
+  rates,
 }: {
   eyebrow: string;
   headline: string;
   sub: string;
   primaryCta: string;
-  secondaryCta: string;
   stats: Stat[];
-  tagWords: string[];
+  /** "Legal Name · HE 461330 · Nicosia, Cyprus" — small and discreet under the stats. */
+  registration: string;
+  whatsapp: string;
+  rates: CalcRates;
 }) {
   const [phase, setPhase] = useState(0);
   useEffect(() => {
@@ -74,7 +81,7 @@ export function VHero({
       setTimeout(() => setPhase(1), 120), // eyebrow
       setTimeout(() => setPhase(2), 200), // headline characters
       setTimeout(() => setPhase(3), 800), // sub
-      setTimeout(() => setPhase(4), 1100), // buttons
+      setTimeout(() => setPhase(4), 1100), // buttons + calculator
       setTimeout(() => setPhase(5), 1350), // rail
     ];
     return () => ts.forEach(clearTimeout);
@@ -89,33 +96,25 @@ export function VHero({
             <h1 className={`vh-h1${phase >= 2 ? " go" : ""}`}>{splitHeadline(headline)}</h1>
             <p className={`vh-sub vh-fade${phase >= 3 ? " go" : ""}`}>{sub}</p>
             <div className={`vh-btns vh-fade${phase >= 4 ? " go" : ""}`}>
-              <Link href="/contact" className="pill">{primaryCta}</Link>
-              <Link href="/services" className="pill ghost">{secondaryCta}</Link>
+              <Link href="/book" className="pill">{primaryCta}</Link>
+              <WhatsAppButton number={whatsapp} />
             </div>
+          </div>
+          <div className={`vh-calc vh-fade${phase >= 4 ? " go" : ""}`}>
+            <TaxCalculator rates={rates} compact />
           </div>
         </div>
         <div className={`vh-rail vh-fade${phase >= 5 ? " go" : ""}`}>
-          {stats.map((s, i) => (
-            <div className="vh-stat" key={i}>
-              <b>{s.v}</b>
-              <span>{s.l}</span>
-            </div>
-          ))}
-          {tagWords.length > 0 && (
-            <div className="vh-tag">
-              {tagWords.map((w, i) => (
-                <span key={i}>
-                  {w}
-                  <i>.</i>{" "}
-                </span>
-              ))}
-            </div>
-          )}
+          <div className="vh-stats">
+            {stats.map((s, i) => (
+              <div className="vh-stat" key={i}>
+                <b>{s.v}</b>
+                <span>{s.l}</span>
+              </div>
+            ))}
+          </div>
+          {registration && <div className="vh-reg">{registration}</div>}
         </div>
-      </div>
-      <div className="vh-scroll" aria-hidden>
-        <i />
-        Scroll
       </div>
     </section>
   );

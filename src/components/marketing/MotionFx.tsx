@@ -188,7 +188,7 @@ export function MotionFx({ edgeLeft, edgeRight }: { edgeLeft: string; edgeRight:
       /* ── tilt cards + magnetic pills ─────────────────────────────── */
       shell
         .querySelectorAll(
-          ".svc-card, .icard, .price-card, .stat, .feat, .fq4, .gcard, .step, .how-card, .belief-list li, .pcard",
+          ".svc-card, .svc8-card, .tool-card, .icard, .stat, .feat, .fq4, .gcard, .step, .how-card, .ccard, .person, .pcard",
         )
         .forEach((c) => {
           if (!c.closest(".sc-ring, .form-card")) c.classList.add("mo-tilt");
@@ -197,9 +197,9 @@ export function MotionFx({ edgeLeft, edgeRight }: { edgeLeft: string; edgeRight:
 
       /* ── generic entry reveals (tag, observe, reveal once, untag) ── */
       const sel =
-        ".phero h1,.phero .sub,.sec-center h2,.sec-center .lead,.svc-card,.ins4-grid .icard,.stat,.price-card,.fq4," +
-        ".step,.how-card,.faq4-head .l,.article-body p,.article-body h2,.article-body ul,.cta-box," +
-        ".belief-list li,.feat,.wtc-grid > div,.hero-g > div";
+        ".phero h1,.phero .sub,.sec-center h2,.sec-center .lead,.svc8-card,.tool-card,.ins4-grid .icard,.stat,.fq4," +
+        ".step,.how-card,.how-col,.faq4-head .l,.article-body p,.article-body h2,.article-body ul,.cta-box," +
+        ".feat,.wtc-grid > div,.ccard,.person,.about-svc";
       const els = [...shell.querySelectorAll<HTMLElement>(sel)].filter(
         (e) => !e.closest(".vhero, .form-card, .sc-ring") && !e.classList.contains("rv-init") && !e.classList.contains("reveal"),
       );

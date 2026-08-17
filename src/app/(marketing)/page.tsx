@@ -1,159 +1,107 @@
 import Link from "next/link";
 import { getBranding } from "@/lib/services/branding";
+import { getServerBranding } from "@/lib/services/branding-server";
 import { getSiteContent } from "@/lib/services/content";
 import { getPublishedArticles } from "@/lib/services/articles";
-import { SERVICES, ServiceIcons } from "@/components/marketing/ServiceIcons";
+import { getToolSettings } from "@/lib/services/tool-settings";
+import { SERVICES } from "@/components/marketing/ServiceIcons";
 import { CtaBand } from "@/components/marketing/CtaBand";
-import { TaxCalculator } from "@/components/marketing/TaxCalculator";
 import { VHero } from "@/components/marketing/VHero";
-import { ServicesCarousel } from "@/components/marketing/ServicesCarousel";
+import { HowItWorks } from "@/components/marketing/HowItWorks";
+import { ServicesGrid } from "@/components/marketing/ServicesGrid";
+import { ToolsBlock } from "@/components/marketing/ToolsBlock";
 import { Marquee } from "@/components/marketing/Marquee";
 import { InsightCard } from "@/components/marketing/InsightCard";
 import { ConsultBlock } from "@/components/marketing/ConsultBlock";
-import { ArrowIc, BoldText, GoldHeading, parseStatValue } from "@/components/marketing/mk";
-
-/* Marquee keywords: the service lines plus the evergreen topics they cover. */
-const MARQUEE_TOPICS = [
-  "Company formation",
-  "Tax residency",
-  "Non-Dom status",
-  "Accounting and VAT",
-  "Licensing",
-  "Banking and EMI",
-  "Immigration permits",
-  "Permanent residency",
-  "60-day rule",
-  "IP Box",
-  "VAT and VIES",
-];
+import { ArrowIc, GoldHeading } from "@/components/marketing/mk";
 
 export default async function LandingPage() {
-  const [{ brandName }, { hero, servicesIntro, stats, insights, contact, consultation }, articles] = await Promise.all([
+  const [{ brandName }, { legalName, jurisdiction }, content, articles, rates] = await Promise.all([
     getBranding(),
+    getServerBranding(),
     getSiteContent(),
     getPublishedArticles(),
+    getToolSettings(),
   ]);
+  const { hero, servicesIntro, how, stats, insights, contact, consultation, cta } = content;
+  // "Legal Name · HE 461330 · Nicosia, Cyprus" — small and discreet under the
+  // stats, so the hero shows the firm is a registered company.
+  const city =
+    contact.address
+      .split(",")
+      .slice(-2)
+      .map((s) => s.trim().replace(/^\d+\s+/, "")) // "1060 Nicosia" → "Nicosia"
+      .filter(Boolean)
+      .join(", ") || jurisdiction;
+  const registration = [legalName, contact.regNo, city].filter(Boolean).join(" · ");
 
   return (
     <main>
-      {/* ── Full-height hero (per-character reveal) ──────────── */}
+      {/* ── Hero: copy left, compact calculator right, stats rail ── */}
       <VHero
         eyebrow={hero.eyebrow}
         headline={hero.display}
         sub={hero.lead}
         primaryCta={hero.primaryCta}
-        secondaryCta={hero.secondaryCta}
         stats={stats}
-        tagWords={["Formation", "Tax", "Relocation"]}
+        registration={registration}
+        whatsapp={contact.whatsapp}
+        rates={{ corporateTax: rates.corporateTax, gesyRate: rates.gesy.passive, gesyCap: rates.gesy.cap }}
       />
 
-      {/* ── Headline + tax calculator ────────────────────────── */}
-      <section className="hero grid-bg">
-        <div className="mk-container hero-g">
-          <div>
-            <span className="kicker">{hero.eyebrow}</span>
-            <h1 style={{ fontSize: "clamp(2rem,4.4vw,3.2rem)" }}><GoldHeading text={hero.headline} /></h1>
-            <p className="lead" style={{ marginTop: 18 }}>{hero.lead}</p>
-            <div className="trust-row" style={{ opacity: 1, animation: "none" }}>
-              {stats.map((s, i) => (
-                <div className="ti" key={i}>
-                  <span className="dot" />
-                  <b>{s.v}</b> {s.l.charAt(0).toLowerCase() + s.l.slice(1)}
-                </div>
-              ))}
-            </div>
-            <div className="ctas" style={{ opacity: 1, animation: "none" }}>
-              <Link href="/contact" className="pill">{hero.primaryCta}</Link>
-              <Link href="/services" className="pill ghost">{hero.secondaryCta}</Link>
-            </div>
-          </div>
-          <div>
-            <TaxCalculator brandName={brandName} />
-          </div>
-        </div>
-      </section>
+      {/* ── Tools block (space freed by deleting the duplicated hero) ── */}
+      <ToolsBlock />
 
-      {/* ── Positioning strip (with self-drawing emblem) ─────── */}
-      <section className="strip">
-        <svg className="knot-draw" id="knotDraw" viewBox="0 0 240 240" aria-hidden />
-        <div className="wrap-in">
-          <h2><BoldText text={consultation.stripHeading} /></h2>
-          <p>{consultation.stripBody}</p>
-        </div>
-      </section>
+      {/* ── How it works (dark band) ── */}
+      <HowItWorks heading={how.heading} sub={how.sub} steps={how.steps} button={cta.button} />
 
-      {/* ── Keyword marquee ──────────────────────────────────── */}
-      <section className="sec-tight" style={{ paddingTop: 34, paddingBottom: 0 }}>
+      {/* ── Services ticker (static, readable) ── */}
+      <section className="sec-tight" style={{ paddingTop: 30, paddingBottom: 0 }}>
         <div className="mk-container">
-          <Marquee items={MARQUEE_TOPICS} />
+          <Marquee items={SERVICES.map((s) => s.title)} />
         </div>
       </section>
 
-      {/* ── Stats ────────────────────────────────────────────── */}
-      <section className="sec-tight" style={{ paddingTop: 26 }}>
-        <div className="mk-container">
-          <div className="stats">
-            {stats.map((s, i) => {
-              const { count, suffix, sup } = parseStatValue(s.v);
-              return (
-                <div className="stat reveal" key={i}>
-                  <div className="num">
-                    {count === null ? s.v : <><span data-count={count}>0</span>{suffix}{sup && <sup>{sup}</sup>}</>}
-                  </div>
-                  <div className="lbl">{s.l}</div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* ── Services (3D carousel) ───────────────────────────── */}
-      <section className="sec" id="services">
+      {/* ── What we do: static grid of eight ── */}
+      <section className="sec" id="services" style={{ paddingTop: 56 }}>
         <div className="mk-container">
           <div className="sec-center" style={{ textAlign: "center", marginBottom: 40 }}>
-            <span className="kicker">{servicesIntro.eyebrow}</span>
             <h2>{servicesIntro.heading}</h2>
             <p className="lead" style={{ margin: "8px auto 0" }}>{servicesIntro.body}</p>
           </div>
-          <ServicesCarousel
-            services={SERVICES.map((s) => ({
-              key: s.key,
-              title: s.title,
-              blurb: s.longBlurb,
-              icon: ServiceIcons[s.key],
-            }))}
-          />
+          <ServicesGrid />
         </div>
       </section>
 
-      {/* ── Insights ─────────────────────────────────────────── */}
-      <section className="insights sec">
-        <div className="mk-container">
-          <div className="ins4-head">
-            <div>
-              <span className="kicker">{insights.kicker}</span>
-              <h2><GoldHeading text={insights.heading} /></h2>
+      {/* ── Insights ── */}
+      {articles.length > 0 && (
+        <section className="insights sec">
+          <div className="mk-container">
+            <div className="ins4-head">
+              <div>
+                <span className="kicker">{insights.kicker}</span>
+                <h2><GoldHeading text={insights.heading} /></h2>
+              </div>
+              <div className="ins4-side">
+                <p>{insights.body}</p>
+                <Link href="/insights" className="ins4-all">
+                  Browse all insights {ArrowIc}
+                </Link>
+              </div>
             </div>
-            <div className="ins4-side">
-              <p>{insights.rhBody}</p>
-              <Link href="/insights" className="ins4-all">
-                Browse all insights {ArrowIc}
-              </Link>
+            <div className="ins4-grid">
+              {articles.slice(0, 3).map((a, i) => (
+                <InsightCard key={a.slug} article={a} index={i} />
+              ))}
             </div>
           </div>
-          <div className="ins4-grid">
-            {articles.slice(0, 3).map((a, i) => (
-              <InsightCard key={a.slug} article={a} index={i} />
-            ))}
-          </div>
-        </div>
-      </section>
+        </section>
+      )}
 
-      {/* ── Who takes your call ──────────────────────────────── */}
+      {/* ── Who takes your call ── */}
       <ConsultBlock consultation={consultation} contact={contact} brandName={brandName} />
 
-      {/* ── Final CTA ────────────────────────────────────────── */}
+      {/* ── Closing call to action ── */}
       <CtaBand />
     </main>
   );

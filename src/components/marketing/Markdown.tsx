@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 
-/* Minimal markdown renderer for Insights article bodies — headings, lists,
-   bold/italic and links. Deliberately dependency-free: article authors are
+/* Minimal markdown renderer for Insights article bodies — headings (with
+   anchor ids for the contents list), lists, tables, bold/italic and links. Deliberately dependency-free: article authors are
    staff (trusted input), and everything renders through React elements so
    nothing is injected as raw HTML. */
 
@@ -46,6 +46,40 @@ function emphasis(text: string, keyBase: string): ReactNode[] {
   );
 }
 
+/** Heading anchor id: "Who qualifies for Non-Dom?" → "who-qualifies-for-non-dom". */
+export function headingId(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[*_`[\]()]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 80);
+}
+
+export type MdHeading = { level: 2 | 3; text: string; id: string };
+
+/** H2/H3 headings in document order — drives the contents list on long
+ *  articles. Same splitting rules as the renderer, so ids always match. */
+export function extractHeadings(text: string): MdHeading[] {
+  const out: MdHeading[] = [];
+  for (const block of text.replace(/\r\n/g, "\n").split(/\n{2,}/)) {
+    const b = block.trim();
+    if (b.startsWith("### ")) out.push({ level: 3, text: b.slice(4).trim(), id: headingId(b.slice(4)) });
+    else if (b.startsWith("## ")) out.push({ level: 2, text: b.slice(3).trim(), id: headingId(b.slice(3)) });
+    else if (b.startsWith("# ")) out.push({ level: 2, text: b.slice(2).trim(), id: headingId(b.slice(2)) });
+  }
+  return out;
+}
+
+/** "| a | b |" rows → cells; a separator row (|---|---|) is skipped. */
+function tableRows(lines: string[]): string[][] | null {
+  if (!lines.every((l) => l.trim().startsWith("|"))) return null;
+  const rows = lines
+    .map((l) => l.trim().replace(/^\|/, "").replace(/\|$/, "").split("|").map((c) => c.trim()))
+    .filter((cells) => !cells.every((c) => /^:?-{2,}:?$/.test(c)));
+  return rows.length ? rows : null;
+}
+
 export function Markdown({ text }: { text: string }) {
   const blocks = text.replace(/\r\n/g, "\n").split(/\n{2,}/);
   return (
@@ -53,9 +87,25 @@ export function Markdown({ text }: { text: string }) {
       {blocks.map((block, bi) => {
         const b = block.trim();
         if (!b) return null;
-        if (b.startsWith("### ")) return <h3 key={bi}>{inline(b.slice(4), `h${bi}`)}</h3>;
-        if (b.startsWith("## ")) return <h2 key={bi}>{inline(b.slice(3), `h${bi}`)}</h2>;
-        if (b.startsWith("# ")) return <h2 key={bi}>{inline(b.slice(2), `h${bi}`)}</h2>;
+        if (b.startsWith("### ")) return <h3 key={bi} id={headingId(b.slice(4))}>{inline(b.slice(4), `h${bi}`)}</h3>;
+        if (b.startsWith("## ")) return <h2 key={bi} id={headingId(b.slice(3))}>{inline(b.slice(3), `h${bi}`)}</h2>;
+        if (b.startsWith("# ")) return <h2 key={bi} id={headingId(b.slice(2))}>{inline(b.slice(2), `h${bi}`)}</h2>;
+        const rows = tableRows(b.split("\n"));
+        if (rows && rows.length > 1) {
+          const [head, ...body] = rows;
+          return (
+            <div key={bi} className="article-table">
+              <table>
+                <thead><tr>{head.map((c, ci) => <th key={ci}>{inline(c, `t${bi}h${ci}`)}</th>)}</tr></thead>
+                <tbody>
+                  {body.map((r, ri) => (
+                    <tr key={ri}>{r.map((c, ci) => <td key={ci}>{inline(c, `t${bi}r${ri}c${ci}`)}</td>)}</tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          );
+        }
         const lone = b.match(LONE_IMAGE);
         if (lone) {
           return (

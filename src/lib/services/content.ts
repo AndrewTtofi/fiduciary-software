@@ -7,128 +7,165 @@ import { prisma } from "@/lib/db";
    the public pages always render even before anything is edited, and new
    fields added later degrade gracefully.
 
-   Fields the public pages do not read are deliberately absent: the site was
-   redesigned after this CMS was written (see 8645527), which baked some
-   headings into the page layouts and dropped the steps/testimonials sections.
-   Offering an input that changes nothing is worse than offering none.
+   The defaults are the wording agreed in the firm's website review (Aug
+   2026). Fields the public pages do not read are deliberately absent —
+   offering an input that changes nothing is worse than offering none.
 
-   Rich-text conventions (rendered by GoldText/BoldText in components/marketing/mk.tsx):
+   Rich-text conventions (rendered by GoldHeading/BoldText in components/marketing/mk.tsx):
    - headings: "\n" splits lines; *asterisks* mark the gold italic span.
-   - bodies:   **double asterisks** mark emphasised (dark) text.
+   - bodies:   **double asterisks** mark emphasised (dark) text; a blank
+               line ("\n\n") splits paragraphs where the page renders several.
    ===================================================================== */
 
 export type Stat = { v: string; l: string };
 export type Faq = { q: string; a: string };
 export type Feature = { t: string; d: string };
+export type Step = { t: string; d: string };
+export type Person = { name: string; title: string; bio: string };
 
 export type Consultation = {
-  kicker: string;
   heading: string;
+  /** Paragraphs split on blank lines. */
   body: string;
   personName: string;
   personTitle: string;
   photoUrl: string;
   photoNote: string;
   points: string[];
-  stripHeading: string;
-  stripBody: string;
-  underForm: string;
 };
 
 export type SiteContent = {
   hero: {
     eyebrow: string;
-    headline: string;
+    /** H1 — two lines, second in gold italic. */
+    display: string;
     lead: string;
     primaryCta: string;
     secondaryCta: string;
-    /** Prototype-v2 full-height hero display line (per-character reveal). */
-    display: string;
   };
-  about: { body1: string; body2: string };
-  why: { kicker: string; features: Feature[] };
-  servicesIntro: { eyebrow: string; heading: string; body: string };
   stats: Stat[];
+  servicesIntro: { heading: string; body: string };
+  how: { heading: string; sub: string; steps: Step[] };
   cta: { heading: string; body: string; button: string };
-  insights: { kicker: string; heading: string; rhHeading: string; rhBody: string };
-  contact: { address: string; phone: string; whatsapp: string; email: string };
+  insights: { kicker: string; heading: string; body: string };
+  contact: {
+    address: string;
+    phone: string;
+    whatsapp: string;
+    email: string;
+    /** Company registration number, e.g. "HE 461330". */
+    regNo: string;
+    /** VAT number, e.g. "60079125D". */
+    vatNo: string;
+    linkedin: string;
+    facebook: string;
+    /** Contact page: a line on parking (saves phone calls). */
+    parking: string;
+    /** Contact page: office hours. */
+    hours: string;
+    /** Footer description line. */
+    footerAbout: string;
+  };
   faq: Faq[];
   consultation: Consultation;
+  about: {
+    /** "How it started" — paragraphs split on blank lines. "{brand}" is
+     *  replaced with the firm's brand name when rendered. */
+    story: string;
+    /** "How we work" — paragraphs split on blank lines. */
+    how: string;
+    /** Intro line above the eight services. */
+    whatWeDoIntro: string;
+    /** "Why clients stay" panels. */
+    why: Feature[];
+    /** "The people" — names, titles, short biographies. No photographs. */
+    people: Person[];
+  };
 };
 
 export const DEFAULT_CONTENT: SiteContent = {
   hero: {
     eyebrow: "Nicosia, Cyprus",
-    headline: "A Modern Cyprus Corporate\nand *Fiduciary* Services Firm",
-    lead: "We help international entrepreneurs and investors relocate, structure and operate in Cyprus. Founder to founder, start to finish, with no guesswork.",
+    display: "Relocate to Cyprus,\n*without the guesswork.*",
+    lead: "Cyprus tax residency from 60 days a year, Non-Dom status for 17 years, and the residency permits that go with it. We map the route before you commit to anything.",
     primaryCta: "Book Your Free 30-Minute Consultation",
-    secondaryCta: "Explore Services",
-    display: "Structured in Cyprus,\n*built to last.*",
-  },
-  about: {
-    body1: "Our team brings **decades of combined expertise** in corporate law, accounting and compliance to the formation and administration of Cyprus entities. Founded in **2024** and based in Nicosia, we serve international entrepreneurs with **transparent, compliant structures** from incorporation to banking, tax residency and beyond.",
-    body2: "From our base at **Stadiou 15, Nicosia**, we support clients across Europe and beyond, always transparent on scope and timeline.",
-  },
-  why: {
-    kicker: "Why choose us",
-    features: [
-      { t: "Transparent and Compliant", d: "Clean structures and compliance designed in from day one, never bolted on after." },
-      { t: "One Team, End to End", d: "Formation, accounting, tax residency, immigration, licensing and banking under one roof, with no handoffs between vendors." },
-      { t: "We Are Where Our Clients Need Us", d: "Cyprus based, internationally minded, built for founders operating across borders." },
-      { t: "Direct, WhatsApp First Access", d: "Reach your adviser directly and get quick answers on the channel you already use." },
-    ],
-  },
-  servicesIntro: {
-    eyebrow: "What we do",
-    heading: "One Team, End to End",
-    body: "Everything an international founder needs to land in Cyprus and operate cleanly, handled under one roof.",
+    secondaryCta: "Message on WhatsApp",
   },
   stats: [
-    { v: "8", l: "Jurisdictions we operate across" },
-    { v: "5 to 7", l: "Working days to a ready company" },
-    { v: "Decades", l: "Of combined team experience" },
+    { v: "60 days", l: "Minimum stay to become a Cyprus tax resident" },
+    { v: "17 years", l: "Non-Dom exemption on dividend income" },
+    { v: "15%", l: "Cyprus corporate tax from January 2026" },
   ],
+  servicesIntro: {
+    heading: "What we do",
+    body: "Company formation, tax, immigration and international structuring for people and businesses moving to Cyprus.",
+  },
+  how: {
+    heading: "How it works",
+    sub: "Before you commit to anything, you will know the route, the timeline and the cost.",
+    steps: [
+      { t: "A call", d: "Thirty minutes, no charge. You tell us where you are now and where you want to be. We tell you what the route involves, including if Cyprus is not the right answer for you." },
+      { t: "A written plan", d: "Steps, timeline, costs and what we need from you, set out in writing. You decide with the full picture in front of you, not after you have paid." },
+      { t: "We handle it", d: "Applications, filings and follow-up, with one point of contact throughout. You are not passed between departments." },
+    ],
+  },
   cta: {
-    heading: "Map Your Cyprus Structure\nin *30 Minutes*",
+    heading: "Not sure where to start?",
     body: "Tell us where you are today and where you want to be. We will show you the route, the timeline and what it involves, before you commit to anything.",
     button: "Book Your Free 30-Minute Consultation",
   },
   insights: {
     kicker: "Insights",
-    heading: "Cyprus,\n*Explained Clearly*",
-    rhHeading: "Written By The People Who Set These Up Every Week",
-    rhBody: "Practical guides on tax, residency and company structure. One article, one search phrase, answered properly.",
+    heading: "Cyprus,\n*explained clearly*",
+    body: "Practical guides on tax, residency, immigration and company structure in Cyprus.",
   },
   contact: {
-    address: "Stadiou 15, Nicosia, Cyprus",
-    phone: "+357 22 037 063",
+    address: "20 Stasandrou, 4th floor, Office 402, 1060 Nicosia, Cyprus",
+    phone: "+357 22 037 060",
     whatsapp: "+357 96 940 440",
     email: "info@orocorporateservices.com",
+    regNo: "HE 461330",
+    vatNo: "60079125D",
+    linkedin: "",
+    facebook: "",
+    parking: "",
+    hours: "",
+    footerAbout: "Helping international founders and families move to Cyprus - tax residency, immigration and company setup.",
   },
   faq: [
-    { q: "Who takes my consultation call?", a: "A founding partner of the firm. Your form is read before you speak, so you never repeat your story, and if Cyprus is not the right move for you, we will tell you that too." },
-    { q: "How fast can my company be ready?", a: "Once we have your documents, a Cyprus company is typically ready in 5 to 7 working days." },
+    { q: "Who takes my consultation call?", a: "Georgia Chrysostomou, Managing Director and Co-Founder. Your form is read before you speak, so you never repeat your story, and if Cyprus is not the right move for you, we will tell you that too." },
+    { q: "What happens on the first call?", a: "Thirty minutes, no charge. You tell us where you are now and where you want to be, and we tell you what the route involves. If it makes sense to go further, you receive a written plan with steps, timeline and costs before you commit to anything." },
     { q: "Where is my data stored?", a: "All data, including identity documents and financial information, is encrypted and stored within the EU, with GDPR compliant data portability and exit terms." },
     { q: "What happens to my information if I do not proceed?", a: "You can request export or deletion of your records at any time. Nothing is shared with third parties without your consent." },
-    { q: "Which services can I ask about?", a: "Company formation, accounting and VAT, tax residency and Non-Dom, immigration and residency, licensing and banking. One team handles all of it end to end." },
-    { q: "How is pricing structured?", a: "Every engagement is scoped to your situation. You receive a personalised quote after your call, once we understand what you need." },
+    { q: "Which services can I ask about?", a: "Company formation, tax residency and Non-Dom, IP Box, immigration and work permits, citizenship, international companies and licensing, Amazon seller setup, and accounting and VAT." },
+    { q: "How is pricing structured?", a: "Every engagement is scoped to your situation. You receive a personalised quote after your call, once we understand what you need. We do not publish package prices." },
   ],
   consultation: {
-    kicker: "Who Takes Your Call",
-    heading: "You talk with the people who *built this firm*",
-    body: "In this industry, \"book a free call\" usually means a sales team reading a script. Not here. When you book a consultation, you speak with Georgia, a founding partner, with a decade of experience moving international entrepreneurs to Cyprus.",
-    personName: "Georgia",
-    personTitle: "Co-Founder and Relocation Expert",
+    heading: "Who takes your call",
+    body: "When you book a call, you get me.\n\nI have spent years walking people through immigration offices, tax registrations and company filings in Cyprus. Some of it is slower and harder than it should be, and I will not pretend otherwise.\n\nBut behind every application there is a family trying to build a life somewhere new, or someone taking a risk on a business. That part never shows up on a checklist, and it is the part I care about most.\n\nSo I will tell you what your situation actually needs. If the route you are asking for is the wrong one, I will say so. If Cyprus is not the right answer for you, I will say that too.\n\nWhat you will not get from me is maybes and ifs.",
+    personName: "Georgia Chrysostomou",
+    personTitle: "Managing Director and Co-Founder",
     photoUrl: "",
-    photoNote: "Professional photo of Georgia, office setting",
+    photoNote: "Photograph to be arranged",
     points: [
-      "She reads your form before you speak, so you never repeat your story.",
-      "Behind her stands the full firm: formations, VAT, legal, banking and licensing.",
-      "If Cyprus is not the right move for you, she will tell you that too.",
+      "If the route you are asking for is not the right one, I will tell you.",
+      "If I think there is a better option, I will explain why.",
+      "If I believe something carries unnecessary risk, I will advise against it.",
     ],
-    stripHeading: "We are not influencers. We do not run a marketing agency. **You talk with the people who built this firm.**",
-    stripBody: "Book a consultation and you speak with a founding partner, not a sales desk.",
-    underForm: "Your consultation is held by a founding partner of the firm.",
+  },
+  about: {
+    story: "{brand} was incorporated in June 2024, but it began earlier than that, as conversations in a small kitchen late at night.\n\nTwo people. An idea. And a name we chose carefully. {brand} means gold. Something valuable. Something built to last.\n\nWe moved quietly at first. Drafting and rewriting. Attending expos even when we felt uncertain. Meeting people and building connections slowly and honestly.\n\nAt some point we realized the conversations had become a company.",
+    how: "A common mistake in corporate matters is focusing only on speed. Speed matters. Clarity matters more.\n\nWhen structures are rushed, the problems appear later - delays, avoidable issues with the authorities, or costly changes that could have been avoided.\n\nOur role is to slow things down at the right moment. To look at the full picture, explain what it actually means, and structure things properly from the start.\n\nClients come to us not just to move forward, but to move forward correctly.\n\nWhen in doubt, it is always better to ask before taking the next step.",
+    whatWeDoIntro: "Everything a person or a business needs to arrive in Cyprus and operate properly.",
+    why: [
+      { t: "We are where our clients need us", d: "Cyprus based, internationally minded, built for people and businesses operating across borders." },
+      { t: "Direct access", d: "Reach us on WhatsApp and get an answer on the channel you already use." },
+      { t: "We tell you when it will not work", d: "If the route you are asking for is not the right one, we say so before you have paid for anything." },
+    ],
+    people: [
+      { name: "Georgia Chrysostomou", title: "Managing Director and Co-Founder", bio: "" },
+      { name: "Chris Philippou", title: "CEO and Co-Founder", bio: "" },
+    ],
   },
 };
 
@@ -138,30 +175,28 @@ function merge(stored: Partial<SiteContent> | null | undefined): SiteContent {
   const s = stored ?? {};
   const obj = <T,>(key: keyof SiteContent): T =>
     ({ ...(DEFAULT_CONTENT[key] as object), ...((s[key] as object) ?? {}) }) as T;
-  const arr = <T,>(key: keyof SiteContent): T[] =>
-    (Array.isArray(s[key]) ? (s[key] as T[]) : (DEFAULT_CONTENT[key] as T[]));
-  // `why`/`insights` hold nested arrays — merge scalars per-field, then let a
-  // stored array replace the default one wholesale (same rule as top-level arrays).
-  const why = obj<SiteContent["why"]>("why");
-  why.features = Array.isArray((s.why as Partial<SiteContent["why"]> | undefined)?.features)
-    ? (s.why!.features as Feature[])
-    : DEFAULT_CONTENT.why.features;
-  const insights = obj<SiteContent["insights"]>("insights");
+  const arr = <T,>(v: unknown, fallback: T[]): T[] => (Array.isArray(v) ? (v as T[]) : fallback);
+
+  const how = obj<SiteContent["how"]>("how");
+  how.steps = arr<Step>((s.how as Partial<SiteContent["how"]> | undefined)?.steps, DEFAULT_CONTENT.how.steps);
   const consultation = obj<Consultation>("consultation");
-  consultation.points = Array.isArray((s.consultation as Partial<Consultation> | undefined)?.points)
-    ? (s.consultation!.points as string[])
-    : DEFAULT_CONTENT.consultation.points;
+  consultation.points = arr<string>((s.consultation as Partial<Consultation> | undefined)?.points, DEFAULT_CONTENT.consultation.points);
+  const about = obj<SiteContent["about"]>("about");
+  const sa = s.about as Partial<SiteContent["about"]> | undefined;
+  about.why = arr<Feature>(sa?.why, DEFAULT_CONTENT.about.why);
+  about.people = arr<Person>(sa?.people, DEFAULT_CONTENT.about.people);
+
   return {
     hero: obj("hero"),
-    about: obj("about"),
-    why,
+    stats: arr<Stat>(s.stats, DEFAULT_CONTENT.stats),
     servicesIntro: obj("servicesIntro"),
-    stats: arr<Stat>("stats"),
+    how,
     cta: obj("cta"),
-    insights,
+    insights: obj("insights"),
     contact: obj("contact"),
-    faq: arr<Faq>("faq"),
+    faq: arr<Faq>(s.faq, DEFAULT_CONTENT.faq),
     consultation,
+    about,
   };
 }
 
@@ -171,3 +206,12 @@ export const getSiteContent = cache(async (): Promise<SiteContent> => {
   const row = await prisma.siteContent.findUnique({ where: { id: "singleton" } });
   return merge(row?.data as Partial<SiteContent> | undefined);
 });
+
+/** Split content-managed body copy into paragraphs on blank lines. */
+export function paragraphs(text: string): string[] {
+  return text
+    .replace(/\r\n/g, "\n")
+    .split(/\n{2,}/)
+    .map((p) => p.trim())
+    .filter(Boolean);
+}

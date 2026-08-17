@@ -1,8 +1,11 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getService, SERVICES } from "@/components/marketing/ServiceIcons";
+import { getPublishedArticles, articlesForService } from "@/lib/services/articles";
+import { getSiteContent } from "@/lib/services/content";
 import { CtaBand } from "@/components/marketing/CtaBand";
-import { CheckIc } from "@/components/marketing/mk";
+import { InsightCard } from "@/components/marketing/InsightCard";
+import { CheckIc, WhatsAppButton } from "@/components/marketing/mk";
 
 export function generateStaticParams() {
   return SERVICES.map((s) => ({ key: s.key }));
@@ -10,15 +13,21 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: { params: Promise<{ key: string }> }) {
   const svc = getService((await params).key);
-  return { title: svc?.title ?? "Service" };
+  return svc ? { title: svc.title, description: svc.sub } : { title: "Service" };
 }
 
+/** Service detail page — the template the review kept: SERVICE eyebrow,
+ *  title, subtitle, "What is included", "How it works", CTA, closing band.
+ *  Plus the plain-spoken note some pages must carry, and links to the most
+ *  relevant Insights articles once any are published. */
 export default async function ServiceDetailPage({ params }: { params: Promise<{ key: string }> }) {
   const svc = getService((await params).key);
   if (!svc) notFound();
+  const [articles, { contact }] = await Promise.all([getPublishedArticles(), getSiteContent()]);
+  const related = articlesForService(articles, svc.key, svc.articleCategories);
   return (
     <main>
-      <section className="phero">
+      <section className="phero phero-short">
         <div className="mk-container">
           <span className="kicker">Service</span>
           <h1>{svc.title}</h1>
@@ -43,11 +52,26 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
               </div>
             ))}
           </div>
-          <div style={{ textAlign: "center", marginTop: 38 }}>
-            <Link href="/contact" className="pill">Book Your Free 30-Minute Consultation</Link>
+          {svc.note && <p className="sd-note">{svc.note}</p>}
+          <div className="final-btns" style={{ justifyContent: "center", marginTop: 38 }}>
+            <Link href="/book" className="pill">Book Your Free 30-Minute Consultation</Link>
+            <WhatsAppButton number={contact.whatsapp} />
           </div>
         </div>
       </section>
+      {related.length > 0 && (
+        <section className="sec" style={{ paddingTop: 64, paddingBottom: 64 }}>
+          <div className="mk-container">
+            <span className="kicker">Read more</span>
+            <h2 style={{ marginBottom: 6 }}>Guides on {svc.band}</h2>
+            <div className="ins4-grid" style={{ marginTop: 26 }}>
+              {related.map((a, i) => (
+                <InsightCard key={a.slug} article={a} index={i} />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
       <CtaBand heading={`Discuss *${svc.band}* with us`} />
     </main>
   );

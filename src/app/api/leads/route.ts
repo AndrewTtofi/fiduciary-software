@@ -43,7 +43,7 @@ export async function POST(req: Request) {
       name: parsed.data.name?.trim() || parsed.data.email,
       email: parsed.data.email.trim(),
       slotIso,
-      timezone: parsed.data.meta?.timezone || "Europe/Nicosia",
+      timezone: parsed.data.meta?.timezone || "Asia/Nicosia",
     });
     if (!result.ok) return NextResponse.json({ error: result.reason }, { status: 409 });
     booked = true;

@@ -58,9 +58,37 @@ export function waLink(number: string): string {
   return `https://wa.me/${number.replace(/[^\d]/g, "")}`;
 }
 
-/** "+357 22 037 063" → tel:+35722037063 */
+/** "+357 22 037 060" → tel:+35722037060 */
 export function telLink(number: string): string {
   return `tel:${number.replace(/[^+\d]/g, "")}`;
+}
+
+/** 12 March 2026 — dates on cards and article pages. */
+export function formatDate(d: Date): string {
+  return d.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
+}
+
+/** "Legal Name · HE 461330 · VAT 60079125D" — the statutory line shown in
+ *  the footer, on the About and Contact pages. Parts that are unset drop out. */
+export function statutoryLine(legalName: string, regNo: string, vatNo: string): string {
+  return [legalName, regNo, vatNo ? `VAT ${vatNo}` : ""].filter(Boolean).join(" · ");
+}
+
+export const WhatsAppIc = (
+  <svg className="ic ic-16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+    <path d="M21 11.5a8.4 8.4 0 0 1-12.6 7.3L3 20.5l1.8-5.3A8.4 8.4 0 1 1 21 11.5z" />
+  </svg>
+);
+
+/** Outline "Message on WhatsApp" button — the low-commitment option that
+ *  sits beside every gold booking button. Renders nothing without a number. */
+export function WhatsAppButton({ number, className = "pill ghost", label = "Message on WhatsApp" }: { number: string; className?: string; label?: string }) {
+  if (!number) return null;
+  return (
+    <a href={waLink(number)} target="_blank" rel="noopener noreferrer" className={className}>
+      {WhatsAppIc} {label}
+    </a>
+  );
 }
 
 export const ArrowIc = (

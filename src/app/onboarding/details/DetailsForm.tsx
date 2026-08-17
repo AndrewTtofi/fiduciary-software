@@ -159,7 +159,15 @@ export function DetailsForm({
           }
         }
         if (Object.keys(errs).length) { showErrors(errs); return; }
-        setError(typeof body.error === "string" ? body.error : "Please complete all required fields.");
+        // A 5xx is not a validation problem — say so instead of blaming the form
+        // (a stale session after a database reset lands here, for instance).
+        setError(
+          typeof body.error === "string"
+            ? body.error
+            : res.status >= 500
+              ? "Something went wrong saving your details. Please sign out, sign back in and try again."
+              : "Please complete all required fields.",
+        );
         return;
       }
       // When the documents phase is disabled, step 2 is the final step:

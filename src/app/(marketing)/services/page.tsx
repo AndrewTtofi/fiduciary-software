@@ -1,37 +1,32 @@
 import { getSiteContent } from "@/lib/services/content";
-import { ServiceIcons, SERVICES } from "@/components/marketing/ServiceIcons";
+import { SERVICES } from "@/components/marketing/ServiceIcons";
 import { CtaBand } from "@/components/marketing/CtaBand";
-import { ServicesCarousel } from "@/components/marketing/ServicesCarousel";
+import { ServicesGrid } from "@/components/marketing/ServicesGrid";
 import { Marquee } from "@/components/marketing/Marquee";
 
-export const metadata = { title: "Our Services" };
+export const metadata = {
+  title: "Our Services",
+  description: "Company formation, tax residency and Non-Dom, IP Box, immigration and work permits, citizenship, international companies and licensing, Amazon seller setup, and accounting and VAT in Cyprus.",
+};
 
 export default async function ServicesMarketingPage() {
   const { servicesIntro } = await getSiteContent();
   return (
     <main>
-      <section className="phero">
+      <section className="phero phero-short">
         <div className="mk-container">
-          <span className="kicker">{servicesIntro.eyebrow}</span>
-          <h1>Everything Your Structure Needs, <span className="gold">Under One Roof</span></h1>
+          <h1>What we do <span className="gold">in Cyprus and beyond</span></h1>
           <p className="sub">{servicesIntro.body}</p>
         </div>
       </section>
-      <section className="sec-tight" style={{ paddingTop: 8, paddingBottom: 0 }}>
+      <section className="sec-tight" style={{ paddingTop: 22, paddingBottom: 0 }}>
         <div className="mk-container">
           <Marquee items={SERVICES.map((s) => s.title)} />
         </div>
       </section>
-      <section className="sec">
+      <section className="sec" style={{ paddingTop: 44 }}>
         <div className="mk-container">
-          <ServicesCarousel
-            services={SERVICES.map((s) => ({
-              key: s.key,
-              title: s.title,
-              blurb: s.longBlurb,
-              icon: ServiceIcons[s.key],
-            }))}
-          />
+          <ServicesGrid />
         </div>
       </section>
       <CtaBand />

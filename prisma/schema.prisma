@@ -538,6 +538,16 @@ model SiteContent {
   updatedAt DateTime @updatedAt
 }
 
+/// Editable Cyprus tax rates + filing calendar behind the public /tools
+/// pages. Stored as a JSON blob merged over the code defaults in
+/// lib/data/tax-rates.ts so the firm can roll figures forward each year
+/// without a developer.
+model ToolSettings {
+  id        String   @id @default("singleton")
+  data      Json
+  updatedAt DateTime @updatedAt
+}
+
 /// Publicly served images for the marketing site (article card images and
 /// photos placed inside article bodies). Deliberately NOT routed through the
 /// storage provider: that seam encrypts every object and serves it only to an
@@ -563,16 +573,31 @@ model Article {
   id          String    @id @default(uuid())
   slug        String    @unique
   title       String
-  keyword     String // the one search phrase this article targets (card tag)
+  keyword     String // the one search phrase this article targets (SEO; not shown as a tag)
+  /// Editorial category shown on cards and used by the Insights filter
+  /// (Tax · Residency · Immigration · Citizenship · Company Formation · International).
+  category    String    @default("Tax")
   excerpt     String // teaser shown on cards and list pages
   body        String // markdown body
   image       String? // card/header image URL (optional)
+  /// Named author — every article carries one (credibility + search).
+  author      String    @default("")
+  authorRole  String    @default("")
+  authorBio   String    @default("")
+  /// "Correct as at" date shown under the title, next to the publication date.
+  correctAsAt DateTime?
+  /// Per-article SEO overrides; empty → derived from title/excerpt.
+  metaTitle   String    @default("")
+  metaDesc    String    @default("")
+  /// Service page this article relates to (services/[key]); links the closing CTA.
+  serviceKey  String    @default("")
   published   Boolean   @default(false)
   publishedAt DateTime?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
   @@index([published, publishedAt])
+  @@index([published, category])
 }
 
 model Service {
