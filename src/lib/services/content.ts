@@ -17,6 +17,14 @@ import { prisma } from "@/lib/db";
                line ("\n\n") splits paragraphs where the page renders several.
    ===================================================================== */
 
+/** Version of the content model. Stored blobs carry `_v`; a stored blob from
+ *  an older version is IGNORED and the code defaults render — that is how the
+ *  wording agreed in the Aug 2026 website review replaced copy the firm had
+ *  saved in July without anyone re-typing it. Saving from the admin stamps
+ *  the current version, so edits made from now on stick. Bump this (and only
+ *  this) whenever the agreed default copy must override what is stored. */
+export const CONTENT_VERSION = 2;
+
 export type Stat = { v: string; l: string };
 export type Faq = { q: string; a: string };
 export type Feature = { t: string; d: string };
@@ -171,8 +179,9 @@ export const DEFAULT_CONTENT: SiteContent = {
 
 /** Merge a stored partial over the defaults: objects merge per-field; arrays
  *  replace entirely when present (so an editor can shorten a list). */
-function merge(stored: Partial<SiteContent> | null | undefined): SiteContent {
-  const s = stored ?? {};
+export function mergeContent(stored: (Partial<SiteContent> & { _v?: number }) | null | undefined): SiteContent {
+  // A blob saved under an older content version is superseded wholesale.
+  const s: Partial<SiteContent> = stored && stored._v === CONTENT_VERSION ? stored : {};
   const obj = <T,>(key: keyof SiteContent): T =>
     ({ ...(DEFAULT_CONTENT[key] as object), ...((s[key] as object) ?? {}) }) as T;
   const arr = <T,>(v: unknown, fallback: T[]): T[] => (Array.isArray(v) ? (v as T[]) : fallback);
@@ -204,7 +213,7 @@ function merge(stored: Partial<SiteContent> | null | undefined): SiteContent {
  *  per request so all public pages share a single read. */
 export const getSiteContent = cache(async (): Promise<SiteContent> => {
   const row = await prisma.siteContent.findUnique({ where: { id: "singleton" } });
-  return merge(row?.data as Partial<SiteContent> | undefined);
+  return mergeContent(row?.data as (Partial<SiteContent> & { _v?: number }) | undefined);
 });
 
 /** Split content-managed body copy into paragraphs on blank lines. */

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { assertRole } from "@/lib/auth/guards";
 import { prisma } from "@/lib/db";
+import { CONTENT_VERSION } from "@/lib/services/content";
 
 export const runtime = "nodejs";
 
@@ -44,10 +45,12 @@ export async function PATCH(req: Request) {
   const parsed = schema.safeParse(await req.json().catch(() => ({})));
   if (!parsed.success) return NextResponse.json({ error: "Invalid input" }, { status: 422 });
 
+  // Stamp the content version so this save is honoured over the code defaults.
+  const data = { ...parsed.data, _v: CONTENT_VERSION };
   await prisma.siteContent.upsert({
     where: { id: "singleton" },
-    update: { data: parsed.data },
-    create: { id: "singleton", data: parsed.data },
+    update: { data },
+    create: { id: "singleton", data },
   });
   return NextResponse.json({ ok: true });
 }
