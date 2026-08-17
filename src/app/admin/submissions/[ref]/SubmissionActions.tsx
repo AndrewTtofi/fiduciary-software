@@ -4,6 +4,11 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import type { ProspectStatus } from "@prisma/client";
 
+/* Timestamps render on the server (container clock, UTC) and again on the
+   client (visitor clock); formatting both in the firm's zone keeps the text
+   identical and avoids the React hydration mismatch (#418). */
+const FIRM_TZ = "Europe/Nicosia";
+
 interface ProspectLite { id: string; status: ProspectStatus; referenceNumber: string }
 interface Partner { id: string; fullName: string }
 interface NoteRow { id: string; author: string; body: string; createdAt: string }
@@ -216,7 +221,7 @@ export function SubmissionActions({
                 <p style={{ lineHeight: 1.5 }}>{n.body}</p>
                 <div className="row-between muted mt-2" style={{ fontSize: "var(--fs-xs)" }}>
                   <span>{n.author}</span>
-                  <span className="mono">{new Date(n.createdAt).toLocaleString("en-GB", { dateStyle: "short", timeStyle: "short" })}</span>
+                  <span className="mono">{new Date(n.createdAt).toLocaleString("en-GB", { dateStyle: "short", timeStyle: "short", timeZone: FIRM_TZ })}</span>
                 </div>
               </div>
             </li>
@@ -230,7 +235,7 @@ export function SubmissionActions({
           {activity.map((a) => (
             <li key={a.id} className="row gap-3" style={{ fontSize: "var(--fs-xs)", alignItems: "flex-start" }}>
               <span className="mono muted" style={{ whiteSpace: "nowrap", flex: "none" }}>
-                {new Date(a.createdAt).toLocaleString("en-GB", { dateStyle: "short", timeStyle: "short" })}
+                {new Date(a.createdAt).toLocaleString("en-GB", { dateStyle: "short", timeStyle: "short", timeZone: FIRM_TZ })}
               </span>
               <span>{prettyAction(a.action)} <span className="muted">— {a.actor}</span></span>
             </li>
