@@ -153,7 +153,7 @@ export const DEFAULT_CONTENT: SiteContent = {
     body: "When you book a call, you get me.\n\nI have spent years walking people through immigration offices, tax registrations and company filings in Cyprus. Some of it is slower and harder than it should be, and I will not pretend otherwise.\n\nBut behind every application there is a family trying to build a life somewhere new, or someone taking a risk on a business. That part never shows up on a checklist, and it is the part I care about most.\n\nSo I will tell you what your situation actually needs. If the route you are asking for is the wrong one, I will say so. If Cyprus is not the right answer for you, I will say that too.\n\nWhat you will not get from me is maybes and ifs.",
     personName: "Georgia Chrysostomou",
     personTitle: "Managing Director and Co-Founder",
-    photoUrl: "",
+    photoUrl: "/marketing/georgia.jpg",
     photoNote: "Photograph to be arranged",
     points: [
       "If the route you are asking for is not the right one, I will tell you.",
