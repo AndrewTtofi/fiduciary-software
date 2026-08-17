@@ -1310,9 +1310,13 @@
   .searchbox input:focus { outline: none; border-color: var(--brand); box-shadow: var(--shadow-focus); }
   .bell { position: relative; color: var(--muted); cursor: pointer; }
   .bell .dot { position: absolute; top: -2px; right: -2px; width: 8px; height: 8px; border-radius: 50%; background: var(--danger); border: 1.5px solid var(--surface); }
-  .appmain { padding: 32px; max-width: 1200px; }
-  .twocol { display: grid; grid-template-columns: 1fr 340px; gap: 24px; align-items: start; }
-  .twocol-wide { grid-template-columns: 2fr 1fr; }
+  .appmain { padding: 32px; max-width: 1200px; min-width: 0; overflow-x: clip; }
+  /* Any prose inside an admin/portal card wraps long unbroken strings rather
+     than poking out of the card (applicant free text, pasted URLs). */
+  .card p, .card dd, .card td, .card li { overflow-wrap: anywhere; }
+  .card { min-width: 0; }
+  .twocol { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 24px; align-items: start; }
+  .twocol-wide { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); }
   .page-head { margin-bottom: 24px; }
   .page-head h2 { font-size: 1.563rem; font-weight: 700; letter-spacing: -0.02em; }
   .page-head p { color: var(--muted); font-size: 0.875rem; margin-top: 4px; }
@@ -1406,9 +1410,12 @@
 /* =====================================================================
    Marketplace + modals (prototype (1) additions)
    ===================================================================== */
-.dl { display: grid; grid-template-columns: auto 1fr; gap: 8px 16px; font-size: 0.875rem; }
+/* minmax(0,1fr) + overflow-wrap: a long unbroken value (pasted URL, test
+   string) must wrap inside the card, never widen the page into a horizontal
+   scroll. */
+.dl { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 8px 16px; font-size: 0.875rem; }
 .dl dt { color: var(--text-muted); }
-.dl dd { margin: 0; font-weight: 500; }
+.dl dd { margin: 0; font-weight: 500; min-width: 0; overflow-wrap: anywhere; white-space: pre-line; }
 
 .avatar-sq { border-radius: var(--radius-sm); }
 
@@ -1460,7 +1467,7 @@
 .kv-section { margin-bottom: var(--space-6); }
 .kv-section:last-child { margin-bottom: 0; }
 .kv-title { font-size: var(--fs-2xs); font-weight: 600; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); margin-bottom: var(--space-3); padding-bottom: var(--space-2); border-bottom: 1px solid var(--border-color); }
-.kv { display: grid; grid-template-columns: 132px 1fr; row-gap: 10px; column-gap: var(--space-4); font-size: var(--fs-sm); }
+.kv { display: grid; grid-template-columns: 132px minmax(0, 1fr); row-gap: 10px; column-gap: var(--space-4); font-size: var(--fs-sm); }
 .kv dt { color: var(--muted); }
 .kv dd { overflow-wrap: anywhere; font-weight: 500; }
 

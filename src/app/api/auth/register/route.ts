@@ -32,10 +32,15 @@ export async function POST(req: Request) {
 
   const result = await registerProspect(parsed.data);
   if (!result.ok) {
-    // Generic message — do not leak existence
+    // Say so plainly. The old "we've sent a verification link" wording was
+    // untrue (accounts are pre-verified, no mail goes out) and, returned with
+    // a 200, sent the sign-up form straight into a sign-in with the new
+    // password — which failed as "Invalid email or password". Existence is
+    // not a secret worth that confusion here: a wrong-password sign-in
+    // reveals it anyway.
     return NextResponse.json(
-      { error: "If that email is available, we've sent a verification link." },
-      { status: 200 },
+      { error: "An account with that email already exists. Sign in instead, or use \"Forgot password\" if you no longer have it." },
+      { status: 409 },
     );
   }
   return NextResponse.json({ ok: true });

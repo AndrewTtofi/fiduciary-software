@@ -72,7 +72,7 @@ describe("auth/register route", () => {
     });
   });
 
-  it("duplicate email → 200 with generic message (no leak)", async () => {
+  it("duplicate email → 409 with a plain already-exists message", async () => {
     await inRollbackTx(prisma, async (tx) => {
       // Seed a user with the same email.
       await tx.user.create({
@@ -86,12 +86,12 @@ describe("auth/register route", () => {
       });
       const { POST } = await loadRoute(wrapTx(tx));
       const res = await POST(makeReq({ method: "POST", body: validBody }));
-      // Route returns 200 to avoid leaking email existence.
-      expect(res.status).toBe(200);
+      // Route says plainly that the account exists (409) so the sign-up form
+      // does not fall through into a failed sign-in with the new password.
+      expect(res.status).toBe(409);
       const json = await res.json();
-      // No `ok: true` — body carries generic message, no user data.
       expect(json.ok).toBeUndefined();
-      expect(json.error).toBeTruthy();
+      expect(json.error).toMatch(/already exists/i);
     });
   });
 

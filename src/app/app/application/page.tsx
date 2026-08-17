@@ -104,7 +104,9 @@ function DetailSection({ title, rows }: { title: string; rows: DetailRow[] }) {
         present.map((r) => (
           <div key={r.label}>
             <div className="text-[12px] uppercase tracking-widest text-muted mb-1 font-semibold">{r.label}</div>
-            <div className={`text-meta ${r.multiline ? "leading-relaxed" : ""}`}>{String(r.value)}</div>
+            {/* break-anywhere: a long unbroken value (a pasted URL, or a test
+                string with no spaces) must wrap inside the card, not overflow it */}
+            <div className={`text-meta [overflow-wrap:anywhere] ${r.multiline ? "leading-relaxed whitespace-pre-line" : ""}`}>{String(r.value)}</div>
           </div>
         ))
       )}
