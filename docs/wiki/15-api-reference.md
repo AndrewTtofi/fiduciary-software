@@ -28,7 +28,7 @@ the *shape*, not the exact validators.
 | `GET` | `/api/bookings/availability` | Next 14 days of free slots |
 | `POST` | `/api/bookings` | Create a booking |
 | `PATCH` | `/api/bookings/[id]` | Cancel / mark complete / no-show |
-| `GET` / `POST` | `/api/messages` | Aggregated messages (staff/partner inbox) |
+| `GET` / `POST` | `/api/messages` | Aggregated messages (staff inbox) |
 
 ## Onboarding (`prospect` role)
 
@@ -44,7 +44,6 @@ the *shape*, not the exact validators.
 | Method | Path | Purpose |
 |---|---|---|
 | `PATCH` | `/api/admin/submissions/[id]` | Change status / approve / reject |
-| `POST` | `/api/admin/submissions/[id]/assign-partner` | Assign partner (validates role) |
 
 ## Admin — clients
 

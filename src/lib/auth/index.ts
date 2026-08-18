@@ -14,7 +14,7 @@ declare module "next-auth" {
     user: {
       id: string;
       email: string;
-      role: "prospect" | "client" | "staff" | "partner";
+      role: "prospect" | "client" | "staff";
       fullName: string;
     } & DefaultSession["user"];
   }
@@ -49,7 +49,7 @@ const providers = [
       // No email-verification gate: the deployment has no outbound email
       // connected, so accounts are created pre-verified and sign in directly.
       // Portal off-switch: when client login is disabled the deployment only
-      // offers consultation booking — staff/partner sign-in stays open.
+      // offers consultation booking — staff sign-in stays open.
       if ((user.role === "client" || user.role === "prospect") && !(await getClientLoginEnabled())) {
         throw new ClientLoginDisabledError();
       }
@@ -95,7 +95,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
       // client/prospect accounts (and brand-new OAuth users, who would be
       // created as prospects) while client login is disabled.
       const role = (user as { role?: string }).role;
-      if (role === "staff" || role === "partner") return true;
+      if (role === "staff") return true;
       return getClientLoginEnabled();
     },
     async jwt({ token, user }) {
@@ -110,7 +110,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
     async session({ session, token }) {
       if (token && session.user) {
         session.user.id = token.uid as string;
-        session.user.role = token.role as "prospect" | "client" | "staff" | "partner";
+        session.user.role = token.role as "prospect" | "client" | "staff";
         session.user.fullName = (token.fullName as string) ?? session.user.name ?? "";
       }
       return session;

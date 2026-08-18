@@ -89,10 +89,6 @@ export async function createKycCase(
   });
 }
 
-export async function createPartner(tx: PrismaClient) {
-  return createUser(tx, { role: "partner" });
-}
-
 export async function createService(
   tx: PrismaClient,
   opts: { key?: string; label?: string; active?: boolean } = {},

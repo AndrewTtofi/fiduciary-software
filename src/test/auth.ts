@@ -4,7 +4,7 @@ export type TestUser = {
   id: string;
   email: string;
   fullName: string;
-  role: "prospect" | "client" | "staff" | "partner";
+  role: "prospect" | "client" | "staff";
 };
 
 /**

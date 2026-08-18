@@ -4,7 +4,6 @@ import { logActivity } from "@/lib/services/activity";
 
 export interface AddClientServiceInput {
   serviceType: string;
-  assignedPartnerId?: string | null;
   startDate?: string | null;
   notes?: string | null;
 }
@@ -14,7 +13,6 @@ export async function addClientService(clientId: string, input: AddClientService
     data: {
       clientId,
       serviceType: input.serviceType,
-      assignedPartnerId: input.assignedPartnerId ?? null,
       startDate: input.startDate ? new Date(input.startDate) : null,
       notes: input.notes ?? null,
     },
@@ -29,7 +27,6 @@ export async function addClientService(clientId: string, input: AddClientService
 
 export interface UpdateClientServiceInput {
   status?: SvcStatus;
-  assignedPartnerId?: string | null;
   startDate?: string | null;
   notes?: string | null;
 }
@@ -37,7 +34,6 @@ export interface UpdateClientServiceInput {
 export async function updateClientService(serviceId: string, patch: UpdateClientServiceInput, actorId: string) {
   const data: Record<string, unknown> = {};
   if (patch.status !== undefined) data.status = patch.status;
-  if (patch.assignedPartnerId !== undefined) data.assignedPartnerId = patch.assignedPartnerId;
   if (patch.startDate !== undefined) data.startDate = patch.startDate ? new Date(patch.startDate) : null;
   if (patch.notes !== undefined) data.notes = patch.notes;
 

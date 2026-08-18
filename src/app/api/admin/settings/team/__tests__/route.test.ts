@@ -20,13 +20,8 @@ vi.mock("@/lib/auth/guards", () => ({
   },
 }));
 
-// The POST route now checks the plan tier before allowing a partner account,
-// and emails a set-password invite. Neither belongs in this route's contract
-// tests, so both are stubbed to the permissive case.
-vi.mock("@/lib/services/branding", () => ({
-  getBranding: async () => ({ planTier: "scale" }),
-  tierAtLeast: () => true,
-}));
+// The POST route emails a set-password invite, which does not belong in this
+// route's contract tests, so it is stubbed to the permissive case.
 vi.mock("@/lib/services/auth-flows", () => ({
   sendTeamInvite: async () => ({ ok: true }),
 }));
@@ -59,7 +54,7 @@ describe("admin/settings/team POST", () => {
       sessionState.user = null;
       const { POST } = await loadRoute(tx);
       await expect(
-        POST(makeReq({ method: "POST", body: { email: "new@test.local", fullName: "New Staff", role: "staff" } }))
+        POST(makeReq({ method: "POST", body: { email: "new@test.local", fullName: "New Staff" } }))
       ).rejects.toThrow();
     });
   });
@@ -70,12 +65,12 @@ describe("admin/settings/team POST", () => {
       sessionState.user = { id: "u1", email: "c@test.local", fullName: "Client", role: "client" };
       const { POST } = await loadRoute(tx);
       await expect(
-        POST(makeReq({ method: "POST", body: { email: "new@test.local", fullName: "New Staff", role: "staff" } }))
+        POST(makeReq({ method: "POST", body: { email: "new@test.local", fullName: "New Staff" } }))
       ).rejects.toThrow("FORBIDDEN");
     });
   });
 
-  it("bad input (invalid role) → 422", async () => {
+  it("bad input (role field is not accepted — accounts are always staff) → 422", async () => {
     await inRollbackTx(prisma, async (rawTx) => {
       const tx = wrapTx(rawTx);
       const staff = await createStaff(tx);
@@ -95,7 +90,7 @@ describe("admin/settings/team POST", () => {
       sessionState.user = { id: staff.id, email: staff.email, fullName: staff.fullName, role: "staff" };
       const { POST } = await loadRoute(tx);
       const res = await POST(
-        makeReq({ method: "POST", body: { email: staff.email, fullName: "Dup Staff", role: "staff" } })
+        makeReq({ method: "POST", body: { email: staff.email, fullName: "Dup Staff" } })
       );
       expect(res.status).toBe(409);
     });
@@ -108,7 +103,7 @@ describe("admin/settings/team POST", () => {
       sessionState.user = { id: staff.id, email: staff.email, fullName: staff.fullName, role: "staff" };
       const { POST } = await loadRoute(tx);
       const res = await POST(
-        makeReq({ method: "POST", body: { email: "newstaff@test.local", fullName: "New Staff Member", role: "staff" } })
+        makeReq({ method: "POST", body: { email: "newstaff@test.local", fullName: "New Staff Member" } })
       );
       expect(res.status).toBe(200);
       const json = await res.json();
@@ -118,24 +113,6 @@ describe("admin/settings/team POST", () => {
       const user = await tx.user.findUnique({ where: { email: "newstaff@test.local" } });
       expect(user?.role).toBe("staff");
       expect(user?.emailVerified).not.toBeNull();
-    });
-  });
-
-  it("happy path: creates partner user → 200 with tempPassword", async () => {
-    await inRollbackTx(prisma, async (rawTx) => {
-      const tx = wrapTx(rawTx);
-      const staff = await createStaff(tx);
-      sessionState.user = { id: staff.id, email: staff.email, fullName: staff.fullName, role: "staff" };
-      const { POST } = await loadRoute(tx);
-      const res = await POST(
-        makeReq({ method: "POST", body: { email: "newpartner@test.local", fullName: "New Partner", role: "partner" } })
-      );
-      expect(res.status).toBe(200);
-      const json = await res.json();
-      expect(json.ok).toBe(true);
-      expect(json.tempPassword).toBeTruthy();
-      const user = await tx.user.findUnique({ where: { email: "newpartner@test.local" } });
-      expect(user?.role).toBe("partner");
     });
   });
 });

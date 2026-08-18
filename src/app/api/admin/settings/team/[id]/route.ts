@@ -6,7 +6,6 @@ import { prisma } from "@/lib/db";
 export const runtime = "nodejs";
 
 const schema = z.object({
-  role: z.enum(["staff", "partner"]).optional(),
   deactivated: z.boolean().optional(),
 }).strict();
 
@@ -17,8 +16,8 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 
   const target = await prisma.user.findUnique({ where: { id }, select: { role: true, email: true } });
   if (!target) return NextResponse.json({ error: "Not found" }, { status: 404 });
-  if (target.role !== "staff" && target.role !== "partner") {
-    return NextResponse.json({ error: "Only staff and partner accounts can be modified here." }, { status: 400 });
+  if (target.role !== "staff") {
+    return NextResponse.json({ error: "Only staff accounts can be modified here." }, { status: 400 });
   }
   // Firm admins manage their own colleagues, but must not be able to demote or
   // lock out the platform operator — deactivating that account would block the
@@ -34,7 +33,6 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   await prisma.user.update({
     where: { id },
     data: {
-      ...(parsed.data.role !== undefined && { role: parsed.data.role }),
       ...(parsed.data.deactivated !== undefined && {
         deactivatedAt: parsed.data.deactivated ? new Date() : null,
       }),

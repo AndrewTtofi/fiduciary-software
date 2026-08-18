@@ -22,7 +22,6 @@ numbered in roughly the order a new contributor benefits from reading them.
 ### User interfaces
 - [11 — Admin panel (every tab)](./11-admin-panel.md)
 - [12 — Client portal](./12-client-portal.md)
-- [13 — Partner workspace](./13-partner-workspace.md)
 
 ### Platform internals
 - [14 — Worker jobs (cron)](./14-worker-jobs.md)
@@ -35,7 +34,7 @@ numbered in roughly the order a new contributor benefits from reading them.
 
 - **Login:** `http://localhost/login`
 - **Demo password (all seeded accounts):** `oroDemo!1`
-- **Staff:** `staff@oro.local` · **Partner:** `partner@oro.local` · **Client:** `dmitry@meridian.io`
+- **Staff:** `staff@oro.local` · **Client:** `dmitry@meridian.io`
 - **Mailpit (dev inbox):** `http://localhost:8025`
 - **MinIO console:** `http://localhost:9001`
 
@@ -59,5 +58,5 @@ numbered in roughly the order a new contributor benefits from reading them.
 - **Server Components by default.** Client components are explicit `"use client"` and live next to their server parents.
 - **All writes go through service modules** in `src/lib/services/*`. Route handlers are thin: parse → call service → return.
 - **All admin/portal writes log to ActivityLog.** This is the source of truth for "who did what when."
-- **Every irreversible domain change requires a role check.** `assertRole("staff")`, `assertRole("staff", "partner")`, etc.
+- **Every irreversible domain change requires a role check.** `assertRole("staff")`, `assertRole("client", "staff")`, etc.
 - **Compliance gates conversion.** A prospect cannot become a client until their ComplianceFile is `cleared`.

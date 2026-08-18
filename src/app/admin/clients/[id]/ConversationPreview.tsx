@@ -46,7 +46,7 @@ export function ConversationPreview({
       ) : (
         <ul className="flex flex-col">
           {recent.map((m, i) => {
-            const fromStaff = m.sender.role === "staff" || m.sender.role === "partner";
+            const fromStaff = m.sender.role === "staff";
             const time = new Date(m.createdAt).toLocaleString("en-GB", {
               day: "2-digit",
               month: "short",

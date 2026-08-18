@@ -7,7 +7,6 @@ export const runtime = "nodejs";
 
 const schema = z.object({
   serviceType: z.string().min(1).max(60),
-  assignedPartnerId: z.string().uuid().nullable().optional(),
   startDate: z.string().date().nullable().optional(),
   notes: z.string().max(2000).nullable().optional(),
 });

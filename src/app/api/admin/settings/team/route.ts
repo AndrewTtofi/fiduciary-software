@@ -5,15 +5,13 @@ import crypto from "node:crypto";
 import { assertRole } from "@/lib/auth/guards";
 import { prisma } from "@/lib/db";
 import { sendTeamInvite } from "@/lib/services/auth-flows";
-import { getBranding, tierAtLeast } from "@/lib/services/branding";
 
 export const runtime = "nodejs";
 
 const schema = z.object({
   email: z.string().email().transform((s) => s.toLowerCase().trim()),
   fullName: z.string().min(2).max(150),
-  role: z.enum(["staff", "partner"]),
-});
+}).strict(); // team accounts are always staff — a role field is not accepted
 
 function makeTempPassword() {
   // 12 char base64url is plenty for a one-time bootstrap secret.
@@ -29,19 +27,6 @@ export async function POST(req: Request) {
   const existing = await prisma.user.findUnique({ where: { email: parsed.data.email } });
   if (existing) return NextResponse.json({ error: "A user with that email already exists" }, { status: 409 });
 
-  // A partner account on a plan without partner access logs straight into a
-  // "portal unavailable" wall, so refuse to create one rather than hand over
-  // credentials that cannot be used.
-  if (parsed.data.role === "partner") {
-    const { planTier } = await getBranding();
-    if (!tierAtLeast(planTier, "professional")) {
-      return NextResponse.json(
-        { error: "Partner access needs the Professional plan. Create this person as Staff, or ask the platform operator to upgrade." },
-        { status: 409 },
-      );
-    }
-  }
-
   const tempPassword = makeTempPassword();
   const passwordHash = await argon2.hash(tempPassword, { type: argon2.argon2id });
 
@@ -49,9 +34,9 @@ export async function POST(req: Request) {
     data: {
       email: parsed.data.email,
       fullName: parsed.data.fullName,
-      role: parsed.data.role,
+      role: "staff",
       passwordHash,
-      emailVerified: new Date(), // staff/partner are admin-provisioned — already trusted
+      emailVerified: new Date(), // staff are admin-provisioned — already trusted
     },
   });
 

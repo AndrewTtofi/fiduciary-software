@@ -2,10 +2,9 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 
-export function AddServiceModal({ clientId, taxonomy, partners }: {
+export function AddServiceModal({ clientId, taxonomy }: {
   clientId: string;
   taxonomy: { key: string; label: string }[];
-  partners: { id: string; fullName: string }[];
 }) {
   const [open, setOpen] = useState(false);
   const [pending, start] = useTransition();
@@ -18,7 +17,6 @@ export function AddServiceModal({ clientId, taxonomy, partners }: {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           serviceType: fd.get("serviceType"),
-          assignedPartnerId: fd.get("assignedPartnerId") || null,
           startDate: fd.get("startDate") || null,
           notes: fd.get("notes") || null,
         }),
@@ -46,13 +44,6 @@ export function AddServiceModal({ clientId, taxonomy, partners }: {
             <label>Service type</label>
             <select name="serviceType" required className="select">
               {taxonomy.map((t) => <option key={t.key} value={t.key}>{t.label}</option>)}
-            </select>
-          </div>
-          <div className="field">
-            <label>Assigned partner</label>
-            <select name="assignedPartnerId" defaultValue="" className="select">
-              <option value="">Unassigned</option>
-              {partners.map((p) => <option key={p.id} value={p.id}>{p.fullName}</option>)}
             </select>
           </div>
           <div className="field">

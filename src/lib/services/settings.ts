@@ -40,7 +40,7 @@ export async function getDocumentsPhase(): Promise<DocumentsPhase> {
 
 /** Whether clients/prospects may sign in to the portal. When disabled, the
  *  public site hides client login/sign-up and only consultation booking is
- *  offered; staff and partner sign-in is unaffected. */
+ *  offered; staff sign-in is unaffected. */
 export async function getClientLoginEnabled(): Promise<boolean> {
   const org = await getOrgSettings();
   return org.clientLoginEnabled;
@@ -159,8 +159,8 @@ export function readStageLabels(value: unknown, serviceKey?: string): Record<Svc
 }
 
 /** Stage wording per service key, defaults filled in. Staff edit these at
- *  /admin/status-stages; the client portal, partner portal and admin status
- *  pickers all read from here so a wording change shows everywhere at once. */
+ *  /admin/status-stages; the client portal and admin status pickers all
+ *  read from here so a wording change shows everywhere at once. */
 export async function getStageLabels(): Promise<Record<string, Record<SvcStageKey, string>>> {
   const services = await getServices();
   const out: Record<string, Record<SvcStageKey, string>> = {};

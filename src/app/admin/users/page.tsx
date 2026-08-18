@@ -3,7 +3,6 @@ import { AdminShell } from "@/components/admin/AdminShell";
 import { DataTable, type DataRow } from "@/components/admin/DataTable";
 import { requireRole } from "@/lib/auth/guards";
 import { auth } from "@/lib/auth";
-import { getBranding, tierAtLeast } from "@/lib/services/branding";
 import { PortalOffNotice } from "@/components/admin/PortalOffNotice";
 import { prisma } from "@/lib/db";
 import { CreateUserForm } from "./CreateUserForm";
@@ -14,21 +13,20 @@ export const dynamic = "force-dynamic";
 
 /* Two different populations share the User table, and showing them in one
    undifferentiated list is what made this page confusing:
-     • the firm's own people (staff, partner) — colleagues
+     • the firm's own people (staff)          — colleagues
      • portal logins (client, prospect)       — customers
    The engagement record for a customer lives under Clients; this page is only
    about the sign-in account, so client rows link across rather than restate it. */
 type Tab = "team" | "logins";
-const TEAM_ROLES = ["staff", "partner"] as const;
+const TEAM_ROLES = ["staff"] as const;
 
 const ROLE_LABEL: Record<string, string> = {
-  staff: "Staff", partner: "Partner", client: "Client", prospect: "Applicant",
+  staff: "Staff", client: "Client", prospect: "Applicant",
 };
 
 export default async function AdminUsersPage({ searchParams }: { searchParams: Promise<{ tab?: string }> }) {
   await requireRole("staff");
   const session = await auth();
-  const { planTier } = await getBranding();
   const tab: Tab = (await searchParams).tab === "logins" ? "logins" : "team";
 
   const users = await prisma.user.findMany({
@@ -50,7 +48,6 @@ export default async function AdminUsersPage({ searchParams }: { searchParams: P
     id: u.id,
     email: u.email,
     fullName: u.fullName,
-    role: u.role as "staff" | "partner",
     deactivatedAt: u.deactivatedAt ? u.deactivatedAt.toISOString() : null,
     createdAt: u.createdAt.toISOString(),
   }));
@@ -111,7 +108,6 @@ export default async function AdminUsersPage({ searchParams }: { searchParams: P
         <TeamManager
           members={teamMembers}
           currentUserId={session?.user?.id ?? ""}
-          partnersAllowed={tierAtLeast(planTier, "professional")}
         />
       ) : (
         <>

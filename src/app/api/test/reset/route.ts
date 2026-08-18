@@ -39,11 +39,6 @@ export async function POST(req: Request) {
       create: { email: "staff@oro.local", passwordHash: hash, fullName: "Staff One", role: "staff", emailVerified: new Date() },
       update: { passwordHash: hash, fullName: "Staff One", role: "staff", emailVerified: new Date() },
     });
-    await prisma.user.upsert({
-      where: { email: "partner@oro.local" },
-      create: { email: "partner@oro.local", passwordHash: hash, fullName: "Partner One", role: "partner", emailVerified: new Date() },
-      update: { passwordHash: hash, fullName: "Partner One", role: "partner", emailVerified: new Date() },
-    });
   }
   return NextResponse.json({ ok: true });
 }

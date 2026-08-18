@@ -58,8 +58,8 @@ export function OrgForm({
         </select>
         <p className="text-meta text-admin-muted">
           When off, the public site hides Client Login, new sign-ups are blocked and existing
-          clients can no longer sign in — visitors can only book a consultation. Staff and
-          partner sign-in keeps working.
+          clients can no longer sign in — visitors can only book a consultation. Staff
+          sign-in keeps working.
         </p>
       </Field>
       <Field label="Onboarding documents step">

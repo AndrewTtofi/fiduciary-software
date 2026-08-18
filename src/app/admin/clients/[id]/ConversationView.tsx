@@ -52,7 +52,7 @@ export function ConversationView({
           )}
 
           {messages.map((m, i) => {
-            const fromStaff = m.sender.role === "staff" || m.sender.role === "partner";
+            const fromStaff = m.sender.role === "staff";
             const prev = messages[i - 1];
             const grouped = prev && prev.sender.id === m.sender.id &&
               (new Date(m.createdAt).getTime() - new Date(prev.createdAt).getTime() < 5 * 60_000);

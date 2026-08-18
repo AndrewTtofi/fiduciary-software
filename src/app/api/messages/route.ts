@@ -14,10 +14,9 @@ const schema = z.object({
 /** Send a message in a prospect/client thread. Server-side authorization:
  *  - prospect/client owner can only post on their own thread
  *  - staff can post on any thread
- *  - partner can post on threads of clients they're assigned to
  */
 export async function POST(req: Request) {
-  const user = await assertRole("prospect", "client", "staff", "partner");
+  const user = await assertRole("prospect", "client", "staff");
   const body = await req.json().catch(() => ({}));
   const parsed = schema.safeParse(body);
   if (!parsed.success) return NextResponse.json({ error: "Invalid input" }, { status: 422 });
@@ -36,13 +35,6 @@ export async function POST(req: Request) {
     if (!client) return NextResponse.json({ error: "Not found" }, { status: 404 });
     if (user.role === "client" && client.userId !== user.id) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
-    }
-    if (user.role === "partner") {
-      const link = await prisma.clientService.findFirst({
-        where: { clientId: client.id, assignedPartnerId: user.id },
-        select: { id: true },
-      });
-      if (!link) return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
   }
 

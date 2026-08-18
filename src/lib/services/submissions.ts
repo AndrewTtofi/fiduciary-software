@@ -10,7 +10,6 @@ export async function setSubmissionStatus(args: {
   actorId: string;
   status: ProspectStatus;
   note?: string;
-  partnerId?: string | null;
 }) {
   const updated = await prisma.prospect.update({
     where: { id: args.prospectId },

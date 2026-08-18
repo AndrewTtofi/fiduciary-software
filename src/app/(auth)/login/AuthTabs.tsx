@@ -38,7 +38,6 @@ export function AuthTabs({
     const s = await getSession();
     switch (s?.user?.role) {
       case "staff": return "/admin";
-      case "partner": return "/partner";
       case "client": return "/app";
       default: return "/onboarding";
     }

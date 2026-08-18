@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 
-/* Personal account settings for staff and partners.
+/* Personal account settings for staff.
 
    Until now the only change-password form lived at /app/settings — the client
    portal. Staff could reach it, but sending a colleague into the customer

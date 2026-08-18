@@ -29,7 +29,6 @@ All seeded accounts share the password `oroDemo!1`.
 | Role | Email | Lands on | Use it for |
 |---|---|---|---|
 | Staff | `staff@oro.local` | `/admin` | Full admin panel |
-| Partner | `partner@oro.local` | `/partner` | Partner-only view |
 | Client | `dmitry@meridian.io` | `/app` | Client portal |
 | Prospect (pending) | `alex.r@uae-invest.com` | `/onboarding` | Submission in queue |
 | Prospect (needs info) | `david@cohen-tech.io` | `/onboarding` | Mid-conversation |
@@ -51,14 +50,14 @@ docker exec oro-corporation-web-1 npx tsx prisma/seed.ts
 ```
 
 The first call truncates every domain table; the second re-runs the full
-seed (the `?seed=1` flag only seeds the minimal `staff` + `partner` for
+seed (the `?seed=1` flag only seeds the minimal `staff` account for
 tests).
 
 ## Side channels
 
 - **Mailpit** at `http://localhost:8025` — captures every outbound email
-  (verification links, password resets, document-request notifications,
-  partner assignments). Click an email to view its raw content.
+  (verification links, password resets, document-request notifications).
+  Click an email to view its raw content.
 - **MinIO console** at `http://localhost:9001` — only relevant if you set
   `STORAGE_DRIVER=s3`. Credentials default to `oro_dev` / `oro_dev_password`.
 - **Postgres** is on port 5432 inside the network (not exposed). Use

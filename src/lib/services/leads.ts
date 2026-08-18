@@ -111,8 +111,8 @@ export async function sendConsultationEmails(input: {
       to: input.email,
       subject: `Your consultation request with ${brandName}`,
       html: `<p>Hello ${esc(name)},</p>
-             <p>We received your consultation request and your answers. A founding partner reads
-             them before you speak, so you never repeat your story.</p>
+             <p>We received your consultation request and your answers. They are read
+             before you speak, so you never repeat your story.</p>
              <p>We will confirm your slot by email${input.phone ? " or WhatsApp" : ""} within 24 hours.</p>
              <p>${esc(legalName || brandName)}</p>`,
     });

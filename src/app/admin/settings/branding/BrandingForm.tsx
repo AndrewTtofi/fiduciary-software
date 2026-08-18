@@ -15,8 +15,8 @@ const THEME_SWATCHES: { key: string; label: string; brand: string }[] = [
 ];
 
 const TIERS: { key: string; label: string; desc: string }[] = [
-  { key: "starter", label: "Starter", desc: "Core qualification gate + client dashboard. No partner portal, white-label, AML or compliance calendar." },
-  { key: "professional", label: "Professional", desc: "Adds conditional forms, CRM, partner portal, compliance calendar and WhatsApp reminders." },
+  { key: "starter", label: "Starter", desc: "Core qualification gate + client dashboard. No white-label, AML or compliance calendar." },
+  { key: "professional", label: "Professional", desc: "Adds conditional forms, CRM, compliance calendar and WhatsApp reminders." },
   { key: "scale", label: "Scale", desc: "Adds full white-label theming, AML / KYC screening, multi-language and API integrations." },
 ];
 
@@ -179,7 +179,7 @@ export function BrandingForm({ initial, canEditPlan }: { initial: Initial; canEd
           </div>
           <p className="muted mb-4" style={{ fontSize: "var(--fs-xs)" }}>
             {canEditPlan
-              ? "Switching tiers toggles feature availability (partner portal, compliance calendar, AML)."
+              ? "Switching tiers toggles feature availability (compliance calendar, AML)."
               : "Your plan is managed by your platform provider. Contact them to change it."}
           </p>
           <div className="stack gap-2">

@@ -3,9 +3,8 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import type { ServiceRow, StageWording } from "./ServicesEngagedList";
 
-export function ServiceRowClient({ row, partners, taxonomy, stages }: {
+export function ServiceRowClient({ row, taxonomy, stages }: {
   row: ServiceRow;
-  partners: { id: string; fullName: string }[];
   taxonomy: { key: string; label: string }[];
   stages: StageWording;
 }) {
@@ -22,7 +21,6 @@ export function ServiceRowClient({ row, partners, taxonomy, stages }: {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           status: draft.status,
-          assignedPartnerId: draft.assignedPartnerId,
           startDate: draft.startDate,
           notes: draft.notes,
         }),
@@ -48,20 +46,13 @@ export function ServiceRowClient({ row, partners, taxonomy, stages }: {
           <button type="button" onClick={remove} disabled={pending} className="btn px-3 py-1.5 text-meta text-[#DC2626]">Remove</button>
         </div>
       </div>
-      <div className="grid gap-3 sm:grid-cols-3">
+      <div className="grid gap-3 sm:grid-cols-2">
         <label className="flex flex-col gap-1">
           <span className="text-[11px] uppercase tracking-widest text-admin-muted">Status</span>
           <select value={draft.status} onChange={(e) => setDraft({ ...draft, status: e.target.value as ServiceRow["status"] })} className="input">
             <option value="pending">{stages.pending}</option>
             <option value="in_progress">{stages.in_progress}</option>
             <option value="completed">{stages.completed}</option>
-          </select>
-        </label>
-        <label className="flex flex-col gap-1">
-          <span className="text-[11px] uppercase tracking-widest text-admin-muted">Partner</span>
-          <select value={draft.assignedPartnerId ?? ""} onChange={(e) => setDraft({ ...draft, assignedPartnerId: e.target.value || null })} className="input">
-            <option value="">Unassigned</option>
-            {partners.map((p) => <option key={p.id} value={p.id}>{p.fullName}</option>)}
           </select>
         </label>
         <label className="flex flex-col gap-1">

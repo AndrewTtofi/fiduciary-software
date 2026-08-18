@@ -7,7 +7,6 @@ export const runtime = "nodejs";
 
 const patchSchema = z.object({
   status: z.enum(["pending", "in_progress", "completed"]).optional(),
-  assignedPartnerId: z.string().uuid().nullable().optional(),
   startDate: z.string().date().nullable().optional(),
   notes: z.string().max(2000).nullable().optional(),
 }).strict();

@@ -3,9 +3,8 @@ import type { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
 
 const protectedPrefixes: { prefix: string; roles: string[] }[] = [
-  { prefix: "/app",     roles: ["prospect", "client", "staff", "partner"] },
+  { prefix: "/app",     roles: ["prospect", "client", "staff"] },
   { prefix: "/admin",   roles: ["staff"] },
-  { prefix: "/partner", roles: ["partner"] },
   { prefix: "/onboarding", roles: ["prospect", "client", "staff"] },
 ];
 
@@ -36,7 +35,7 @@ export async function middleware(req: NextRequest) {
   }
 
   if (!guard.roles.includes(String(token.role))) {
-    // Hide the existence of admin/partner surfaces from the wrong role.
+    // Hide the existence of admin surfaces from the wrong role.
     return NextResponse.rewrite(new URL("/404", req.url));
   }
 
@@ -62,5 +61,5 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/app/:path*", "/admin/:path*", "/partner/:path*", "/onboarding/:path*"],
+  matcher: ["/app/:path*", "/admin/:path*", "/onboarding/:path*"],
 };

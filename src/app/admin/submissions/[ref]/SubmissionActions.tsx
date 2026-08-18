@@ -10,7 +10,6 @@ import type { ProspectStatus } from "@prisma/client";
 const FIRM_TZ = "Europe/Nicosia";
 
 interface ProspectLite { id: string; status: ProspectStatus; referenceNumber: string }
-interface Partner { id: string; fullName: string }
 interface NoteRow { id: string; author: string; body: string; createdAt: string }
 interface ActivityRow { id: string; action: string; actor: string; createdAt: string }
 
@@ -25,18 +24,15 @@ const INFO_CHECKLIST = [
 type Comp = "low" | "med" | "high";
 
 export function SubmissionActions({
-  prospect, partners, assignedPartnerId, initialNotes, activity, completenessOverride, autoCompleteness,
+  prospect, initialNotes, activity, completenessOverride, autoCompleteness,
 }: {
   prospect: ProspectLite;
-  partners: Partner[];
-  assignedPartnerId: string | null;
   initialNotes: NoteRow[];
   activity: ActivityRow[];
   completenessOverride: Comp | null;
   autoCompleteness: Comp;
 }) {
   const [status, setStatus] = useState<ProspectStatus>(prospect.status);
-  const [partnerId, setPartnerId] = useState<string | null>(assignedPartnerId);
   const [override, setOverride] = useState<Comp | null>(completenessOverride);
   const [note, setNote] = useState("");
   const [notes, setNotes] = useState<NoteRow[]>(initialNotes);
@@ -73,15 +69,6 @@ export function SubmissionActions({
       body: JSON.stringify({ completeness: value }),
     });
     router.refresh();
-  }
-
-  async function reassignPartner(id: string | null) {
-    setPartnerId(id);
-    await fetch(`/api/admin/submissions/${prospect.id}/assign-partner`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ partnerId: id }),
-    });
   }
 
   async function postNote() {
@@ -144,7 +131,7 @@ export function SubmissionActions({
       </section>
 
       <section className="card mb-4">
-        <div className="field">
+        <div className="field" style={{ marginBottom: 0 }}>
           <label>Status</label>
           <select
             value={status}
@@ -155,18 +142,6 @@ export function SubmissionActions({
             <option value="approved">Approved</option>
             <option value="needs_info">Needs More Info</option>
             <option value="rejected">Rejected</option>
-          </select>
-        </div>
-
-        <div className="field" style={{ marginBottom: 0 }}>
-          <label>Assigned Partner</label>
-          <select
-            value={partnerId ?? ""}
-            onChange={(e) => void reassignPartner(e.target.value || null)}
-            className="select"
-          >
-            <option value="">Unassigned</option>
-            {partners.map((p) => <option key={p.id} value={p.id}>{p.fullName}</option>)}
           </select>
         </div>
       </section>

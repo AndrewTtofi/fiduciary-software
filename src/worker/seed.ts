@@ -5,7 +5,7 @@ import { pgAdapter } from "@/lib/prisma-adapter";
 const prisma = new PrismaClient({ adapter: pgAdapter() });
 
 /**
- * Idempotent demo seed: 1 staff, 1 partner, 3 prospects in different statuses,
+ * Idempotent demo seed: 1 staff, 3 prospects in different statuses,
  * and 1 converted client with services + key_dates + a confirmed booking.
  * Re-runnable; uses upserts + skipDuplicates to stay safe on repeat boots.
  */
@@ -16,12 +16,6 @@ export async function runSeed() {
     where: { email: "staff@oro.local" },
     update: {},
     create: { email: "staff@oro.local", passwordHash: password, fullName: "Eleni Christodoulou", role: Role.staff, emailVerified: new Date() },
-  });
-
-  const partner = await prisma.user.upsert({
-    where: { email: "partner@oro.local" },
-    update: {},
-    create: { email: "partner@oro.local", passwordHash: password, fullName: "Maria Georgiou", role: Role.partner, emailVerified: new Date() },
   });
 
   // Pending prospect
@@ -143,8 +137,8 @@ export async function runSeed() {
   await prisma.clientService.createMany({
     skipDuplicates: true,
     data: [
-      { clientId: client.id, serviceType: "company_formation", status: SvcStatus.in_progress, assignedPartnerId: partner.id, startDate: new Date("2026-01-15"), notes: "Registering with Registrar of Companies. Name 'Meridian Trading' approved." },
-      { clientId: client.id, serviceType: "banking", status: SvcStatus.pending, assignedPartnerId: partner.id, startDate: new Date("2026-01-20"), notes: "Bank of Cyprus application submitted. Awaiting KYC approval." },
+      { clientId: client.id, serviceType: "company_formation", status: SvcStatus.in_progress, startDate: new Date("2026-01-15"), notes: "Registering with Registrar of Companies. Name 'Meridian Trading' approved." },
+      { clientId: client.id, serviceType: "banking", status: SvcStatus.pending, startDate: new Date("2026-01-20"), notes: "Bank of Cyprus application submitted. Awaiting KYC approval." },
     ],
   });
   await prisma.keyDate.deleteMany({ where: { clientId: client.id } });
@@ -160,7 +154,7 @@ export async function runSeed() {
   await prisma.internalNote.createMany({
     skipDuplicates: true,
     data: [
-      { clientId: client.id, authorId: partner.id, body: "Dmitry mentioned he might want to open a secondary branch in Estonia later this year. Keep in mind for cross-border tax planning.", createdAt: new Date("2026-05-10") },
+      { clientId: client.id, authorId: staff.id, body: "Dmitry mentioned he might want to open a secondary branch in Estonia later this year. Keep in mind for cross-border tax planning.", createdAt: new Date("2026-05-10") },
       { clientId: client.id, authorId: staff.id, body: "Waiting for the signed engagement letter for the banking module.", createdAt: new Date("2026-05-05") },
     ],
   });
@@ -173,7 +167,6 @@ export async function runSeed() {
   return {
     accounts: {
       staff: "staff@oro.local",
-      partner: "partner@oro.local",
       prospects: ["alex.r@uae-invest.com (pending)", "david@cohen-tech.io (needs_info)", "elena.p@limassol.cy (approved)"],
       client: "dmitry@meridian.io",
       password: "oroDemo!1",

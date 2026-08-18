@@ -10,21 +10,19 @@ import { FilterSelect } from "./FilterSelect";
 export const metadata = { title: "Clients" };
 
 interface PageProps {
-  searchParams: Promise<{ status?: string; service?: string; partner?: string; q?: string }>;
+  searchParams: Promise<{ status?: string; service?: string; q?: string }>;
 }
 
 export default async function AdminClientsPage({ searchParams }: PageProps) {
   const sp = await searchParams;
   const statusFilter = (sp.status ?? "all") as "all" | "active" | "on_hold" | "completed";
   const serviceFilter = sp.service ?? "all";
-  const partnerFilter = sp.partner ?? "all";
   const q = (sp.q ?? "").trim();
 
   const rows = await prisma.client.findMany({
     where: {
       ...(statusFilter !== "all" ? { status: statusFilter as ClientStatus } : {}),
       ...(serviceFilter !== "all" ? { services: { some: { serviceType: serviceFilter } } } : {}),
-      ...(partnerFilter !== "all" ? { services: { some: { assignedPartnerId: partnerFilter } } } : {}),
       ...(q
         ? {
             OR: [
@@ -38,7 +36,7 @@ export default async function AdminClientsPage({ searchParams }: PageProps) {
     include: {
       user: true,
       primaryStaff: true,
-      services: { include: { assignedPartner: true } },
+      services: true,
       keyDates: { where: { status: { in: ["upcoming", "overdue"] } }, orderBy: { dueDate: "asc" }, take: 1 },
     },
     orderBy: { createdAt: "desc" },
@@ -50,7 +48,6 @@ export default async function AdminClientsPage({ searchParams }: PageProps) {
     by: ["status"],
     where: {
       ...(serviceFilter !== "all" ? { services: { some: { serviceType: serviceFilter } } } : {}),
-      ...(partnerFilter !== "all" ? { services: { some: { assignedPartnerId: partnerFilter } } } : {}),
       ...(q
         ? {
             OR: [
@@ -67,7 +64,6 @@ export default async function AdminClientsPage({ searchParams }: PageProps) {
     k === "all" ? statusCounts.reduce((n, g) => n + g._count, 0)
       : statusCounts.find((g) => g.status === k)?._count ?? 0;
 
-  const partners = await prisma.user.findMany({ where: { role: "partner" }, select: { id: true, fullName: true } });
   const approvedProspects = await prisma.prospect.findMany({
     where: { status: ProspectStatus.approved, client: null },
     include: { user: true, complianceFile: { select: { status: true } } },
@@ -75,14 +71,13 @@ export default async function AdminClientsPage({ searchParams }: PageProps) {
   });
 
   const tableRows: DataRow[] = rows.map((c) => {
-    const partnerName = c.services.find((s) => s.assignedPartner)?.assignedPartner?.fullName ?? null;
     const nextKey = c.keyDates[0];
     return {
       key: c.id,
       href: `/admin/clients/${c.id}`,
       sort: [
         c.user.fullName, c.country, c.services.map((s) => shortService(s.serviceType)).join(", "),
-        partnerName, c.createdAt.getTime(), nextKey?.dueDate.getTime() ?? null, c.status,
+        c.createdAt.getTime(), nextKey?.dueDate.getTime() ?? null, c.status,
       ],
       cells: [
         <div key="c">
@@ -96,7 +91,6 @@ export default async function AdminClientsPage({ searchParams }: PageProps) {
           {c.services.length === 0 ? <span className="muted">—</span>
             : c.services.map((s) => <span key={s.id} className="tag">{shortService(s.serviceType)}</span>)}
         </div>,
-        partnerName ?? <span className="muted" key="p">—</span>,
         <span className="mono muted" style={{ fontSize: "var(--fs-xs)" }} key="d">
           {c.createdAt.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}
         </span>,
@@ -115,7 +109,7 @@ export default async function AdminClientsPage({ searchParams }: PageProps) {
     };
   });
 
-  const filtered = statusFilter !== "all" || serviceFilter !== "all" || partnerFilter !== "all" || !!q;
+  const filtered = statusFilter !== "all" || serviceFilter !== "all" || !!q;
 
   return (
     <AdminShell active="clients" search={{ placeholder: "Search clients, companies…" }}>
@@ -151,10 +145,6 @@ export default async function AdminClientsPage({ searchParams }: PageProps) {
           { value: "banking", label: "Banking" },
           { value: "licensing", label: "Licensing" },
         ]} />
-        <FilterSelect name="partner" label="Assigned Partner" current={partnerFilter} options={[
-          { value: "all", label: "All Partners" },
-          ...partners.map((p) => ({ value: p.id, label: p.fullName })),
-        ]} />
         {filtered && (
           <Link href="/admin/clients" className="btn btn-ghost btn-sm" style={{ alignSelf: "flex-end" }}>
             Clear filters
@@ -171,7 +161,6 @@ export default async function AdminClientsPage({ searchParams }: PageProps) {
         ] as const).map((t) => {
           const next = new URLSearchParams();
           if (serviceFilter !== "all") next.set("service", serviceFilter);
-          if (partnerFilter !== "all") next.set("partner", partnerFilter);
           if (q) next.set("q", q);
           if (t.key !== "all") next.set("status", t.key);
           const qs = next.toString();
@@ -192,7 +181,6 @@ export default async function AdminClientsPage({ searchParams }: PageProps) {
           { label: "Client", sortable: true },
           { label: "Lives in", sortable: true },
           { label: "Services", sortable: true },
-          { label: "Partner", sortable: true },
           { label: "Since", sortable: true },
           { label: "Next key date", sortable: true },
           { label: "Status", sortable: true },

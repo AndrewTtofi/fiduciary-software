@@ -9,7 +9,6 @@ import { computeCompleteness, generateBrief, detailsToMap, type Completeness } f
 import { getBranding, tierAtLeast } from "@/lib/services/branding";
 import { amlResult } from "@/lib/services/aml";
 import { RegenerateBriefButton } from "./RegenerateBriefButton";
-import { Role } from "@prisma/client";
 
 export const metadata = { title: "Submission" };
 
@@ -27,10 +26,8 @@ export default async function SubmissionDetailPage({ params }: { params: Promise
   });
   if (!prospect) notFound();
 
-  const partners = await prisma.user.findMany({ where: { role: Role.partner }, select: { id: true, fullName: true } });
   const map = Object.fromEntries(prospect.details.map((d) => [d.fieldName, d.fieldValue]));
   const services = Array.isArray(prospect.servicesSelected) ? (prospect.servicesSelected as string[]) : [];
-  const assignedPartnerId = ((prospect.draft as Record<string, unknown> | null)?.__assignedPartnerId as string | null | undefined) ?? null;
 
   // AI-style internal brief + completeness (override wins over the auto score).
   const answers = detailsToMap(prospect.details);
@@ -190,8 +187,6 @@ export default async function SubmissionDetailPage({ params }: { params: Promise
         <div>
           <SubmissionActions
             prospect={{ id: prospect.id, status: prospect.status, referenceNumber: prospect.referenceNumber }}
-            partners={partners}
-            assignedPartnerId={assignedPartnerId}
             completenessOverride={(prospect.completenessOverride as Completeness | null) ?? null}
             autoCompleteness={autoCompleteness}
             initialNotes={prospect.internalNotes.map((n) => ({

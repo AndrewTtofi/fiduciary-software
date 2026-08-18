@@ -16,19 +16,15 @@ export type Member = {
   id: string;
   email: string;
   fullName: string;
-  role: "staff" | "partner";
   deactivatedAt: string | null;
   createdAt: string;
 };
 
 export function TeamManager({
-  members, currentUserId, partnersAllowed,
+  members, currentUserId,
 }: {
   members: Member[];
   currentUserId: string;
-  /** Partner access is gated at the Professional plan; below it a partner
-   *  account can only reach a "portal unavailable" wall. */
-  partnersAllowed: boolean;
 }) {
   const router = useRouter();
   const [pending, start] = useTransition();
@@ -45,7 +41,6 @@ export function TeamManager({
         body: JSON.stringify({
           fullName: String(fd.get("fullName") ?? ""),
           email: String(fd.get("email") ?? ""),
-          role: String(fd.get("role") ?? "staff"),
         }),
       });
       const j = (await res.json().catch(() => ({}))) as { error?: string; email?: string; tempPassword?: string; invited?: boolean };
@@ -78,7 +73,7 @@ export function TeamManager({
     const off = !!m.deactivatedAt;
     return {
       key: m.id,
-      sort: [m.fullName, m.email, m.role, off ? 1 : 0, new Date(m.createdAt).getTime()],
+      sort: [m.fullName, m.email, off ? 1 : 0, new Date(m.createdAt).getTime()],
       cells: [
         <div className="cell-entity" key="n">
           <div className="avatar" style={{ width: 26, height: 26, fontSize: 11 }}>
@@ -88,24 +83,6 @@ export function TeamManager({
           {isSelf && <span className="tag">You</span>}
         </div>,
         <span className="mono" style={{ fontSize: "var(--fs-xs)" }} key="e">{m.email}</span>,
-        // Your own role is not editable here — the API refuses it, so don't offer it.
-        isSelf ? (
-          <span className="tag" key="r">{m.role === "staff" ? "Staff" : "Partner"}</span>
-        ) : (
-          <select
-            key="r"
-            className="select select-sm"
-            style={{ width: 120 }}
-            value={m.role}
-            disabled={pending}
-            onChange={(e) => patch(m.id, { role: e.target.value })}
-          >
-            <option value="staff">Staff</option>
-            <option value="partner" disabled={!partnersAllowed && m.role !== "partner"}>
-              Partner{partnersAllowed || m.role === "partner" ? "" : " — needs Professional"}
-            </option>
-          </select>
-        ),
         off
           ? <span className="badge badge-neutral" key="s">Deactivated</span>
           : <span className="badge badge-approved" key="s">Active</span>,
@@ -156,15 +133,6 @@ export function TeamManager({
               <span className="flabel">Email</span>
               <input name="email" type="email" required className="input" />
             </label>
-            <label className="field" style={{ marginBottom: 0, width: 150 }}>
-              <span className="flabel">Role</span>
-              <select name="role" defaultValue="staff" className="select">
-                <option value="staff">Staff</option>
-                <option value="partner" disabled={!partnersAllowed}>
-                  Partner{partnersAllowed ? "" : " — needs Professional"}
-                </option>
-              </select>
-            </label>
             <button type="submit" className="btn btn-primary" disabled={pending}>
               {pending ? "Creating…" : "Create account"}
             </button>
@@ -210,14 +178,13 @@ export function TeamManager({
         columns={[
           { label: "Name", sortable: true },
           { label: "Email", sortable: true },
-          { label: "Role", sortable: true },
           { label: "Status", sortable: true },
           { label: "Joined", sortable: true },
           { label: "Actions" },
         ]}
         rows={rows}
         emptyTitle="No colleagues yet"
-        emptyBody="Add your first staff or partner account above."
+        emptyBody="Add your first colleague above."
       />
     </>
   );

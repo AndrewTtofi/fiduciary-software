@@ -8,8 +8,8 @@ export const dynamic = "force-dynamic";
 export default async function TeamSettingsPage() {
   const me = await requireRole("staff");
   const members = await prisma.user.findMany({
-    where: { role: { in: ["staff", "partner"] } },
-    select: { id: true, email: true, fullName: true, role: true, deactivatedAt: true, createdAt: true },
+    where: { role: "staff" },
+    select: { id: true, email: true, fullName: true, deactivatedAt: true, createdAt: true },
     orderBy: [{ deactivatedAt: "asc" }, { createdAt: "desc" }],
   });
   return (
@@ -19,7 +19,6 @@ export default async function TeamSettingsPage() {
         id: m.id,
         email: m.email,
         fullName: m.fullName,
-        role: m.role as "staff" | "partner",
         deactivatedAt: m.deactivatedAt?.toISOString() ?? null,
         createdAt: m.createdAt.toISOString(),
       }))}

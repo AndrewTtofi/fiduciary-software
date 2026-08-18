@@ -140,7 +140,7 @@
 @layer components {
   /* ─── Shells (unified cool chrome; marketing has its own dark skin below) ── */
   .shell-client,
-  .shell-admin, .shell-partner {
+  .shell-admin {
     --bg: #F7F8FA; --surface: #FFFFFF; --fg: #10182A; --muted: #5A6478; --border: #E3E7EE;
     --text: var(--fg); --text-muted: var(--muted); --border-color: var(--border);
     background: var(--bg);
@@ -379,7 +379,7 @@
 /* =====================================================================
    Marketing surface — ORO brand skin (navy + gold + cream, Playfair display).
    Rebuilt from the approved v1 build reference. Everything is scoped under
-   .shell-marketing so the client/admin/partner shells keep the cool
+   .shell-marketing so the client/admin shells keep the cool
    "Quiet Authority" chrome. The `.ivory` sub-surface remaps the portal
    tokens (--brand/--surface/…) so existing components (cards, inputs,
    chips, calculators) re-skin automatically on light sections.
@@ -1278,7 +1278,7 @@
 }
 
 /* =====================================================================
-   App shell — sidebar + appbar (client / admin / partner)
+   App shell — sidebar + appbar (client / admin)
    ===================================================================== */
 @layer components {
   .shell { display: grid; grid-template-columns: var(--sidebar-w) 1fr; min-height: 100vh; }
@@ -1408,7 +1408,7 @@
 .mono { font-variant-numeric: tabular-nums; }
 
 /* =====================================================================
-   Marketplace + modals (prototype (1) additions)
+   Modals (prototype (1) additions)
    ===================================================================== */
 /* minmax(0,1fr) + overflow-wrap: a long unbroken value (pasted URL, test
    string) must wrap inside the card, never widen the page into a horizontal
@@ -1417,35 +1417,12 @@
 .dl dt { color: var(--text-muted); }
 .dl dd { margin: 0; font-weight: 500; min-width: 0; overflow-wrap: anywhere; white-space: pre-line; }
 
-.avatar-sq { border-radius: var(--radius-sm); }
 
 .toggle-group { display: inline-flex; border: 1px solid var(--border-strong-color); border-radius: var(--radius-sm); overflow: hidden; }
 .toggle-group button { background: var(--surface); border: 0; border-right: 1px solid var(--border-strong-color); padding: 9px 14px; font-size: 0.875rem; font-weight: 500; color: var(--text-muted); cursor: pointer; transition: var(--transition-colors); }
 .toggle-group button:last-child { border-right: 0; }
 .toggle-group button:hover { color: var(--text); background: var(--surface-2); }
 .toggle-group button.active { background: var(--brand); color: #fff; }
-.mkt-cats { flex-wrap: wrap; max-width: 100%; }
-
-.mkt-card { display: flex; flex-direction: column; height: 100%; }
-.mkt-grid { align-items: stretch; }
-
-/* Partner network — mobile-friendly filters + horizontally scrollable category bar */
-@media (max-width: 640px) {
-  .mkt-filterbar { flex-direction: column; align-items: stretch; }
-  .mkt-filterbar .searchbox,
-  .mkt-filterbar .searchbox input,
-  .mkt-filterbar .select { width: 100% !important; max-width: none !important; }
-  .mkt-filterbar > .right { margin-left: 0; width: 100%; }
-  .mkt-filterbar > .right .select { flex: 1; }
-  .mkt-filterbar > .right .toggle-group { flex: none; }
-  /* category switcher scrolls sideways instead of wrapping into broken rows */
-  .mkt-cats { flex-wrap: nowrap; overflow-x: auto; overflow-y: hidden; max-width: 100%; scrollbar-width: none; }
-  .mkt-cats::-webkit-scrollbar { display: none; }
-  .mkt-cats button { flex: 0 0 auto; white-space: nowrap; }
-}
-
-.compare-bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 120; background: var(--surface); border-top: 1px solid var(--border-color); box-shadow: 0 -4px 16px rgba(16,24,40,.08); padding: var(--space-4) 0; }
-
 /* modal */
 .scrim { position: fixed; inset: 0; background: var(--overlay-scrim); backdrop-filter: blur(2px); z-index: 1200; display: grid; place-items: center; padding: var(--space-6); animation: fade var(--dur-base); }
 @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
@@ -1601,7 +1578,7 @@ table.tbl td > .mono, table.tbl td.mono { white-space: nowrap; }
 /* Each state gets foreground / background / border so a badge reads at a
    glance without shouting. Low saturation on purpose — this is a fiduciary
    firm's back office, not a consumer app. */
-.shell-admin, .shell-partner, .shell-client {
+.shell-admin, .shell-client {
   --st-wait-fg: var(--warning);  --st-wait-bg: var(--warning-tint);  --st-wait-br: #E9D3A4;
   --st-ok-fg:   var(--success);  --st-ok-bg:   var(--success-tint);  --st-ok-br:   #B8DCC8;
   --st-info-fg: var(--brand);    --st-info-bg: var(--brand-50);      --st-info-br: #C3CFE8;
@@ -1847,7 +1824,7 @@ table.tbl tbody tr:focus-visible { outline: 2px solid var(--brand); outline-offs
 
 /* =====================================================================
    Client portal — prototype-v2 skin. Scoped entirely to .shell-client so
-   the admin and partner shells keep the "Quiet Authority" chrome. The
+   the admin shell keeps the "Quiet Authority" chrome. The
    token remap re-skins every shared component (.card, .btn, .badge, .kpi,
    .tbl…) the same way .ivory does on the marketing site; below it are the
    portal-specific pieces: navy-deep sidebar with the gold active item,

@@ -2,7 +2,7 @@ import { describe, it, expect, beforeAll, afterAll, afterEach, vi } from "vitest
 import type { PrismaClient } from "@prisma/client";
 import { getTestPrisma, stopTestPrisma } from "@/test/db";
 import { inRollbackTx, wrapTx } from "@/test/tx";
-import { createStaff, createPartner } from "@/test/seed";
+import { createStaff } from "@/test/seed";
 import { makeReq, makeParams } from "@/test/route";
 
 let prisma: PrismaClient;
@@ -124,8 +124,8 @@ describe("admin/settings/team/[id] PATCH", () => {
     await inRollbackTx(prisma, async (rawTx) => {
       const tx = wrapTx(rawTx);
       const actor = await createStaff(tx);
-      // Create a partner that's pre-deactivated
-      const target = await createPartner(tx);
+      // Create a colleague that's pre-deactivated
+      const target = await createStaff(tx);
       await tx.user.update({ where: { id: target.id }, data: { deactivatedAt: new Date() } });
       sessionState.user = { id: actor.id, email: actor.email, fullName: actor.fullName, role: "staff" };
       const { PATCH } = await loadRoute(tx);
@@ -136,23 +136,6 @@ describe("admin/settings/team/[id] PATCH", () => {
       expect(res.status).toBe(200);
       const updated = await tx.user.findUnique({ where: { id: target.id } });
       expect(updated?.deactivatedAt).toBeNull();
-    });
-  });
-
-  it("change role: staff → partner → 200", async () => {
-    await inRollbackTx(prisma, async (rawTx) => {
-      const tx = wrapTx(rawTx);
-      const actor = await createStaff(tx);
-      const target = await createStaff(tx);
-      sessionState.user = { id: actor.id, email: actor.email, fullName: actor.fullName, role: "staff" };
-      const { PATCH } = await loadRoute(tx);
-      const res = await PATCH(
-        makeReq({ method: "PATCH", body: { role: "partner" } }),
-        makeParams({ id: target.id })
-      );
-      expect(res.status).toBe(200);
-      const updated = await tx.user.findUnique({ where: { id: target.id } });
-      expect(updated?.role).toBe("partner");
     });
   });
 });

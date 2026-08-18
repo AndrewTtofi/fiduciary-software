@@ -49,7 +49,7 @@ export default async function ClientProfilePage({
     include: {
       user: true,
       primaryStaff: true,
-      services: { include: { assignedPartner: true } },
+      services: true,
       keyDates: { orderBy: { dueDate: "asc" } },
       internalNotes: { include: { author: true }, orderBy: { createdAt: "desc" } },
       prospect: { include: { documents: true } },
@@ -66,7 +66,6 @@ export default async function ClientProfilePage({
     include: { actor: true },
   });
 
-  const partners = await prisma.user.findMany({ where: { role: Role.partner, deactivatedAt: null }, select: { id: true, fullName: true } });
   const staff = await prisma.user.findMany({ where: { role: Role.staff, deactivatedAt: null }, select: { id: true, fullName: true } });
   // Use getServices() (not a raw query) so the taxonomy lazily seeds when empty —
   // otherwise service folders fall back to raw snake_case keys.
@@ -84,14 +83,7 @@ export default async function ClientProfilePage({
       <ClientStatusPanel
         clientId={client.id}
         status={client.status}
-        primaryStaff={{ id: client.primaryStaff.id, name: client.primaryStaff.fullName, role: "Primary Contact / Partner" }}
-        extras={Array.from(
-          new Map(
-            client.services
-              .filter((s) => s.assignedPartner && s.assignedPartner.id !== client.primaryStaff.id)
-              .map((s) => [s.assignedPartner!.id, { id: s.assignedPartner!.id, name: s.assignedPartner!.fullName, role: "Assigned Partner" }]),
-          ).values(),
-        )}
+        primaryStaff={{ id: client.primaryStaff.id, name: client.primaryStaff.fullName, role: "Primary Contact" }}
         staff={staff}
       />
       <QuickActions clientId={client.id} showRequestDocs={fullWorkspace} />
@@ -161,11 +153,9 @@ export default async function ClientProfilePage({
                 clientId: client.id,
                 serviceType: s.serviceType,
                 status: s.status,
-                assignedPartnerId: s.assignedPartnerId,
                 startDate: s.startDate?.toISOString() ?? null,
                 notes: s.notes,
               }))}
-              partners={partners}
               taxonomy={taxonomy}
               stageLabels={stageLabels}
             />

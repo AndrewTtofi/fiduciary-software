@@ -40,7 +40,6 @@ export function ReassignModal({ clientId, currentPrimaryId, staff }: {
               {staff.map((s) => <option key={s.id} value={s.id}>{s.fullName}</option>)}
             </select>
           </div>
-          <p className="muted" style={{ fontSize: "0.75rem", marginBottom: 0 }}>To change assigned partners per service, edit them inline in the Services Engaged section.</p>
         </div>
         <div className="modal-foot">
           <button type="button" onClick={() => setOpen(false)} className="btn btn-secondary">Cancel</button>

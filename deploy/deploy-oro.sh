@@ -153,13 +153,22 @@ docker compose up -d
 #     so the entrypoint's `migrate deploy` is a no-op and would leave an empty
 #     database. `db push` (without --accept-data-loss) applies additive schema
 #     changes and refuses destructive ones, so it's safe to run every deploy.
+#     If a schema change is destructive (drops a column / enum value), db push
+#     refuses it every deploy and the DB silently stops tracking the schema —
+#     so say so loudly instead of hiding the output. Resolve by hand on the box:
+#       docker compose exec web node ./node_modules/prisma/build/index.js db push --accept-data-loss
 echo "[deploy] syncing DB schema (prisma db push)…"
+schema_synced=0
 for i in $(seq 1 20); do
   if docker compose exec -T web node ./node_modules/prisma/build/index.js db push >/dev/null 2>&1; then
-    echo "[deploy] schema synced"; break
+    echo "[deploy] schema synced"; schema_synced=1; break
   fi
   sleep 3
 done
+if [ "$schema_synced" != "1" ]; then
+  echo "[deploy] WARNING: prisma db push did not apply — the DB schema may be behind the code. Output:"
+  docker compose exec -T web node ./node_modules/prisma/build/index.js db push 2>&1 | tail -20 || true
+fi
 
 # 5c) provision the platform super-admin account(s) from the secret-backed env
 #     (idempotent). Passed via -e so it works even before web is recreated.

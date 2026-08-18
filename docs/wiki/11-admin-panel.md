@@ -22,8 +22,8 @@ URL-driven filters (shareable):
 - **Service** — narrow by requested services
 - **Search** — full name, email, or reference (`ORO-xxxxxx`)
 
-Rows show: reference, name, services, status pill, submitted-at,
-assigned partner. Click a row → detail.
+Rows show: reference, name, services, status pill, submitted-at.
+Click a row → detail.
 
 ### Detail page `/admin/submissions/[ref]`
 
@@ -41,8 +41,6 @@ documents (click to preview decrypted).
 - **Status dropdown** — flip pending → in_review → needs_info /
   approved / rejected. Each change logs to ActivityLog and emails the
   prospect when relevant.
-- **Assign partner** — picker; only `role=partner` users accepted
-  (backend enforces).
 - **Compliance →** opens the KYC dashboard for this submission's file.
 - **Convert to client** — disabled until status is `approved` AND
   compliance file is `cleared`. See [07 — Conversion](./07-conversion.md).
@@ -75,22 +73,22 @@ The roster of converted clients.
 
 ### List
 
-Filters: status (`active / on_hold / completed`), service, assigned
-partner, free-text search (company, name, email).
+Filters: status (`active / on_hold / completed`), service, free-text
+search (company, name, email).
 
 Per row: company name, primary contact, status, services count, next
-key date, assigned partner.
+key date.
 
 ### Detail `/admin/clients/[id]`
 
 Five sections on one long page:
 
 **1. Header.** Inline-editable: company name, primary contact, primary
-staff, partner-per-service. Status changes log `client.status_changed`.
+staff. Status changes log `client.status_changed`.
 
 **2. Services.** CRUD over `ClientService` rows. Add a new service from
 the catalog, change a service's status (pending → in_progress →
-completed), assign a different partner per service.
+completed).
 
 **3. Key dates.** CRUD over `KeyDate`. Each key date has dueDate,
 description, status, optional serviceTypeKey binding. Overdue dates
@@ -215,9 +213,9 @@ when you're ready.
 
 ### Settings → Team `/admin/settings/team`
 
-The staff + partner roster. Per row:
+The staff roster. Per row:
 
-- email, full name, role
+- email, full name
 - deactivate / reactivate (sets `User.deactivatedAt`)
 
 Deactivating immediately blocks login — see

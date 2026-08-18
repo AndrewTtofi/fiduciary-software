@@ -59,7 +59,7 @@ const esc = (v: string) =>
  *  emails a set-your-own-password link instead, on the same token machinery as
  *  the reset flow but with a week's expiry, because an invite is often opened
  *  days later. Best-effort: a mail failure must never fail account creation. */
-export async function sendTeamInvite(input: { email: string; fullName: string; role: "staff" | "partner" }) {
+export async function sendTeamInvite(input: { email: string; fullName: string }) {
   const user = await prisma.user.findUnique({ where: { email: input.email.toLowerCase() } });
   if (!user) return { ok: false as const };
 
@@ -74,12 +74,11 @@ export async function sendTeamInvite(input: { email: string; fullName: string; r
 
   const link = `${env().APP_URL}/reset/${rawToken}`;
   const { legalName, brandName } = await getServerBranding();
-  const where = input.role === "partner" ? "the partner portal" : "the admin";
   await email().send({
     to: user.email,
     subject: `Your account at ${legalName}`,
     html: `<p>Hello ${esc(input.fullName)},</p>
-           <p>An account has been created for you at ${esc(brandName)}, with access to ${where}.</p>
+           <p>An account has been created for you at ${esc(brandName)}, with access to the admin.</p>
            <p>Choose your password using the link below, then sign in with <b>${esc(user.email)}</b>. The link is valid for 7 days.</p>
            <p><a href="${link}">${link}</a></p>
            <p>If you were not expecting this, you can ignore this email.</p>`,

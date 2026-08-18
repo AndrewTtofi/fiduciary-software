@@ -7,7 +7,6 @@ type Member = {
   id: string;
   email: string;
   fullName: string;
-  role: "staff" | "partner";
   deactivatedAt: string | null;
   createdAt: string;
 };
@@ -30,7 +29,6 @@ export function TeamTable({ initial, currentUserId }: { initial: Member[]; curre
         body: JSON.stringify({
           email: fd.get("email"),
           fullName: fd.get("fullName"),
-          role: fd.get("role"),
         }),
       });
       const j = (await res.json().catch(() => ({}))) as { error?: string; tempPassword?: string; email?: string };
@@ -41,7 +39,7 @@ export function TeamTable({ initial, currentUserId }: { initial: Member[]; curre
     });
   }
 
-  function patch(id: string, body: Partial<{ role: "staff" | "partner"; deactivated: boolean }>) {
+  function patch(id: string, body: { deactivated: boolean }) {
     start(async () => {
       setMsg(null);
       const res = await fetch(`/api/admin/settings/team/${id}`, {
@@ -62,7 +60,7 @@ export function TeamTable({ initial, currentUserId }: { initial: Member[]; curre
     <div>
       <div className="flex justify-between items-center mb-4">
         <p className="text-meta text-admin-muted">
-          Staff and partner accounts. New members get a one-time password shown here once after creation.
+          Staff accounts. New members get a one-time password shown here once after creation.
         </p>
         <button type="button" onClick={() => setCreating((v) => !v)} className="btn btn-primary px-4 py-2">
           {creating ? "Cancel" : "+ Add member"}
@@ -79,12 +77,6 @@ export function TeamTable({ initial, currentUserId }: { initial: Member[]; curre
           </Field>
           <Field label="Email" className="w-72">
             <input name="email" type="email" required className="input" />
-          </Field>
-          <Field label="Role" className="w-40">
-            <select name="role" defaultValue="staff" className="input">
-              <option value="staff">Staff</option>
-              <option value="partner">Partner</option>
-            </select>
           </Field>
           <button type="submit" disabled={pending} className="btn btn-primary px-4 py-2 disabled:opacity-50">Create</button>
         </form>
@@ -105,7 +97,6 @@ export function TeamTable({ initial, currentUserId }: { initial: Member[]; curre
             <tr style={{ background: "#FDFDFD" }}>
               <Th>Name</Th>
               <Th>Email</Th>
-              <Th>Role</Th>
               <Th>Status</Th>
               <Th>Joined</Th>
               <Th>Actions</Th>
@@ -119,17 +110,6 @@ export function TeamTable({ initial, currentUserId }: { initial: Member[]; curre
                 <tr key={m.id} className="border-t border-admin-border">
                   <Td className="font-semibold">{m.fullName}</Td>
                   <Td className="font-mono">{m.email}</Td>
-                  <Td>
-                    <select
-                      value={m.role}
-                      disabled={pending || isSelf}
-                      onChange={(e) => patch(m.id, { role: e.target.value as "staff" | "partner" })}
-                      className="input py-1 px-2 text-meta"
-                    >
-                      <option value="staff">Staff</option>
-                      <option value="partner">Partner</option>
-                    </select>
-                  </Td>
                   <Td>
                     {deactivated
                       ? <span className="badge badge-pending">Deactivated</span>

@@ -10,7 +10,7 @@ A custom-built client-onboarding portal — originally "ORO" (a Cyprus corporate
 
 ## 📖 Documentation
 
-The full reference lives in [**`docs/wiki/`**](./docs/wiki/) — 18 chapters covering architecture, data model, every admin tab, the client portal, the partner workspace, the worker jobs, the API surface, testing, deployment, and troubleshooting. Start with [`docs/wiki/README.md`](./docs/wiki/README.md) or jump directly to:
+The full reference lives in [**`docs/wiki/`**](./docs/wiki/) — 17 chapters covering architecture, data model, every admin tab, the client portal, the worker jobs, the API surface, testing, deployment, and troubleshooting. Start with [`docs/wiki/README.md`](./docs/wiki/README.md) or jump directly to:
 
 - [System overview & architecture](./docs/wiki/01-overview.md)
 - [Getting started (local dev)](./docs/wiki/02-getting-started.md)
@@ -57,7 +57,6 @@ Demo accounts (after `SEED_ON_BOOT=true` runs):
 | Role | Email | Password |
 |---|---|---|
 | Staff | `staff@oro.local` | `oroDemo!1` |
-| Partner | `partner@oro.local` | `oroDemo!1` |
 | Prospect (pending) | `alex.r@uae-invest.com` | `oroDemo!1` |
 | Prospect (needs info) | `david@cohen-tech.io` | `oroDemo!1` |
 | Prospect (approved) | `elena.p@limassol.cy` | `oroDemo!1` |
@@ -112,7 +111,6 @@ src/
 │  ├─ onboarding/           Step 1 → Step 2 → Step 3 → Success
 │  ├─ app/                  authenticated client app — warm palette
 │  ├─ admin/                staff CRM — cool palette
-│  ├─ partner/              read-only mirror — cool palette
 │  └─ api/                  Route handlers (health, auth, docs, bookings, cron)
 ├─ components/               design-system primitives + shell components
 ├─ lib/

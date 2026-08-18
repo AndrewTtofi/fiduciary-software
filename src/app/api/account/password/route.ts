@@ -12,7 +12,7 @@ const schema = z.object({
 });
 
 export async function POST(req: Request) {
-  const user = await assertRole("prospect", "client", "staff", "partner");
+  const user = await assertRole("prospect", "client", "staff");
   const body = await req.json().catch(() => ({}));
   const parsed = schema.safeParse(body);
   if (!parsed.success) return NextResponse.json({ error: "Invalid input" }, { status: 422 });

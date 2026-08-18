@@ -9,7 +9,7 @@ admin can configure that's not per-client". Lives at `/admin/settings`.
 /admin/settings              Organization (the OrgSettings singleton)
 /admin/settings/services     The catalog the firm sells
 /admin/settings/flags        Feature toggles (KNOWN_FLAGS)
-/admin/settings/team         Staff + partner roster
+/admin/settings/team         Staff roster
 ```
 
 ---
@@ -88,11 +88,11 @@ requests, so a flip propagates immediately.
 
 ## Team `/admin/settings/team`
 
-The roster of staff and partner accounts (`role IN ('staff','partner')`).
+The roster of staff accounts (`role = 'staff'`).
 
 Per-row:
 
-- email, full name, role
+- email, full name
 - created-at, last-login (when available)
 - **Deactivate** — sets `User.deactivatedAt = now()`. Logging in is
   immediately blocked (see [03 — Roles & auth](./03-roles-and-auth.md)).
@@ -102,9 +102,8 @@ Per-row:
 
 "Invite" form at the top of the page:
 
-1. Pick role (staff or partner)
-2. Enter email + full name
-3. The system:
+1. Enter email + full name
+2. The system:
    - Creates a `User` with `emailVerified = now()` (bypass verification —
      this is an internal account)
    - Creates a `PasswordReset` row
@@ -114,10 +113,9 @@ When they click the link, they set a password and can sign in.
 
 ### Cannot demote / promote between staff and client
 
-Role changes between staff/partner are allowed via this UI. Changes
-between client and staff/partner are *not* — those would require
-re-evaluating compliance status and aren't trivial. They must be done
-via SQL with a paper trail.
+Role changes between client and staff are *not* possible via this UI —
+those would require re-evaluating compliance status and aren't trivial.
+They must be done via SQL with a paper trail.
 
 ---
 

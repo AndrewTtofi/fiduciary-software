@@ -11,7 +11,7 @@ User ──┬─ Prospect ─── ProspectDetail
        │              \
        │               └─ Document
        │
-       ├─ Client ── ClientService ── (assigned Partner)
+       ├─ Client ── ClientService
        │         ├─ KeyDate
        │         ├─ Document
        │         ├─ DocumentRequest
@@ -19,7 +19,7 @@ User ──┬─ Prospect ─── ProspectDetail
        │         ├─ InternalNote
        │         └─ Booking
        │
-       └─ (also as primaryStaff / assignedPartner)
+       └─ (also as primaryStaff)
 
 Prospect ──┐
            ├─ ComplianceFile ── Party ── KycCase ── ScreeningRun ── ScreeningHit
@@ -55,8 +55,7 @@ Client   ──┘                                 └─ Document
 
 - **`Client`** — a converted prospect. Owns operational artefacts:
   services, key dates, documents, messages, internal notes, bookings.
-  `primaryStaffId` points to the account manager; per-service
-  `assignedPartnerId` points to the external partner.
+  `primaryStaffId` points to the account manager.
 
 - **`ClientService`** — many-to-many between `Client` and the services the
   firm sells. `serviceTypeKey` references the human-key in `Service`

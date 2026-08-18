@@ -29,8 +29,6 @@ service who can see the message.
   `Prospect.id`.
 - **Staff** see every message attached to any client/prospect — the
   whole inbox.
-- **Partners** see only messages for clients they're assigned to via
-  `ClientService.assignedPartnerId`.
 
 The same authoritative filter runs server-side regardless of which UI
 surface called it.
@@ -61,8 +59,7 @@ week"), risk-discussion shorthand, or anything that should not leave the
 firm.
 
 Endpoint: `POST /api/admin/notes` with `{ entityType: "client" |
-"prospect", entityId, body }`. Visible only to roles `staff` and
-`partner` viewing the same entity.
+"prospect", entityId, body }`. Visible only to `staff`.
 
 ## Unread counts
 

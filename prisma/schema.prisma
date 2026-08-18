@@ -13,7 +13,6 @@ enum Role {
   prospect
   client
   staff
-  partner
 }
 
 enum Lang {
@@ -161,7 +160,6 @@ model User {
   clientAccount     Client?
   reviewedProspects Prospect[]      @relation("Reviewer")
   primaryFor        Client[]        @relation("PrimaryStaff")
-  partnerServices   ClientService[] @relation("AssignedPartner")
   internalNotes     InternalNote[]
   messages          Message[]
   expertBookings    Booking[]       @relation("Expert")
@@ -294,8 +292,6 @@ model ClientService {
   client            Client    @relation(fields: [clientId], references: [id], onDelete: Cascade)
   serviceType       String
   status            SvcStatus @default(pending)
-  assignedPartnerId String?
-  assignedPartner   User?     @relation("AssignedPartner", fields: [assignedPartnerId], references: [id])
   startDate         DateTime?
   notes             String?
 
@@ -458,7 +454,7 @@ model OrgSettings {
   documentsPhase String @default("mandatory")
   // Whether clients/prospects can sign in to the portal at all. When off, the
   // public site hides client login and sign-up and visitors can only book
-  // consultations; staff and partner sign-in keeps working.
+  // consultations; staff sign-in keeps working.
   clientLoginEnabled Boolean @default(true)
   // Per-section visibility overrides for the client dashboard, as a
   // { [sectionKey]: boolean } map. Absent keys fall back to the section's
@@ -514,20 +510,6 @@ model Lead {
 
   @@index([email])
   @@index([createdAt])
-}
-
-/// Marketplace partner application — a client applying to a vetted provider.
-model Application {
-  id           String   @id @default(uuid())
-  userId       String   // the applicant (client/prospect user)
-  providerId   String
-  providerName String
-  category     String
-  status       String   @default("sent") // sent | review | approved
-  responseBy   String?
-  createdAt    DateTime @default(now())
-
-  @@index([userId, createdAt])
 }
 
 /// Editable marketing-site content (landing + FAQ copy). Singleton JSON blob,

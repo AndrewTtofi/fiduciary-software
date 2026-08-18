@@ -30,7 +30,7 @@ export default async function LoginPage({
             <p className="text-muted mt-1" style={{ fontSize: "0.875rem" }}>
               {clientLogin
                 ? "Sign in to track the progress of your order and message your adviser."
-                : "Team and partner sign-in."}
+                : "Team sign-in."}
             </p>
           </div>
 

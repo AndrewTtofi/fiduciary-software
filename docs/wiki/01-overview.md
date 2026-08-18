@@ -24,8 +24,6 @@ client-facing portal.
               │               submissions, clients, compliance│
               │               bookings, analytics, settings   │
               ├───────────────────────────────────────────────┤
-  partner ──▶ │  /partner/*   partner-only client list & view │
-              ├───────────────────────────────────────────────┤
   client  ──▶ │  /app/*       client portal                   │
               │               dashboard, documents, messages, │
               │               bookings, application, settings │
@@ -77,7 +75,7 @@ testing — both unit tests and integration tests target them.
 
 Every write to a domain entity must log a row to `ActivityLog`. This is
 how the application reconstructs "what happened" for clients,
-compliance officers, and partners. It backs the override-history panel,
+and compliance officers. It backs the override-history panel,
 the per-client activity feed, and the audit trail in submissions.
 
 ### 4. Compliance gates conversion
@@ -91,7 +89,7 @@ and tested in `src/lib/services/__tests__/conversion-gate.test.ts`.
 ### 5. Roles are guarded server-side
 
 Server Components and route handlers call
-`assertRole("staff", "partner")` (etc.) before doing anything sensitive.
+`assertRole("staff")` (etc.) before doing anything sensitive.
 Client-side route protection is cosmetic; the real check happens on the
 server. See [03 — Roles & auth](./03-roles-and-auth.md).
 
@@ -105,7 +103,6 @@ src/
 │   ├── api/                 route handlers
 │   ├── app/                 client portal (note: app/app/* is the portal)
 │   ├── onboarding/          prospect 3-step wizard
-│   ├── partner/             partner workspace
 │   └── verify/[token]/      email-verification link target
 ├── components/              shared UI primitives (admin shell, badges, …)
 │   └── compliance/          ComplianceDashboard, RiskPanel, PartiesTable…

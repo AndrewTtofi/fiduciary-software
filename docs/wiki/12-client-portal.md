@@ -27,7 +27,7 @@ Three widgets across the top:
 - **Upcoming key dates** — next 3, with dueDate + description
 
 Beneath, a per-service status grid showing each `ClientService` row
-(status, primary staff, assigned partner).
+(status, primary staff).
 
 The page is fully server-rendered. Refresh to update.
 

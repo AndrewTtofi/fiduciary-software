@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { auth } from "./index";
 
-export type AppRole = "prospect" | "client" | "staff" | "partner";
+export type AppRole = "prospect" | "client" | "staff";
 
 /** Server-side: require a logged-in user; otherwise redirect to /login. */
 export async function requireUser() {

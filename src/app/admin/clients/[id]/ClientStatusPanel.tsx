@@ -8,12 +8,11 @@ import { ReassignModal } from "./ReassignModal";
 interface Person { id: string; name: string; role: string }
 
 export function ClientStatusPanel({
-  clientId, status, primaryStaff, extras, staff,
+  clientId, status, primaryStaff, staff,
 }: {
   clientId: string;
   status: ClientStatus;
   primaryStaff: Person;
-  extras: Person[];
   staff: { id: string; fullName: string }[];
 }) {
   const [pending, start] = useTransition();
@@ -47,7 +46,6 @@ export function ClientStatusPanel({
 
       <div className="text-[12px] font-bold uppercase text-admin-muted tracking-widest mt-6 mb-3">Assigned Team</div>
       <Member member={primaryStaff} accent />
-      {extras.map((m) => <Member key={m.id} member={m} />)}
 
       <div className="mt-3">
         <ReassignModal clientId={clientId} currentPrimaryId={primaryStaff.id} staff={staff} />

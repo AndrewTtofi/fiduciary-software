@@ -2,7 +2,7 @@ import { describe, it, expect, beforeAll, afterAll, afterEach, vi } from "vitest
 import type { PrismaClient } from "@prisma/client";
 import { getTestPrisma, stopTestPrisma } from "@/test/db";
 import { inRollbackTx, wrapTx } from "@/test/tx";
-import { createClient, createProspect, createStaff, createUser } from "@/test/seed";
+import { createClient, createStaff } from "@/test/seed";
 import { makeReq } from "@/test/route";
 
 let prisma: PrismaClient;
@@ -110,48 +110,6 @@ describe("admin/notes POST", () => {
       const note = await tx.internalNote.findUnique({ where: { id: json.id } });
       expect(note?.clientId).toBe(client.id);
       expect(note?.body).toBe("Staff note here");
-    });
-  });
-
-  it("partner posting a note on a prospect → 403", async () => {
-    await inRollbackTx(prisma, async (rawTx) => {
-      const tx = wrapTx(rawTx);
-      const prospect = await createProspect(tx);
-      const partner = await createUser(tx, { role: "partner" });
-      sessionState.user = { id: partner.id, email: partner.email, fullName: partner.fullName, role: "partner" };
-      const { POST } = await loadRoute(tx);
-      const res = await POST(makeReq({ method: "POST", body: { prospectId: prospect.id, body: "Partner note on prospect" } }));
-      expect(res.status).toBe(403);
-    });
-  });
-
-  it("partner without client assignment → 404", async () => {
-    await inRollbackTx(prisma, async (rawTx) => {
-      const tx = wrapTx(rawTx);
-      const client = await createClient(tx);
-      const partner = await createUser(tx, { role: "partner" });
-      sessionState.user = { id: partner.id, email: partner.email, fullName: partner.fullName, role: "partner" };
-      const { POST } = await loadRoute(tx);
-      const res = await POST(makeReq({ method: "POST", body: { clientId: client.id, body: "Partner unassigned note" } }));
-      expect(res.status).toBe(404);
-    });
-  });
-
-  it("partner assigned to client → 200, note created", async () => {
-    await inRollbackTx(prisma, async (rawTx) => {
-      const tx = wrapTx(rawTx);
-      const client = await createClient(tx);
-      const partner = await createUser(tx, { role: "partner" });
-      // Assign partner via ClientService
-      await tx.clientService.create({
-        data: { clientId: client.id, serviceType: "audit", assignedPartnerId: partner.id },
-      });
-      sessionState.user = { id: partner.id, email: partner.email, fullName: partner.fullName, role: "partner" };
-      const { POST } = await loadRoute(tx);
-      const res = await POST(makeReq({ method: "POST", body: { clientId: client.id, body: "Partner assigned note" } }));
-      expect(res.status).toBe(200);
-      const json = await res.json();
-      expect(json.ok).toBe(true);
     });
   });
 });

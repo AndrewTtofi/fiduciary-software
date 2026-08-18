@@ -9,7 +9,6 @@ There are four roles, defined in the `Role` enum in `prisma/schema.prisma`:
 | `prospect` | every signup before submission | `/onboarding` | their own wizard only |
 | `client` | post-conversion users | `/app` | client portal |
 | `staff` | internal team | `/admin` | full admin panel |
-| `partner` | external partners (e.g. lawyers) | `/partner` | restricted partner workspace |
 
 A user has exactly one role. Conversion of a prospect into a client
 *upgrades* the role on the same `User` row inside a transaction — the
@@ -38,7 +37,6 @@ landing path:
 ```ts
 switch (s?.user?.role) {
   case "staff":   return "/admin";
-  case "partner": return "/partner";
   case "client":  return "/app";
   default:        return "/onboarding";
 }
@@ -57,7 +55,7 @@ const user = await requireUser();
 
 // Throw if not signed in OR role is wrong.
 const user = await requireRole("staff");
-const user = await requireRole("staff", "partner");
+const user = await requireRole("client", "staff");
 
 // Same as requireRole but with a friendlier error type for routes.
 const user = await assertRole("staff");

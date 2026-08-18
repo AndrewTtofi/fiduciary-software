@@ -9,20 +9,19 @@ export const runtime = "nodejs";
 /**
  * Stream a document's plaintext to an authorized user.
  *  - Staff: any doc
- *  - Partner: docs on a client where this partner is assigned to a ClientService
  *  - Prospect/Client owner: their own docs
  */
 export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
-  const user = await assertRole("prospect", "client", "staff", "partner");
+  const user = await assertRole("prospect", "client", "staff");
   const { id } = await params;
 
   const doc = await prisma.document.findUnique({
     where: { id },
-    include: { prospect: { include: { client: true } } },
+    include: { prospect: true },
   });
   if (!doc) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-  const allowed = await authorizeDocAccess(doc, user.id, user.role);
+  const allowed = authorizeDocAccess(doc, user.id, user.role);
   if (!allowed) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   await logActivity({
@@ -54,22 +53,14 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
   });
 }
 
-async function authorizeDocAccess(
-  doc: { prospectId: string; prospect: { userId: string; client: { id: string } | null } },
+function authorizeDocAccess(
+  doc: { prospectId: string; prospect: { userId: string } },
   userId: string,
   role: string,
-): Promise<boolean> {
+): boolean {
   if (role === "staff") return true;
   if (role === "prospect" || role === "client") {
     return doc.prospect.userId === userId;
-  }
-  if (role === "partner") {
-    if (!doc.prospect.client) return false;
-    const link = await prisma.clientService.findFirst({
-      where: { clientId: doc.prospect.client.id, assignedPartnerId: userId },
-      select: { id: true },
-    });
-    return !!link;
   }
   return false;
 }

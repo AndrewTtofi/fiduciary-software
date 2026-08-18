@@ -86,7 +86,7 @@ Visit `https://oro.yourdomain.com`. The first request triggers Caddy's TLS hands
 docker compose exec web node ./dist-worker/worker/seed.js
 ```
 
-Creates `staff@oro.local`, `partner@oro.local`, three prospects, and one converted client. All accounts use password `oroDemo!1` — change them before sharing.
+Creates `staff@oro.local`, three prospects, and one converted client. All accounts use password `oroDemo!1` — change them before sharing.
 
 ## 9. Backups
 
