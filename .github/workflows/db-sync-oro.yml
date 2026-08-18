@@ -1,0 +1,92 @@
+name: Sync DB schema (accept data loss)
+
+# One-off / on-demand: apply a DESTRUCTIVE prisma schema change to the production
+# ORO database. The regular deploy runs `prisma db push` without
+# --accept-data-loss, so it refuses (and now loudly reports) changes that drop a
+# column, table or enum value. When such a change is intended, run this workflow
+# once after the deploy has shipped the new image; it prints what would be lost,
+# refuses if a removed Role value is still in use, applies the change, and
+# re-checks that the schema is in sync.
+#
+# Reuses the same access path as deploy-oro / seed-oro: the runner SSHes to the
+# ORO box (ORO_HOST/ORO_SSH_PORT/ORO_SSH_USER repo variables; ORO_DEPLOY_KEY
+# secret or the runner's own SSH identity) and runs prisma inside the web
+# container, so it always uses the schema of the currently deployed image.
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type "accept-data-loss" to confirm the destructive schema sync'
+        required: true
+        type: string
+
+concurrency:
+  group: deploy-oro
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    name: Sync ORO DB schema (self-hosted runner)
+    runs-on: [self-hosted, oro-ci]
+    steps:
+      - name: Refuse without explicit confirmation
+        if: ${{ inputs.confirm != 'accept-data-loss' }}
+        run: |
+          echo "::error::Refusing — the confirm input must be exactly 'accept-data-loss'."
+          exit 1
+
+      - name: Sync schema over the private network
+        env:
+          ORO_DEPLOY_KEY: ${{ secrets.ORO_DEPLOY_KEY }}
+          ORO_HOST: ${{ vars.ORO_HOST || '10.50.40.100' }}
+          ORO_SSH_PORT: ${{ vars.ORO_SSH_PORT || '22' }}
+          ORO_SSH_USER: ${{ vars.ORO_SSH_USER || 'ubuntu' }}
+        run: |
+          set -euo pipefail
+          SSH_OPTS=(-o BatchMode=yes -o StrictHostKeyChecking=accept-new -p "$ORO_SSH_PORT")
+          if [ -n "$ORO_DEPLOY_KEY" ]; then
+            install -m 700 -d "$HOME/.ssh"
+            printf '%s\n' "$ORO_DEPLOY_KEY" > "$HOME/.ssh/oro_deploy"
+            chmod 600 "$HOME/.ssh/oro_deploy"
+            trap 'rm -f "$HOME/.ssh/oro_deploy"' EXIT
+            SSH_OPTS+=(-i "$HOME/.ssh/oro_deploy")
+          fi
+
+          ssh "${SSH_OPTS[@]}" "$ORO_SSH_USER@$ORO_HOST" 'bash -s' <<'REMOTE'
+          set -euo pipefail
+          cd /opt/oro
+          PRISMA="node ./node_modules/prisma/build/index.js"
+          psql() { docker compose exec -T db psql -U oro -d oro -tAc "$1"; }
+
+          echo "[db-sync] deployed image:"
+          docker compose images web | tail -n +2 || true
+
+          echo "[db-sync] pending changes (dry run):"
+          # Without --accept-data-loss this only reports; non-zero exit is the expected "refused" state.
+          docker compose exec -T web $PRISMA db push 2>&1 | tail -20 || true
+
+          # A Role value that is still referenced cannot be dropped — the push would
+          # fail half-way. Surface the accounts instead of guessing.
+          if psql "select 1 from pg_enum e join pg_type t on t.oid=e.enumtypid where t.typname='Role' and e.enumlabel='partner'" | grep -q 1; then
+            n=$(psql "select count(*) from \"User\" where role='partner'")
+            if [ "${n:-0}" != "0" ]; then
+              echo "::error::$n user(s) still have role='partner' — convert or delete them first:"
+              psql "select email, \"fullName\", \"deactivatedAt\" from \"User\" where role='partner'"
+              exit 1
+            fi
+            echo "[db-sync] no users with role='partner' — safe to drop the enum value"
+          fi
+          if psql "select to_regclass('\"Application\"')" | grep -q Application; then
+            echo "[db-sync] Application rows that will be dropped: $(psql 'select count(*) from "Application"')"
+          fi
+
+          echo "[db-sync] applying: prisma db push --accept-data-loss"
+          docker compose exec -T web $PRISMA db push --accept-data-loss 2>&1 | tail -30
+
+          echo "[db-sync] verifying schema is in sync:"
+          docker compose exec -T web $PRISMA db push 2>&1 | tail -5
+
+          echo "[db-sync] web health:"
+          docker compose exec -T web curl -fsS http://127.0.0.1:3000/api/health && echo
+          REMOTE

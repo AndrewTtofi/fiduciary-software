@@ -124,6 +124,13 @@ and you must **not hand-edit `CHANGELOG.md`** (release-please owns it).
 - The deploy runs `prisma db push`, then `ensure-super-admin` and
   `ensure-branding`, behind a health gate. Super-admin + secrets come from
   GitHub secrets injected into the box.
+- `db push` there runs **without** `--accept-data-loss`, so a destructive schema
+  change (dropped column/table/enum value) is refused and the deploy log prints
+  a `WARNING: prisma db push did not apply` block. When the loss is intended,
+  run the **"Sync DB schema (accept data loss)"** workflow once
+  (`gh workflow run db-sync-oro.yml -f confirm=accept-data-loss`) after the
+  deploy — it checks for still-used Role values, applies the change on the box
+  and re-verifies the schema.
 - Internal Discord deploy notifications read the firm from the `COMPANY_NAME`
   repo variable (empty → neutral "the platform" wording).
 
