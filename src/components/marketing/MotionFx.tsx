@@ -300,6 +300,7 @@ export function MotionFx({ edgeLeft, edgeRight }: { edgeLeft: string; edgeRight:
       .map((el) => el?.querySelector<SVGSVGElement>(".edge-knot"))
       .filter(Boolean) as SVGSVGElement[];
 
+    const compact = window.matchMedia("(max-width: 900px), (pointer: coarse)");
     const onScroll = () => {
       const y = window.scrollY;
       /* transparent header over the vhero */
@@ -308,10 +309,20 @@ export function MotionFx({ edgeLeft, edgeRight }: { edgeLeft: string; edgeRight:
       const max = document.documentElement.scrollHeight - window.innerHeight;
       const q = max > 0 ? Math.min(1, Math.max(0, y / max)) : 0;
       if (barRef.current) barRef.current.style.width = `${(q * 100).toFixed(2)}%`;
-      if (vhIn) {
-        const k = Math.min(y, window.innerHeight);
-        vhIn.style.transform = `translateY(${(k * 0.28).toFixed(1)}px)`;
-        vhIn.style.opacity = Math.max(0, 1 - k / (window.innerHeight * 0.85)).toFixed(3);
+      if (vhIn && vhero) {
+        /* Parallax + fade of the hero content. On phones the stacked hero is
+           much taller than the viewport, so a viewport-based fade blanks the
+           screen while the hero is still on it — skip the effect there and
+           measure it against the hero's own height everywhere else. */
+        if (compact.matches) {
+          vhIn.style.transform = "";
+          vhIn.style.opacity = "";
+        } else {
+          const span = Math.max(1, vhero.offsetHeight * 0.85);
+          const k = Math.min(y, span);
+          vhIn.style.transform = `translateY(${(k * 0.28).toFixed(1)}px)`;
+          vhIn.style.opacity = Math.max(0, 1 - k / span).toFixed(3);
+        }
       }
       knots.forEach((k, i) => {
         const dir = i ? -1 : 1;
