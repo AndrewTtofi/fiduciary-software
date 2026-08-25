@@ -13,7 +13,7 @@ set -euo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")/.."   # repo root
 
 # Default image follows this repo's name (CI publishes ghcr.io/<owner>/<repo>).
-IMAGE="${ORO_IMAGE:-ghcr.io/andrewttofi/oro-corp:latest}"
+IMAGE="${ORO_IMAGE:-ghcr.io/andrewttofi/fiduciary-software:latest}"
 PUBIP="${ORO_PUBLIC_IP:-185.106.101.11}"
 # Public base URL of the app (may include a port, e.g. behind an LB mapping
 # :8081 → box :80). Drives APP_URL/AUTH_URL in the box .env.
