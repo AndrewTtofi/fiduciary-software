@@ -24,7 +24,7 @@ export default async function LandingPage() {
     getToolSettings(),
   ]);
   const { hero, servicesIntro, how, stats, insights, contact, consultation, cta } = content;
-  // "Legal Name · HE 461330 · Nicosia, Cyprus" — small and discreet under the
+  // "Legal Name · HE 123456 · Nicosia, Cyprus" — small and discreet under the
   // stats, so the hero shows the firm is a registered company.
   const city =
     contact.address

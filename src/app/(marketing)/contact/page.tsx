@@ -46,7 +46,7 @@ export default async function ContactPage() {
                 </span>
                 <b>Phone</b>
                 <span className="cval">{contact.phone}</span>
-                <span className="cnote">Nicosia office{contact.hours ? `, ${contact.hours}` : ""}</span>
+                <span className="cnote">Our office{contact.hours ? `, ${contact.hours}` : ""}</span>
               </a>
             )}
             {contact.email && (
@@ -70,27 +70,29 @@ export default async function ContactPage() {
         </div>
       </section>
 
-      <section className="sec">
-        <div className="mk-container office-grid">
-          <div>
-            <span className="kicker">Office</span>
-            <h2>Where to find us</h2>
-            <p className="lead" style={{ marginTop: 14 }}>{contact.address}</p>
-            {contact.parking && <p className="body"><b>Parking:</b> {contact.parking}</p>}
-            {contact.hours && <p className="body"><b>Office hours:</b> {contact.hours}</p>}
-            <p className="statutory" style={{ marginTop: 22 }}>{statutoryLine(legalName, contact.regNo, contact.vatNo)}</p>
+      {contact.address && (
+        <section className="sec">
+          <div className="mk-container office-grid">
+            <div>
+              <span className="kicker">Office</span>
+              <h2>Where to find us</h2>
+              <p className="lead" style={{ marginTop: 14 }}>{contact.address}</p>
+              {contact.parking && <p className="body"><b>Parking:</b> {contact.parking}</p>}
+              {contact.hours && <p className="body"><b>Office hours:</b> {contact.hours}</p>}
+              <p className="statutory" style={{ marginTop: 22 }}>{statutoryLine(legalName, contact.regNo, contact.vatNo)}</p>
+            </div>
+            <div className="office-map">
+              <iframe
+                title={`Map to ${legalName}`}
+                src={mapSrc}
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                allowFullScreen
+              />
+            </div>
           </div>
-          <div className="office-map">
-            <iframe
-              title={`Map to ${legalName}`}
-              src={mapSrc}
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
-              allowFullScreen
-            />
-          </div>
-        </div>
-      </section>
+        </section>
+      )}
     </main>
   );
 }

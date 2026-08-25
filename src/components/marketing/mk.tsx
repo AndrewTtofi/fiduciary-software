@@ -53,12 +53,12 @@ export function parseStatValue(v: string): { count: number | null; suffix: strin
   return { count: parseInt(m[1], 10), suffix: m[2], sup: m[3] };
 }
 
-/** "+357 96 940 440" → https://wa.me/35796940440 */
+/** "+357 99 123 456" → https://wa.me/35799123456 */
 export function waLink(number: string): string {
   return `https://wa.me/${number.replace(/[^\d]/g, "")}`;
 }
 
-/** "+357 22 037 060" → tel:+35722037060 */
+/** "+357 22 123 456" → tel:+35722123456 */
 export function telLink(number: string): string {
   return `tel:${number.replace(/[^+\d]/g, "")}`;
 }
@@ -68,7 +68,7 @@ export function formatDate(d: Date): string {
   return d.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
 }
 
-/** "Legal Name · HE 461330 · VAT 60079125D" — the statutory line shown in
+/** "Legal Name · HE 123456 · VAT 12345678X" — the statutory line shown in
  *  the footer, on the About and Contact pages. Parts that are unset drop out. */
 export function statutoryLine(legalName: string, regNo: string, vatNo: string): string {
   return [legalName, regNo, vatNo ? `VAT ${vatNo}` : ""].filter(Boolean).join(" · ");

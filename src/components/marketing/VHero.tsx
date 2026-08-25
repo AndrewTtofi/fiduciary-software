@@ -70,7 +70,7 @@ export function VHero({
   sub: string;
   primaryCta: string;
   stats: Stat[];
-  /** "Legal Name · HE 461330 · Nicosia, Cyprus" — small and discreet under the stats. */
+  /** "Legal Name · HE 123456 · Nicosia, Cyprus" — small and discreet under the stats. */
   registration: string;
   whatsapp: string;
   rates: CalcRates;

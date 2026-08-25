@@ -7,8 +7,10 @@ import { prisma } from "@/lib/db";
    the public pages always render even before anything is edited, and new
    fields added later degrade gracefully.
 
-   The defaults are the wording agreed in the firm's website review (Aug
-   2026). Fields the public pages do not read are deliberately absent —
+   The defaults are neutral white-label copy: they describe the services and
+   the jurisdiction, never the firm. Firm identity (people, address, phone,
+   registration numbers, photographs) is set per deployment in Admin →
+   Content. Fields the public pages do not read are deliberately absent —
    offering an input that changes nothing is worse than offering none.
 
    Rich-text conventions (rendered by GoldHeading/BoldText in components/marketing/mk.tsx):
@@ -18,11 +20,10 @@ import { prisma } from "@/lib/db";
    ===================================================================== */
 
 /** Version of the content model. Stored blobs carry `_v`; a stored blob from
- *  an older version is IGNORED and the code defaults render — that is how the
- *  wording agreed in the Aug 2026 website review replaced copy the firm had
- *  saved in July without anyone re-typing it. Saving from the admin stamps
- *  the current version, so edits made from now on stick. Bump this (and only
- *  this) whenever the agreed default copy must override what is stored. */
+ *  an older version is IGNORED and the code defaults render. Saving from the
+ *  admin stamps the current version, so edits made from now on stick. Bump
+ *  this (and only this) whenever the shipped default copy must override what
+ *  is stored. */
 export const CONTENT_VERSION = 2;
 
 export type Stat = { v: string; l: string };
@@ -61,9 +62,9 @@ export type SiteContent = {
     phone: string;
     whatsapp: string;
     email: string;
-    /** Company registration number, e.g. "HE 461330". */
+    /** Company registration number, e.g. "HE 123456". */
     regNo: string;
-    /** VAT number, e.g. "60079125D". */
+    /** VAT number, e.g. "12345678X". */
     vatNo: string;
     linkedin: string;
     facebook: string;
@@ -93,7 +94,7 @@ export type SiteContent = {
 
 export const DEFAULT_CONTENT: SiteContent = {
   hero: {
-    eyebrow: "Nicosia, Cyprus",
+    eyebrow: "Cyprus",
     display: "Relocate to Cyprus,\n*without the guesswork.*",
     lead: "Cyprus tax residency from 60 days a year, Non-Dom status for 17 years, and the residency permits that go with it. We map the route before you commit to anything.",
     primaryCta: "Book Your Free 30-Minute Consultation",
@@ -128,12 +129,12 @@ export const DEFAULT_CONTENT: SiteContent = {
     body: "Practical guides on tax, residency, immigration and company structure in Cyprus.",
   },
   contact: {
-    address: "20 Stasandrou, 4th floor, Office 402, 1060 Nicosia, Cyprus",
-    phone: "+357 22 037 060",
-    whatsapp: "+357 96 940 440",
-    email: "info@orocorporateservices.com",
-    regNo: "HE 461330",
-    vatNo: "60079125D",
+    address: "",
+    phone: "",
+    whatsapp: "",
+    email: "",
+    regNo: "",
+    vatNo: "",
     linkedin: "",
     facebook: "",
     parking: "",
@@ -141,7 +142,7 @@ export const DEFAULT_CONTENT: SiteContent = {
     footerAbout: "Helping international founders and families move to Cyprus - tax residency, immigration and company setup.",
   },
   faq: [
-    { q: "Who takes my consultation call?", a: "Georgia Chrysostomou, Managing Director and Co-Founder. Your form is read before you speak, so you never repeat your story, and if Cyprus is not the right move for you, we will tell you that too." },
+    { q: "Who takes my consultation call?", a: "A senior member of our team. Your form is read before you speak, so you never repeat your story, and if Cyprus is not the right move for you, we will tell you that too." },
     { q: "What happens on the first call?", a: "Thirty minutes, no charge. You tell us where you are now and where you want to be, and we tell you what the route involves. If it makes sense to go further, you receive a written plan with steps, timeline and costs before you commit to anything." },
     { q: "Where is my data stored?", a: "All data, including identity documents and financial information, is encrypted and stored within the EU, with GDPR compliant data portability and exit terms." },
     { q: "What happens to my information if I do not proceed?", a: "You can request export or deletion of your records at any time. Nothing is shared with third parties without your consent." },
@@ -150,19 +151,19 @@ export const DEFAULT_CONTENT: SiteContent = {
   ],
   consultation: {
     heading: "Who takes your call",
-    body: "When you book a call, you get me.\n\nI have spent years walking people through immigration offices, tax registrations and company filings in Cyprus. Some of it is slower and harder than it should be, and I will not pretend otherwise.\n\nBut behind every application there is a family trying to build a life somewhere new, or someone taking a risk on a business. That part never shows up on a checklist, and it is the part I care about most.\n\nSo I will tell you what your situation actually needs. If the route you are asking for is the wrong one, I will say so. If Cyprus is not the right answer for you, I will say that too.\n\nWhat you will not get from me is maybes and ifs.",
-    personName: "Georgia Chrysostomou",
-    personTitle: "Managing Director and Co-Founder",
-    photoUrl: "/marketing/georgia.jpg",
+    body: "When you book a call, you speak to the people who will actually handle your case.\n\nWe have spent years walking people through immigration offices, tax registrations and company filings in Cyprus. Some of it is slower and harder than it should be, and we will not pretend otherwise.\n\nBut behind every application there is a family trying to build a life somewhere new, or someone taking a risk on a business. That part never shows up on a checklist, and it is the part we care about most.\n\nSo we will tell you what your situation actually needs. If the route you are asking for is the wrong one, we will say so. If Cyprus is not the right answer for you, we will say that too.\n\nWhat you will not get from us is maybes and ifs.",
+    personName: "",
+    personTitle: "",
+    photoUrl: "",
     photoNote: "Photograph to be arranged",
     points: [
-      "If the route you are asking for is not the right one, I will tell you.",
-      "If I think there is a better option, I will explain why.",
-      "If I believe something carries unnecessary risk, I will advise against it.",
+      "If the route you are asking for is not the right one, we will tell you.",
+      "If we think there is a better option, we will explain why.",
+      "If we believe something carries unnecessary risk, we will advise against it.",
     ],
   },
   about: {
-    story: "{brand} was incorporated in June 2024, but it began earlier than that, as conversations in a small kitchen late at night.\n\nTwo people. An idea. And a name we chose carefully. {brand} means gold. Something valuable. Something built to last.\n\nWe moved quietly at first. Drafting and rewriting. Attending expos even when we felt uncertain. Meeting people and building connections slowly and honestly.\n\nAt some point we realized the conversations had become a company.",
+    story: "{brand} began with a simple observation: moving yourself or your business to a new country involves too many offices, too many forms and too little straight talk.\n\nWe set out to be the firm we would want on our own side - one that maps the whole route before asking for a commitment, and says plainly when a route is not the right one.\n\nThat is still how we work today.",
     how: "A common mistake in corporate matters is focusing only on speed. Speed matters. Clarity matters more.\n\nWhen structures are rushed, the problems appear later - delays, avoidable issues with the authorities, or costly changes that could have been avoided.\n\nOur role is to slow things down at the right moment. To look at the full picture, explain what it actually means, and structure things properly from the start.\n\nClients come to us not just to move forward, but to move forward correctly.\n\nWhen in doubt, it is always better to ask before taking the next step.",
     whatWeDoIntro: "Everything a person or a business needs to arrive in Cyprus and operate properly.",
     why: [
@@ -170,10 +171,7 @@ export const DEFAULT_CONTENT: SiteContent = {
       { t: "Direct access", d: "Reach us on WhatsApp and get an answer on the channel you already use." },
       { t: "We tell you when it will not work", d: "If the route you are asking for is not the right one, we say so before you have paid for anything." },
     ],
-    people: [
-      { name: "Georgia Chrysostomou", title: "Managing Director and Co-Founder", bio: "" },
-      { name: "Chris Philippou", title: "CEO and Co-Founder", bio: "" },
-    ],
+    people: [],
   },
 };
 

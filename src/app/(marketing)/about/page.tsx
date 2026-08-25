@@ -78,20 +78,24 @@ export default async function AboutPage() {
 
       <section className="sec">
         <div className="mk-container">
-          <span className="kicker">The people</span>
-          <h2>Who you will be dealing with</h2>
-          <div className="people">
-            {about.people.map((p, i) => (
-              <div className="person" key={i}>
-                <b>{p.name}</b>
-                <span className="role">{p.title}</span>
-                {p.bio && <p>{p.bio}</p>}
+          {about.people.length > 0 && (
+            <>
+              <span className="kicker">The people</span>
+              <h2>Who you will be dealing with</h2>
+              <div className="people">
+                {about.people.map((p, i) => (
+                  <div className="person" key={i}>
+                    <b>{p.name}</b>
+                    <span className="role">{p.title}</span>
+                    {p.bio && <p>{p.bio}</p>}
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+            </>
+          )}
           <div className="about-where">
             <span className="kicker">Where we are</span>
-            <p className="lead">{contact.address}</p>
+            {contact.address && <p className="lead">{contact.address}</p>}
             <p className="statutory">{statutoryLine(legalName, contact.regNo, contact.vatNo)}</p>
             <div className="final-btns" style={{ marginTop: 22, justifyContent: "flex-start" }}>
               <Link href="/contact" className="pill">Talk to us {ArrowIc}</Link>

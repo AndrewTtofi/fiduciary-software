@@ -207,7 +207,7 @@ export function ContentEditor({ initial }: { initial: SiteContent }) {
           <Field label="Title"><input className="input" value={c.consultation.personTitle} onChange={(e) => setConsult("personTitle", e.target.value)} /></Field>
         </div>
         <Field label="Text, in the first person (blank line between paragraphs)"><textarea className="input" rows={8} value={c.consultation.body} onChange={(e) => setConsult("body", e.target.value)} /></Field>
-        <Field label="Photo URL (portrait, 4:5)"><input className="input" value={c.consultation.photoUrl} onChange={(e) => setConsult("photoUrl", e.target.value)} placeholder="/marketing/georgia.jpg" /></Field>
+        <Field label="Photo URL (portrait, 4:5)"><input className="input" value={c.consultation.photoUrl} onChange={(e) => setConsult("photoUrl", e.target.value)} placeholder="/marketing/portrait.jpg" /></Field>
         <Field label="Note shown while no photo is set"><input className="input" value={c.consultation.photoNote} onChange={(e) => setConsult("photoNote", e.target.value)} /></Field>
         <hr className="hairline" style={{ margin: "8px 0" }} />
         {c.consultation.points.map((pt, i) => (
@@ -225,7 +225,7 @@ export function ContentEditor({ initial }: { initial: SiteContent }) {
           <Field label="Email"><input className="input" value={c.contact.email} onChange={(e) => setContact("email", e.target.value)} /></Field>
           <Field label="Landline"><input className="input" value={c.contact.phone} onChange={(e) => setContact("phone", e.target.value)} /></Field>
           <Field label="WhatsApp"><input className="input" value={c.contact.whatsapp} onChange={(e) => setContact("whatsapp", e.target.value)} /></Field>
-          <Field label="Company registration number (e.g. HE 461330)"><input className="input" value={c.contact.regNo} onChange={(e) => setContact("regNo", e.target.value)} /></Field>
+          <Field label="Company registration number (e.g. HE 123456)"><input className="input" value={c.contact.regNo} onChange={(e) => setContact("regNo", e.target.value)} /></Field>
           <Field label="VAT number"><input className="input" value={c.contact.vatNo} onChange={(e) => setContact("vatNo", e.target.value)} /></Field>
           <Field label="Office hours (Contact page)"><input className="input" value={c.contact.hours} onChange={(e) => setContact("hours", e.target.value)} placeholder="Monday to Friday, 9:00 to 17:00" /></Field>
           <Field label="A line on parking (Contact page)"><input className="input" value={c.contact.parking} onChange={(e) => setContact("parking", e.target.value)} placeholder="Where visitors can park" /></Field>

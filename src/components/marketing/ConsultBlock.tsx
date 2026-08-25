@@ -42,10 +42,12 @@ export function ConsultBlock({
               </a>
             )}
           </div>
-          <div className="gcard-txt">
-            <b>{consultation.personName}</b>
-            <span className="role">{consultation.personTitle}, {brandName}</span>
-          </div>
+          {consultation.personName && (
+            <div className="gcard-txt">
+              <b>{consultation.personName}</b>
+              <span className="role">{[consultation.personTitle, brandName].filter(Boolean).join(", ")}</span>
+            </div>
+          )}
         </div>
         <div>
           <h2>{consultation.heading}</h2>
