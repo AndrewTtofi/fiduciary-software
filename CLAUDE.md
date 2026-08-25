@@ -54,7 +54,7 @@ APP_URL=http://localhost NEXT_TELEMETRY_DISABLED=1 npm run build
 ```
 
 After merging a build-affecting change, watch the deploy and prod health:
-`gh run watch <deploy run>` and `curl http://185.106.101.11:8081/api/health` (prod is on **:8081**; plain :80 on that IP is an older, unrelated deployment).
+`gh run watch <deploy run>` and `curl http://185.106.101.11:8082/api/health` (this deployment is on **:8082**; :8081 is the separate ORO deployment; plain :80 on that IP is an older, unrelated deployment).
 
 ## `--legacy-peer-deps` everywhere
 
@@ -119,7 +119,7 @@ and you must **not hand-edit `CHANGELOG.md`** (release-please owns it).
 ## Deploy & white-label
 
 - Push to `main` → CI (incl. `build-image`) → `deploy.yml` on a **self-hosted
-  runner** → prod at `http://185.106.101.11:8081` (private target `10.50.2.11`, reached through the runner as jump host). Plain `:80` on that IP is an older, unrelated deployment.
+  runner** → prod at `http://185.106.101.11:8082` (private target `10.50.40.100` — the `ORO_HOST` workflow fallback, reached through the runner as jump host). Plain `:80` on that IP is an older, unrelated deployment.
   Deploy is gated on full CI success — a red `build-image` skips the deploy.
 - The deploy runs `prisma db push`, then `ensure-super-admin` and
   `ensure-branding`, behind a health gate. Super-admin + secrets come from

@@ -57,14 +57,18 @@ jobs:
           set -euo pipefail
           cd /opt/oro
           PRISMA="node ./node_modules/prisma/build/index.js"
-          psql() { docker compose exec -T db psql -U oro -d oro -tAc "$1"; }
+          # Every `docker compose exec -T` must take stdin from /dev/null: this
+          # script is itself fed to `bash -s` over ssh stdin, and an exec that
+          # inherits stdin swallows the rest of the script (bash then hits EOF
+          # and "succeeds" without running the apply).
+          psql() { docker compose exec -T db psql -U oro -d oro -tAc "$1" </dev/null; }
 
           echo "[db-sync] deployed image:"
           docker compose images web | tail -n +2 || true
 
           echo "[db-sync] pending changes (dry run):"
           # Without --accept-data-loss this only reports; non-zero exit is the expected "refused" state.
-          docker compose exec -T web $PRISMA db push 2>&1 | tail -20 || true
+          docker compose exec -T web $PRISMA db push </dev/null 2>&1 | tail -20 || true
 
           # A Role value that is still referenced cannot be dropped — the push would
           # fail half-way. Surface the accounts instead of guessing.
@@ -82,11 +86,11 @@ jobs:
           fi
 
           echo "[db-sync] applying: prisma db push --accept-data-loss"
-          docker compose exec -T web $PRISMA db push --accept-data-loss 2>&1 | tail -30
+          docker compose exec -T web $PRISMA db push --accept-data-loss </dev/null 2>&1 | tail -30
 
           echo "[db-sync] verifying schema is in sync:"
-          docker compose exec -T web $PRISMA db push 2>&1 | tail -5
+          docker compose exec -T web $PRISMA db push </dev/null 2>&1 | tail -5
 
           echo "[db-sync] web health:"
-          docker compose exec -T web curl -fsS http://127.0.0.1:3000/api/health && echo
+          docker compose exec -T web curl -fsS http://127.0.0.1:3000/api/health </dev/null && echo
           REMOTE
