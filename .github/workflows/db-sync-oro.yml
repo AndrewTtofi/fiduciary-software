@@ -71,8 +71,12 @@ jobs:
           docker compose exec -T web $PRISMA db push </dev/null 2>&1 | tail -20 || true
 
           # A Role value that is still referenced cannot be dropped — the push would
-          # fail half-way. Surface the accounts instead of guessing.
+          # fail half-way. The legacy seed data shipped a demo partner account
+          # (partner@oro.local); demote it, then surface any real accounts
+          # instead of guessing.
           if psql "select 1 from pg_enum e join pg_type t on t.oid=e.enumtypid where t.typname='Role' and e.enumlabel='partner'" | grep -q 1; then
+            demoted=$(psql "update \"User\" set role='client' where email='partner@oro.local' and role='partner' returning email")
+            if [ -n "$demoted" ]; then echo "[db-sync] demoted legacy seed account to client: $demoted"; fi
             n=$(psql "select count(*) from \"User\" where role='partner'")
             if [ "${n:-0}" != "0" ]; then
               echo "::error::$n user(s) still have role='partner' — convert or delete them first:"
