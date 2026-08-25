@@ -51,7 +51,7 @@ test("staff requests a document → client sees it in /app/documents", async ({ 
   });
 
   // ── 3. Sign in as staff, approve, clear, convert ──────────────────────────
-  await signIn(page, "staff@oro.local", "oroDemo!1");
+  await signIn(page, "staff@axenorconsulting.com", "oroDemo!1");
   await page.waitForURL(/\/admin/, { timeout: 15000 });
 
   await page.goto("/admin/submissions");

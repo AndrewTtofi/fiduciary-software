@@ -176,6 +176,7 @@ echo "[deploy] ensuring super-admin account(s)…"
 docker compose exec -T \
   -e SUPER_ADMIN_EMAILS="${SUPER_ADMIN_EMAILS:-}" \
   -e SUPER_ADMIN_PASSWORD="${SUPER_ADMIN_PASSWORD:-}" \
+  -e SUPER_ADMIN_RESET_PASSWORD="${SUPER_ADMIN_RESET_PASSWORD:-}" \
   web node ./dist-worker/worker/ensure-super-admin.js || echo "[deploy] super-admin provisioning skipped/failed (non-fatal)"
 
 # 5d) apply white-label brand identity from COMPANY_* (idempotent; no-op if unset).

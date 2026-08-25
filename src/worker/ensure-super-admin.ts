@@ -8,12 +8,14 @@ const prisma = new PrismaClient({ adapter: pgAdapter() });
  * Idempotent provisioning of the platform super-admin account(s) from env.
  * Runs on every deploy. Values come from GitHub secrets, injected into the
  * box .env / passed through by the deploy script:
- *   SUPER_ADMIN_EMAILS    comma-separated emails (the same allowlist the app gates on)
- *   SUPER_ADMIN_PASSWORD  password set when the account is first created
+ *   SUPER_ADMIN_EMAILS          comma-separated emails (the same allowlist the app gates on)
+ *   SUPER_ADMIN_PASSWORD        password set when the account is first created
+ *   SUPER_ADMIN_RESET_PASSWORD  "true" → also reset existing accounts to that password
  *
  * Each email becomes a verified `staff` user. An existing account is promoted
  * to staff + verified but its password is left untouched (we never reset a
- * password someone may have changed).
+ * password someone may have changed) — unless SUPER_ADMIN_RESET_PASSWORD is
+ * explicitly "true", which forces the configured password on every deploy.
  */
 export async function ensureSuperAdmins() {
   const emails = (process.env.SUPER_ADMIN_EMAILS ?? "")
@@ -23,14 +25,15 @@ export async function ensureSuperAdmins() {
   if (!emails.length) { console.log("[super-admin] SUPER_ADMIN_EMAILS not set — nothing to provision."); return; }
   if (!password) { console.log("[super-admin] SUPER_ADMIN_PASSWORD not set — cannot create accounts; skipping."); return; }
 
+  const resetPassword = process.env.SUPER_ADMIN_RESET_PASSWORD === "true";
   const hash = await argon2.hash(password, { type: argon2.argon2id });
   for (const email of emails) {
     const user = await prisma.user.upsert({
       where: { email },
-      update: { role: Role.staff, emailVerified: new Date(), deactivatedAt: null },
+      update: { role: Role.staff, emailVerified: new Date(), deactivatedAt: null, ...(resetPassword && { passwordHash: hash }) },
       create: { email, passwordHash: hash, fullName: "Platform Admin", role: Role.staff, emailVerified: new Date() },
     });
-    console.log(`[super-admin] ensured ${email} (id=${user.id}, role=${user.role})`);
+    console.log(`[super-admin] ensured ${email} (id=${user.id}, role=${user.role}${resetPassword ? ", password reset" : ""})`);
   }
 }
 

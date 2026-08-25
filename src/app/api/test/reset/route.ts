@@ -35,8 +35,8 @@ export async function POST(req: Request) {
 
     const hash = await argon2.hash("oroDemo!1", { type: argon2.argon2id });
     await prisma.user.upsert({
-      where: { email: "staff@oro.local" },
-      create: { email: "staff@oro.local", passwordHash: hash, fullName: "Staff One", role: "staff", emailVerified: new Date() },
+      where: { email: "staff@axenorconsulting.com" },
+      create: { email: "staff@axenorconsulting.com", passwordHash: hash, fullName: "Staff One", role: "staff", emailVerified: new Date() },
       update: { passwordHash: hash, fullName: "Staff One", role: "staff", emailVerified: new Date() },
     });
   }

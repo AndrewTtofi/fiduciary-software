@@ -28,7 +28,7 @@ All seeded accounts share the password `oroDemo!1`.
 
 | Role | Email | Lands on | Use it for |
 |---|---|---|---|
-| Staff | `staff@oro.local` | `/admin` | Full admin panel |
+| Staff | `staff@axenorconsulting.com` | `/admin` | Full admin panel |
 | Client | `dmitry@meridian.io` | `/app` | Client portal |
 | Prospect (pending) | `alex.r@uae-invest.com` | `/onboarding` | Submission in queue |
 | Prospect (needs info) | `david@cohen-tech.io` | `/onboarding` | Mid-conversation |

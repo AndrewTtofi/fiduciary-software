@@ -53,6 +53,7 @@ jobs:
           # Managed config injected into the box .env by deploy-oro.sh.
           SUPER_ADMIN_EMAILS: ${{ secrets.SUPER_ADMIN_EMAILS }}
           SUPER_ADMIN_PASSWORD: ${{ secrets.SUPER_ADMIN_PASSWORD }}
+          SUPER_ADMIN_RESET_PASSWORD: ${{ vars.SUPER_ADMIN_RESET_PASSWORD }}
           # White-label firm identity → applied to the app's branding (single
           # source of truth; COMPANY_NAME is also used by the deploy notifier).
           # Empty → neutral wording / existing branding preserved.
@@ -77,7 +78,7 @@ jobs:
           # Pass secret-backed config to the remote shell; deploy-oro.sh reads
           # them from env and writes them into /opt/oro/.env. GitHub masks values.
           ssh "${SSH_OPTS[@]}" "$ORO_SSH_USER@$ORO_HOST" \
-              "SUPER_ADMIN_EMAILS='${SUPER_ADMIN_EMAILS}' SUPER_ADMIN_PASSWORD='${SUPER_ADMIN_PASSWORD}' COMPANY_NAME='${COMPANY_NAME}' COMPANY_LEGAL_NAME='${COMPANY_LEGAL_NAME}' COMPANY_EMAIL='${COMPANY_EMAIL}' COMPANY_ADDRESS='${COMPANY_ADDRESS}' COMPANY_PLAN_TIER='${COMPANY_PLAN_TIER}' ORO_PUBLIC_URL='${ORO_PUBLIC_URL}' GH_ACCESS_TOKEN='${GH_ACCESS_TOKEN}' bash -s" <<'REMOTE'
+              "SUPER_ADMIN_EMAILS='${SUPER_ADMIN_EMAILS}' SUPER_ADMIN_PASSWORD='${SUPER_ADMIN_PASSWORD}' SUPER_ADMIN_RESET_PASSWORD='${SUPER_ADMIN_RESET_PASSWORD}' COMPANY_NAME='${COMPANY_NAME}' COMPANY_LEGAL_NAME='${COMPANY_LEGAL_NAME}' COMPANY_EMAIL='${COMPANY_EMAIL}' COMPANY_ADDRESS='${COMPANY_ADDRESS}' COMPANY_PLAN_TIER='${COMPANY_PLAN_TIER}' ORO_PUBLIC_URL='${ORO_PUBLIC_URL}' GH_ACCESS_TOKEN='${GH_ACCESS_TOKEN}' bash -s" <<'REMOTE'
           set -euo pipefail
           cd /opt/oro
           # Private repo + private GHCR package: authenticate both with the

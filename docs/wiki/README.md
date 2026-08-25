@@ -34,7 +34,7 @@ numbered in roughly the order a new contributor benefits from reading them.
 
 - **Login:** `http://localhost/login`
 - **Demo password (all seeded accounts):** `oroDemo!1`
-- **Staff:** `staff@oro.local` · **Client:** `dmitry@meridian.io`
+- **Staff:** `staff@axenorconsulting.com` · **Client:** `dmitry@meridian.io`
 - **Mailpit (dev inbox):** `http://localhost:8025`
 - **MinIO console:** `http://localhost:9001`
 

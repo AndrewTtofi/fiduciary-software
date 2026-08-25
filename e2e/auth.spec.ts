@@ -28,7 +28,7 @@ test("register new account → lands on /onboarding", async ({ page }) => {
 test("sign in with seeded staff account → lands on /admin", async ({ page }) => {
   await page.goto("/login");
 
-  await page.locator("input[name='email']").fill("staff@oro.local");
+  await page.locator("input[name='email']").fill("staff@axenorconsulting.com");
   await page.locator("input[name='password']").fill("oroDemo!1");
   // Submit via the form submit button
   await page.locator("form button[type='submit']").click();

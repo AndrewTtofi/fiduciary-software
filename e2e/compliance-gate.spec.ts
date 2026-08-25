@@ -61,7 +61,7 @@ test("approved prospect with no compliance file is blocked from conversion", asy
   });
 
   // Staff approves submission (compliance NOT cleared — no ComplianceFile exists)
-  await signIn(page, "staff@oro.local", "oroDemo!1");
+  await signIn(page, "staff@axenorconsulting.com", "oroDemo!1");
   await page.waitForURL(/\/admin/, { timeout: 15000 });
 
   await page.goto("/admin/submissions");
@@ -97,7 +97,7 @@ test("convert API returns error when compliance is not cleared", async ({ page, 
   });
 
   // Staff approves (no compliance clearance)
-  await signIn(page, "staff@oro.local", "oroDemo!1");
+  await signIn(page, "staff@axenorconsulting.com", "oroDemo!1");
   await page.waitForURL(/\/admin/, { timeout: 15000 });
 
   await page.goto("/admin/submissions");

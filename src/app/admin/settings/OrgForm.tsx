@@ -46,7 +46,7 @@ export function OrgForm({
         <input name="displayName" required defaultValue={initial.displayName} className="input" />
       </Field>
       <Field label="Contact email">
-        <input name="contactEmail" type="email" defaultValue={initial.contactEmail ?? ""} className="input" placeholder="hello@oro.local" />
+        <input name="contactEmail" type="email" defaultValue={initial.contactEmail ?? ""} className="input" placeholder="hello@axenorconsulting.com" />
       </Field>
       <Field label="Address">
         <textarea name="address" rows={3} defaultValue={initial.address ?? ""} className="input" placeholder="Street, City, Country" />

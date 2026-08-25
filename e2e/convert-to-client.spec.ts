@@ -57,7 +57,7 @@ test("prospect → staff approves + compliance cleared → staff converts → cl
   expect(submitRes.ok(), `submit: ${submitRes.status()}`).toBeTruthy();
 
   // ── 3. Sign in as staff ───────────────────────────────────────────────────
-  await signIn(page, "staff@oro.local", "oroDemo!1");
+  await signIn(page, "staff@axenorconsulting.com", "oroDemo!1");
   await page.waitForURL(/\/admin/, { timeout: 15000 });
 
   // ── 4. Approve the submission ─────────────────────────────────────────────

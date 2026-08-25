@@ -20,7 +20,7 @@ export async function createProspect(tx: PrismaClient, opts: { userId?: string; 
   return tx.prospect.create({
     data: {
       userId,
-      referenceNumber: `ORO-TEST-${uniq()}`,
+      referenceNumber: `AXN-TEST-${uniq()}`,
       status: opts.status ?? "approved",
       servicesSelected: [],
     },

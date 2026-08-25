@@ -12,10 +12,26 @@ const prisma = new PrismaClient({ adapter: pgAdapter() });
 export async function runSeed() {
   const password = await argon2.hash("oroDemo!1", { type: argon2.argon2id });
 
+  // Migrate demo rows seeded under the legacy identifiers (oro.local emails,
+  // ORO- reference numbers) so re-seeding renames them in place instead of
+  // leaving stale accounts behind. No-ops on a fresh database.
+  const legacyEmails: Record<string, string> = {
+    "staff@oro.local": "staff@axenorconsulting.com",
+    "partner@oro.local": "partner@axenorconsulting.com",
+  };
+  for (const [from, to] of Object.entries(legacyEmails)) {
+    if (!(await prisma.user.findUnique({ where: { email: to } }))) {
+      await prisma.user.updateMany({ where: { email: from }, data: { email: to } });
+    }
+  }
+  for (const ref of ["00089", "00140", "00141", "00142"]) {
+    await prisma.prospect.updateMany({ where: { referenceNumber: `ORO-2026-${ref}` }, data: { referenceNumber: `AXN-2026-${ref}` } });
+  }
+
   const staff = await prisma.user.upsert({
-    where: { email: "staff@oro.local" },
+    where: { email: "staff@axenorconsulting.com" },
     update: {},
-    create: { email: "staff@oro.local", passwordHash: password, fullName: "Eleni Christodoulou", role: Role.staff, emailVerified: new Date() },
+    create: { email: "staff@axenorconsulting.com", passwordHash: password, fullName: "Eleni Christodoulou", role: Role.staff, emailVerified: new Date() },
   });
 
   // Pending prospect
@@ -27,7 +43,7 @@ export async function runSeed() {
   const pendingProspect = await prisma.prospect.upsert({
     where: { userId: pendingUser.id },
     update: {},
-    create: { userId: pendingUser.id, referenceNumber: "ORO-2026-00142", status: ProspectStatus.pending, servicesSelected: ["company_formation"] },
+    create: { userId: pendingUser.id, referenceNumber: "AXN-2026-00142", status: ProspectStatus.pending, servicesSelected: ["company_formation"] },
   });
   // Idempotent: these tables have no natural unique key, so `skipDuplicates`
   // can't prevent re-seeding from piling up duplicates on every boot. Clear the
@@ -65,7 +81,7 @@ export async function runSeed() {
   const niProspect = await prisma.prospect.upsert({
     where: { userId: niUser.id },
     update: {},
-    create: { userId: niUser.id, referenceNumber: "ORO-2026-00140", status: ProspectStatus.needs_info, servicesSelected: ["banking", "licensing"] },
+    create: { userId: niUser.id, referenceNumber: "AXN-2026-00140", status: ProspectStatus.needs_info, servicesSelected: ["banking", "licensing"] },
   });
   await prisma.prospectDetail.deleteMany({ where: { prospectId: niProspect.id } });
   await prisma.prospectDetail.createMany({
@@ -85,7 +101,7 @@ export async function runSeed() {
   const approvedProspect = await prisma.prospect.upsert({
     where: { userId: approvedUser.id },
     update: {},
-    create: { userId: approvedUser.id, referenceNumber: "ORO-2026-00141", status: ProspectStatus.approved, servicesSelected: ["tax_residency"], reviewedAt: new Date(), reviewedById: staff.id },
+    create: { userId: approvedUser.id, referenceNumber: "AXN-2026-00141", status: ProspectStatus.approved, servicesSelected: ["tax_residency"], reviewedAt: new Date(), reviewedById: staff.id },
   });
   await prisma.prospectDetail.deleteMany({ where: { prospectId: approvedProspect.id } });
   await prisma.prospectDetail.createMany({
@@ -124,7 +140,7 @@ export async function runSeed() {
   const clientProspect = await prisma.prospect.upsert({
     where: { userId: clientUser.id },
     update: {},
-    create: { userId: clientUser.id, referenceNumber: "ORO-2026-00089", status: ProspectStatus.approved, servicesSelected: ["company_formation", "banking"], reviewedAt: new Date("2026-01-14"), reviewedById: staff.id },
+    create: { userId: clientUser.id, referenceNumber: "AXN-2026-00089", status: ProspectStatus.approved, servicesSelected: ["company_formation", "banking"], reviewedAt: new Date("2026-01-14"), reviewedById: staff.id },
   });
   const client = await prisma.client.upsert({
     where: { userId: clientUser.id },
@@ -166,7 +182,7 @@ export async function runSeed() {
 
   return {
     accounts: {
-      staff: "staff@oro.local",
+      staff: "staff@axenorconsulting.com",
       prospects: ["alex.r@uae-invest.com (pending)", "david@cohen-tech.io (needs_info)", "elena.p@limassol.cy (approved)"],
       client: "dmitry@meridian.io",
       password: "oroDemo!1",

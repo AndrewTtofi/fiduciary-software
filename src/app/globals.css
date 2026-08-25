@@ -1560,7 +1560,7 @@
 .tag { padding: 4px 9px; line-height: 1.45; white-space: nowrap; }
 
 /* Reference numbers and dates are single tokens — wrapping them mid-token
-   ("ORO-2026-" / "00089") makes them unreadable and unsearchable by eye. */
+   ("AXN-2026-" / "00089") makes them unreadable and unsearchable by eye. */
 table.tbl td > .mono, table.tbl td.mono { white-space: nowrap; }
 
 /* Buttons took their height from a fixed value with no vertical padding, so

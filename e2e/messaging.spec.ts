@@ -52,7 +52,7 @@ test("staff sends a message → client sees it in /app/messages", async ({ page,
   });
 
   // ── 3. Sign in as staff, approve, clear compliance, convert ───────────────
-  await signIn(page, "staff@oro.local", "oroDemo!1");
+  await signIn(page, "staff@axenorconsulting.com", "oroDemo!1");
   await page.waitForURL(/\/admin/, { timeout: 15000 });
 
   await page.goto("/admin/submissions");

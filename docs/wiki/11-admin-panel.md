@@ -4,7 +4,7 @@ The admin panel lives at `/admin/*`. Access requires `role = staff`. The
 left-rail nav (in `AdminShell.tsx`) carries: Submissions, Bookings,
 Clients, Users, Compliance, Analytics, Content, Settings.
 
-Sign in at `/login` with `staff@oro.local` / `oroDemo!1`.
+Sign in at `/login` with `staff@axenorconsulting.com` / `oroDemo!1`.
 
 ---
 

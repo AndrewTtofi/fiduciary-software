@@ -7,7 +7,7 @@ export async function resetAndSeed(req: APIRequestContext) {
 
 export async function signInAsStaff(page: Page) {
   await page.goto("/login");
-  await page.locator("input[name='email']").fill("staff@oro.local");
+  await page.locator("input[name='email']").fill("staff@axenorconsulting.com");
   await page.locator("input[name='password']").fill("oroDemo!1");
   // Click the submit button inside the sign-in form (not the tab button)
   await page.locator("form button[type='submit']").click();
