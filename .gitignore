@@ -44,3 +44,8 @@ playwright-report/
 # Design reference artifacts (kept locally, not in the repo)
 (C) Platform Prototype*.html
 (C) ORO Website Concept*.html
+
+# Project skills are shared; local settings stay private.
+!.claude/
+.claude/*
+!.claude/skills/

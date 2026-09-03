@@ -1,5 +1,11 @@
 import { cache } from "react";
 import { getOrgSettings } from "@/lib/services/settings";
+import {
+  isFrontTemplateKey,
+  parseFrontOverrides,
+  type FrontTemplateKey,
+  type FrontThemeOverrides,
+} from "@/lib/front-templates";
 
 /* =====================================================================
    White-label theming + plan tiers (single-org, one deployment per tenant)
@@ -108,6 +114,10 @@ export type Branding = {
   themePreset: string;
   planTier: PlanTier;
   contactEmail: string | null;
+  /** Front-face (marketing + auth) UI template — see src/lib/front-templates.ts. */
+  frontTemplate: FrontTemplateKey;
+  /** Validated per-deployment template overrides (colours/fonts). */
+  frontOverrides: FrontThemeOverrides;
 };
 
 /** Resolved white-label branding for the current deployment. Cached per-request
@@ -125,5 +135,7 @@ export const getBranding = cache(async (): Promise<Branding> => {
     themePreset: THEME_KEYS.includes(org.themePreset as ThemePreset) ? org.themePreset : "indigo",
     planTier,
     contactEmail: org.contactEmail,
+    frontTemplate: isFrontTemplateKey(org.frontTemplate) ? org.frontTemplate : "heritage",
+    frontOverrides: parseFrontOverrides(org.frontTheme),
   };
 });

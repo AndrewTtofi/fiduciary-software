@@ -18,7 +18,7 @@ export default async function ClientDashboardPage() {
   // could straddle a boundary, giving two windows computed from different nows.
   const now = new Date();
   const user = await requireUser();
-  const dbUser = await prisma.user.findUnique({ where: { id: user.id }, select: { fullName: true } });
+  const dbUser = await prisma.user.findUnique({ where: { id: user.id }, select: { fullName: true, passwordHash: true } });
   const prospect = await getProspectForUser(user.id);
   if (!prospect) redirect("/onboarding");
 
@@ -37,7 +37,7 @@ export default async function ClientDashboardPage() {
 
   if (!client) {
     // Prospect-stage dashboard — preserve original visual output.
-    return <LegacyProspectDashboard prospect={prospect} user={user} />;
+    return <LegacyProspectDashboard prospect={prospect} user={user} needsPassword={!dbUser?.passwordHash} />;
   }
 
   const recentStaffMessages = await prisma.message.count({
@@ -120,9 +120,12 @@ function in30days() {
 function LegacyProspectDashboard({
   prospect,
   user,
+  needsPassword = false,
 }: {
   prospect: Awaited<ReturnType<typeof getProspectForUser>>;
   user: { fullName?: string | null };
+  /** Signed in from an activation link, no password yet. */
+  needsPassword?: boolean;
 }) {
   if (!prospect) return null;
 
@@ -137,6 +140,11 @@ function LegacyProspectDashboard({
 
   const upcomingBooking = prospect.bookings.find((b) => b.status === "confirmed" && b.startsAt >= new Date());
   const services = Array.isArray(prospect.servicesSelected) ? (prospect.servicesSelected as string[]) : [];
+  // Activated after a consultation: the call already happened, so the stage
+  // tracker and the side card must say so instead of "book once approved".
+  const callDone = prospect.consultationDoneAt;
+  // completeness is stamped when the application is sent to compliance.
+  const submitted = prospect.completeness !== null || prospect.documents.length > 0;
 
   return (
     <ClientShell active="dashboard" approved={isApproved}>
@@ -152,14 +160,24 @@ function LegacyProspectDashboard({
         </span>
       </div>
 
+      {needsPassword && (
+        <div className="note mb-8" style={{ justifyContent: "space-between", flexWrap: "wrap", gap: "0.75rem" }}>
+          <span>You&apos;re signed in from your link. Set a password so you can come back to your portal any time.</span>
+          <Link href="/app/settings" className="btn btn-secondary btn-sm">Set a password</Link>
+        </div>
+      )}
+
       <div className="grid gap-8 xl:grid-cols-[2fr_1fr]">
         <div className="flex flex-col gap-8">
           <section className="surface rounded-card p-8">
             <h2 className="text-lg font-semibold mb-6">Application Progress</h2>
             <ol className="ptl">
-              <TimelineItem done active={false} title="Submitted" body={`Application and initial documents received on ${prospect.createdAt.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}.`} />
+              {callDone && (
+                <TimelineItem done active={false} title="Consultation complete" body={`Done with your adviser on ${callDone.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}.`} />
+              )}
+              <TimelineItem done={submitted || !callDone} active={!!callDone && !submitted} title={callDone ? "Documents submitted" : "Submitted"} body={callDone ? (submitted ? `Received on ${prospect.createdAt.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}.` : "Upload your passport and proof of address to get your file moving.") : `Application and initial documents received on ${prospect.createdAt.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}.`} />
               <TimelineItem done={status !== "pending" && status !== "needs_info"} active={status === "pending" || status === "needs_info"} title="Under Review" body="Our compliance team is verifying your details. This usually takes 24-48 hours." />
-              <TimelineItem done={isApproved} active={false} title="Final Approval" body="Once approved, you will be invited to book your consultation." />
+              <TimelineItem done={isApproved} active={false} title={callDone ? "Onboarding complete" : "Final Approval"} body={callDone ? "Your adviser takes it from here — next up." : "Once approved, your adviser will confirm the next steps with you."} />
             </ol>
 
             <div className="grid sm:grid-cols-2 gap-4 mt-8">
@@ -202,7 +220,18 @@ function LegacyProspectDashboard({
         <div className="flex flex-col gap-8">
           <section className="card">
             <div className="card-title">Consultation</div>
-            {isApproved ? (
+            {callDone ? (
+              <>
+                <p className="text-muted" style={{ fontSize: "0.875rem" }}>Completed with your adviser.</p>
+                <div className="mt-1" style={{ fontSize: "1.125rem", fontWeight: 600 }}>
+                  {callDone.toLocaleDateString("en-GB", { dateStyle: "long" })}
+                </div>
+                <p className="text-muted mt-3" style={{ fontSize: "0.8125rem" }}>
+                  Your file is with compliance — no action needed right now. Need another word? Message us from your portal.
+                </p>
+                <Link href="/app/messages" className="btn btn-secondary btn-block mt-4">Message your adviser</Link>
+              </>
+            ) : isApproved ? (
               upcomingBooking ? (
                 <>
                   <p className="text-muted" style={{ fontSize: "0.875rem" }}>Upcoming consultation</p>
@@ -220,10 +249,10 @@ function LegacyProspectDashboard({
               )
             ) : (
               <>
-                <p className="text-muted" style={{ fontSize: "0.875rem" }}>Booking becomes available once your application is approved.</p>
+                <p className="text-muted" style={{ fontSize: "0.875rem" }}>We&apos;ll invite you to book a consultation as soon as your application has been reviewed.</p>
                 <div className="note mt-4">
                   <span className="w-4 h-4">{LockIcon}</span>
-                  <span>Locked until your application is approved.</span>
+                  <span>Available after review.</span>
                 </div>
               </>
             )}

@@ -103,7 +103,7 @@ export function CompareTool() {
                     <td className="t-num">{j.minCap}</td>
                     {cell("treaties", String(j.treaties))}
                     <td>
-                      <a href={j.sourceUrl} target="_blank" rel="noreferrer noopener" className="link-gold" style={{ fontSize: "var(--fs-xs)", whiteSpace: "nowrap" }} title="PwC Worldwide Tax Summaries">
+                      <a href={j.sourceUrl} target="_blank" rel="noreferrer noopener" className="link-gold" style={{ fontSize: "var(--fs-xs)" }} title="PwC Worldwide Tax Summaries">
                         PwC ↗
                       </a>
                       {j.pendingReview && (
@@ -116,7 +116,7 @@ export function CompareTool() {
                         </span>
                       )}
                     </td>
-                    <td style={{ textAlign: "right" }}>
+                    <td style={{ textAlign: "right", whiteSpace: "nowrap", width: 1 }}>
                       {j.id === "cy" && <Link href="/book" className="btn btn-ghost btn-sm">Talk to us →</Link>}
                     </td>
                   </tr>

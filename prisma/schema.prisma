@@ -196,6 +196,13 @@ model Prospect {
   reviewedAt       DateTime?
   reviewedById     String?
   reviewedBy       User?          @relation("Reviewer", fields: [reviewedById], references: [id])
+  /// The website lead this application was activated from (post-call invite
+  /// link). Null for self-starters who used the public "Create account" form.
+  leadId           String?        @unique
+  lead             Lead?          @relation(fields: [leadId], references: [id], onDelete: SetNull)
+  /// Set when the first consultation already happened before the account was
+  /// activated — the portal then shows "call done" instead of "book a call".
+  consultationDoneAt DateTime?
 
   details        ProspectDetail[]
   documents      Document[]
@@ -442,6 +449,19 @@ model OrgSettings {
   jurisdiction String?  // governing-law country for legal pages; defaults to "Cyprus"
   accentColor  String?  // hex; overrides the theme preset's brand colour
   themePreset  String   @default("indigo") // indigo | emerald | gold | burgundy | slate
+  // Front-face (marketing + auth) UI template — key into FRONT_TEMPLATES
+  // (src/lib/front-templates.ts): heritage | meridian | atelier | summit | clarity.
+  // Super-admin managed (Settings → Site template).
+  frontTemplate String  @default("heritage")
+  // Per-deployment template overrides as { primary?, accent?, bg?,
+  // displayFont?, bodyFont? } — validated by parseFrontOverrides(); invalid
+  // keys are ignored so a broken row can never break the public site.
+  frontTheme    Json?
+  // Which public tools this deployment offers, as a { [toolKey]: boolean }
+  // map over the code catalog (src/lib/data/tools.ts). Absent keys default
+  // to enabled, so new tools ship on and a broken row shows everything.
+  // Super-admin managed (Settings → Site tools).
+  toolsEnabled  Json?
   // Plan tier gates feature availability (starter | professional | scale).
   // Defaults to the entry product: a deployment nobody has configured should
   // receive what was bought, not the full compliance suite by accident. Set
@@ -505,11 +525,35 @@ model Lead {
   meta           Json?    // extra form fields (country, nationality, preferred slot, …)
   createdAt      DateTime @default(now())
   lastActivityAt DateTime @default(now())
+  /// Post-call activation: when the onboarding link was last emailed, and the
+  /// account it turned into once the prospect clicked it.
+  activationSentAt DateTime?
+  activatedAt      DateTime?
+  activatedUserId  String?
 
-  bookings Booking[]
+  bookings    Booking[]
+  activations LeadActivation[]
+  prospect    Prospect?
 
   @@index([email])
   @@index([createdAt])
+}
+
+/// Single-use, expiring, hashed-at-rest token that turns a lead into an
+/// authenticated prospect account (the post-call "activate your account"
+/// link). Reissuing revokes every earlier token for the lead.
+model LeadActivation {
+  id          String    @id @default(uuid())
+  leadId      String
+  lead        Lead      @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  tokenHash   String    @unique
+  expires     DateTime
+  usedAt      DateTime?
+  revokedAt   DateTime?
+  createdById String?
+  createdAt   DateTime  @default(now())
+
+  @@index([leadId])
 }
 
 /// Editable marketing-site content (landing + FAQ copy). Singleton JSON blob,

@@ -71,6 +71,12 @@ export function ContentEditor({ initial }: { initial: SiteContent }) {
   }
   function pointAdd() { setC((p) => ({ ...p, consultation: { ...p.consultation, points: [...p.consultation.points, ""] } })); }
   function pointRemove(i: number) { setC((p) => ({ ...p, consultation: { ...p.consultation, points: p.consultation.points.filter((_, j) => j !== i) } })); }
+  // Booking-confirmation prep videos (title/blurb/duration/link per card).
+  function videoSet(i: number, k: keyof SiteContent["consultation"]["prepVideos"][number], v: string) {
+    setC((p) => ({ ...p, consultation: { ...p.consultation, prepVideos: p.consultation.prepVideos.map((x, j) => (j === i ? { ...x, [k]: v } : x)) } }));
+  }
+  function videoAdd() { setC((p) => ({ ...p, consultation: { ...p.consultation, prepVideos: [...p.consultation.prepVideos, { tag: "", title: "", blurb: "", duration: "", url: "" }] } })); }
+  function videoRemove(i: number) { setC((p) => ({ ...p, consultation: { ...p.consultation, prepVideos: p.consultation.prepVideos.filter((_, j) => j !== i) } })); }
 
   function save() {
     setMsg(null);
@@ -213,6 +219,23 @@ export function ContentEditor({ initial }: { initial: SiteContent }) {
         {c.consultation.points.map((pt, i) => (
           <ListItem key={i} onRemove={() => pointRemove(i)} index={i + 1}>
             <Field label="Point"><input className="input" value={pt} onChange={(e) => pointSet(i, e.target.value)} /></Field>
+          </ListItem>
+        ))}
+      </Card>
+      <Card title="Before-the-call videos (booking confirmation)" onAdd={videoAdd} addLabel="Add video" where={[{ href: "/book", label: "Booking confirmation" }]}>
+        <p className="muted" style={{ fontSize: "var(--fs-sm)" }}>
+          Short answers to the questions people ask before a call, shown the moment a consultation is booked.
+          Leave the link empty until the video exists — the card still shows the question.
+        </p>
+        {c.consultation.prepVideos.map((v, i) => (
+          <ListItem key={i} onRemove={() => videoRemove(i)} index={i + 1}>
+            <div className="grid gap-3 sm:grid-cols-3">
+              <Field label="Tag (e.g. Costs)"><input className="input" value={v.tag} onChange={(e) => videoSet(i, "tag", e.target.value)} /></Field>
+              <Field label="Title"><input className="input" value={v.title} onChange={(e) => videoSet(i, "title", e.target.value)} /></Field>
+              <Field label="Duration (m:ss)"><input className="input" value={v.duration} onChange={(e) => videoSet(i, "duration", e.target.value)} placeholder="1:02" /></Field>
+            </div>
+            <Field label="One-line blurb"><input className="input" value={v.blurb} onChange={(e) => videoSet(i, "blurb", e.target.value)} /></Field>
+            <Field label="Video link (https://…)"><input className="input" value={v.url} onChange={(e) => videoSet(i, "url", e.target.value)} placeholder="https://" /></Field>
           </ListItem>
         ))}
       </Card>

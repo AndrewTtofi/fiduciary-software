@@ -21,9 +21,11 @@ const PLATFORM_SERVICES: { key: ServiceKey; title: string; blurb: string; icon: 
 export function ServicesPicker({
   initialSelected,
   reference,
+  nextHref = "/onboarding/details",
 }: {
   initialSelected: string[];
   reference: string;
+  nextHref?: string;
 }) {
   const [selected, setSelected] = useState<Set<string>>(new Set(initialSelected));
   const [pending, start] = useTransition();
@@ -45,7 +47,7 @@ export function ServicesPicker({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ services: Array.from(selected) }),
       });
-      if (res.ok) router.push("/onboarding/details");
+      if (res.ok) router.push(nextHref);
     });
   }
 

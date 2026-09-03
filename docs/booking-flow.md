@@ -5,6 +5,33 @@ slot pick is no longer a "preference" the team confirms by hand: submitting the
 form reserves the slot internally and writes the event into the connected
 Google/Outlook calendar.
 
+## Step order (click before you type)
+
+The form is four short steps, ordered so the visitor commits with clicks
+before being asked for anything personal, and gives the highest-friction
+field (phone) last:
+
+| Step | Asks | Typed? | Why here |
+|---|---|---|---|
+| 1 · What you need | service tiles (multi-select) + "not sure yet" | no | frictionless micro-commitment that also qualifies |
+| 2 · Your situation | citizenship, residence, relocate?, timeline, property (optional) | no | momentum keeps building; drives the routing flags |
+| 3 · Your plan | first name + email, optional note, consent | yes | they're invested, so the ask lands; consent sits at the point of capture |
+| 4 · Book your slot | calendar, then phone/WhatsApp (optional) | phone only | one tap from booked |
+
+**Partial save.** Passing step 3 posts the answers so far to `POST /api/leads`
+with `partial: true`. That upserts the `Lead` (email + source `contact`) with
+`meta.funnelStage = "plan_requested"`, books nothing and sends no email. An
+abandon on the calendar is therefore still a lead the team can follow up. The
+final submit upserts the same record with every answer (`slot_pending`, then
+`booked` once the booking lands).
+
+**Confirmation is not a dead end.** After booking the visitor sees the slot,
+an "Add to calendar" (Google template link; the .ics is in the email) and
+"Reschedule" pair, the before-the-call prep videos (Admin → Content →
+Consultation → "Before-the-call videos"; cards render without a link until a
+URL is set), and a "what happens next" note. The internal notification fires
+at the same moment so the team can reach out within minutes.
+
 ## Flow
 
 ```

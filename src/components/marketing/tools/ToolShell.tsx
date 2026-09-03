@@ -14,6 +14,7 @@ export function ToolShell({
   intro,
   children,
   aside,
+  wide,
 }: {
   tool: Tool;
   taxYear: number;
@@ -22,6 +23,9 @@ export function ToolShell({
   children: ReactNode;
   /** Optional column beside the tool (required wording, explanations). */
   aside?: ReactNode;
+  /** Let the tool use the full container width — for the jurisdiction
+   *  comparison, whose eight-column table scrolled inside the 820px card. */
+  wide?: boolean;
 }) {
   return (
     <main>
@@ -37,7 +41,7 @@ export function ToolShell({
         </div>
       </section>
       <section className="ivory sec" style={{ paddingTop: 56 }}>
-        <div className={`mk-container${aside ? " calc-grid" : ""}`} style={aside ? undefined : { maxWidth: 820 }}>
+        <div className={`mk-container${aside ? " calc-grid" : ""}`} style={aside || wide ? undefined : { maxWidth: 820 }}>
           {aside && <div className="tool-aside">{aside}</div>}
           <div>{children}</div>
         </div>

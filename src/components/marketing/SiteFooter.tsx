@@ -4,7 +4,7 @@ import { getSiteContent } from "@/lib/services/content";
 import { getClientLoginEnabled } from "@/lib/services/settings";
 import { getServerBranding } from "@/lib/services/branding-server";
 import { SERVICES } from "@/components/marketing/ServiceIcons";
-import { TOOLS } from "@/lib/data/tools";
+import { getEnabledTools } from "@/lib/services/tools-enabled";
 import { statutoryLine, telLink, waLink } from "@/components/marketing/mk";
 
 /** Navy public-site footer: brand + description, Company / Services / Tools
@@ -12,11 +12,12 @@ import { statutoryLine, telLink, waLink } from "@/components/marketing/mk";
  *  social links (LinkedIn, Facebook — shown once the URLs are set in Admin →
  *  Content → Contact). */
 export async function SiteFooter() {
-  const [{ brandName, brandMark, logo }, { legalName }, { contact }, clientLogin] = await Promise.all([
+  const [{ brandName, brandMark, logo }, { legalName }, { contact }, clientLogin, tools] = await Promise.all([
     getBranding(),
     getServerBranding(),
     getSiteContent(),
     getClientLoginEnabled(),
+    getEnabledTools(),
   ]);
   const year = new Date().getFullYear();
   const socials = [
@@ -73,12 +74,14 @@ export async function SiteFooter() {
               <Link key={s.key} href={`/services/${s.key}`}>{s.title}</Link>
             ))}
           </div>
-          <div className="col">
-            <h4>Tools</h4>
-            {TOOLS.map((t) => (
-              <Link key={t.slug} href={`/tools/${t.slug}`}>{t.name}</Link>
-            ))}
-          </div>
+          {tools.length > 0 && (
+            <div className="col">
+              <h4>Tools</h4>
+              {tools.map((t) => (
+                <Link key={t.slug} href={`/tools/${t.slug}`}>{t.name}</Link>
+              ))}
+            </div>
+          )}
           <div className="f-contact">
             <h4>Get In Touch</h4>
             {contact.address && (

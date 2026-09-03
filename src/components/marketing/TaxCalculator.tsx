@@ -102,11 +102,15 @@ export function TaxCalculator({
   rates,
   compact = false,
   whatsapp = "",
+  breakdown = true,
 }: {
   rates: CalcRates;
   /** Homepage hero variant: slider, country, result, one button. */
   compact?: boolean;
   whatsapp?: string;
+  /** Whether the effective-rate tool page exists on this deployment — when
+   *  it is switched off, the compact CTA books a call instead of 404ing. */
+  breakdown?: boolean;
 }) {
   const [profit, setProfit] = useState(200_000);
   const [country, setCountry] = useState(DEFAULT_COMPARE);
@@ -181,7 +185,9 @@ export function TaxCalculator({
               <div className="kl">more every year than in {cmp.label}</div>
             </div>
             <div className="calc-cta">
-              <Link href={"/tools/effective-tax-rate-calculator"} className="pill">See the full breakdown</Link>
+              {breakdown
+                ? <Link href="/tools/effective-tax-rate-calculator" className="pill">See the full breakdown</Link>
+                : <Link href="/book" className="pill">Book a free consultation</Link>}
             </div>
             <p className="fine">Illustrative estimate, not advice. Excludes director salary and personal income tax.</p>
           </>

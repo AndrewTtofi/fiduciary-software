@@ -64,6 +64,7 @@ export function VHero({
   registration,
   whatsapp,
   rates,
+  calcBreakdown = true,
 }: {
   eyebrow: string;
   headline: string;
@@ -74,6 +75,8 @@ export function VHero({
   registration: string;
   whatsapp: string;
   rates: CalcRates;
+  /** Whether the effective-rate tool page is enabled on this deployment. */
+  calcBreakdown?: boolean;
 }) {
   const [phase, setPhase] = useState(0);
   useEffect(() => {
@@ -101,7 +104,7 @@ export function VHero({
             </div>
           </div>
           <div className={`vh-calc vh-fade${phase >= 4 ? " go" : ""}`}>
-            <TaxCalculator rates={rates} compact />
+            <TaxCalculator rates={rates} compact breakdown={calcBreakdown} />
           </div>
         </div>
         <div className={`vh-rail vh-fade${phase >= 5 ? " go" : ""}`}>

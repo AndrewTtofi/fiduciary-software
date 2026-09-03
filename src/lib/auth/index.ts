@@ -8,6 +8,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { env, features } from "@/lib/env";
 import { getClientLoginEnabled } from "@/lib/services/settings";
+import { consumeLeadActivation } from "@/lib/services/lead-activation";
 
 declare module "next-auth" {
   interface Session {
@@ -32,6 +33,28 @@ const credentialsSchema = z.object({
 });
 
 const providers = [
+  /** Post-call activation link. The token IS the proof of identity (the
+   *  lead's inbox received it), so redeeming it starts a session directly —
+   *  no password wall at the hot moment. Redemption is single-use and happens
+   *  inside consumeLeadActivation, which also turns the lead into a prospect. */
+  Credentials({
+    id: "activation",
+    name: "Activation link",
+    credentials: { token: { label: "Token", type: "text" } },
+    async authorize(raw) {
+      const token = typeof raw?.token === "string" ? raw.token : "";
+      if (token.length < 16) return null;
+      if (!(await getClientLoginEnabled())) throw new ClientLoginDisabledError();
+      const result = await consumeLeadActivation(token);
+      if (!result.ok) return null;
+      return {
+        id: result.user.id,
+        email: result.user.email,
+        name: result.user.fullName,
+        role: result.user.role,
+      } as never;
+    },
+  }),
   Credentials({
     name: "Credentials",
     credentials: {

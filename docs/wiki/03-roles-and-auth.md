@@ -108,3 +108,30 @@ not a code change.
 `process.env.NODE_ENV === "test"` *or* `ALLOW_TEST_RESET=1`. They never
 appear in production. They exist so Playwright specs can deterministically
 seed and clear state. See [17 — Testing](./17-testing-and-deployment.md).
+
+
+## Post-call account activation (magic link)
+
+Website bookings create a `Lead`, not an account. After the first consultation,
+staff open the lead in **Leads / CRM** (or **Submissions → Website bookings**)
+and click **Send onboarding link**. That:
+
+1. Revokes any earlier link for the lead and creates a `LeadActivation` row —
+   32 random bytes, stored only as a SHA-256 hash, expiring after
+   `ACTIVATION_LINK_TTL_DAYS` (default 7), single-use.
+2. Emails `${APP_URL}/activate?token=…` to the lead's address.
+
+Clicking the link (`src/app/(auth)/activate`) signs the prospect in through
+the `activation` credentials provider in `src/lib/auth/index.ts`. Redemption is
+`consumeLeadActivation()` in `src/lib/services/lead-activation.ts`: it marks
+the token used atomically, finds-or-creates the `User` for the lead's email
+(pre-verified, **no password**), creates a `Prospect` pre-filled from the
+booking (`leadId`, `consultationDoneAt`, services, draft) and stamps the lead
+`activated`. One email is always one identity — an email that already has a
+password-protected account gets "sign in" instead, never a second record.
+
+Edge cases: expired → friendly page with "Request a new link" (public,
+rate-limited, keyed by the old token so no address is typed); used → sign in
+or request a new link; already registered → sign in. Accounts created this way
+can set a first password from the welcome screen or Settings via
+`POST /api/account/set-password` (refused once a password exists).

@@ -1,5 +1,7 @@
+import { notFound } from "next/navigation";
 import { CtaBand } from "@/components/marketing/CtaBand";
 import { getToolSettings, correctAsAtLabel } from "@/lib/services/tool-settings";
+import { getEnabledTools } from "@/lib/services/tools-enabled";
 import { ToolsHub } from "./ToolsHub";
 
 export const metadata = {
@@ -8,7 +10,9 @@ export const metadata = {
 };
 
 export default async function ToolsPage() {
-  const rates = await getToolSettings();
+  const [rates, tools] = await Promise.all([getToolSettings(), getEnabledTools()]);
+  // A deployment with every tool switched off has no tools section at all.
+  if (tools.length === 0) notFound();
   return (
     <main>
       <section className="phero phero-short">
@@ -24,7 +28,7 @@ export default async function ToolsPage() {
       </section>
       <section className="sec" style={{ paddingTop: 44 }}>
         <div className="mk-container">
-          <ToolsHub />
+          <ToolsHub tools={tools} />
         </div>
       </section>
       <CtaBand />

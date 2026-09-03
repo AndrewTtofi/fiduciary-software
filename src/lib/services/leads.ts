@@ -20,6 +20,20 @@ const META_LABELS: Record<string, string> = {
   preferredSlotLabel: "Preferred slot (Cyprus time)",
 };
 
+/** Where the visitor got to in the booking funnel. Stored on `meta.funnelStage`
+ *  so staff can tell a plan request that stalled on the calendar from a
+ *  booked call without a schema change. */
+export type FunnelStage = "plan_requested" | "slot_pending" | "booked";
+
+export async function setLeadFunnelStage(leadId: string, funnelStage: FunnelStage) {
+  const lead = await prisma.lead.findUnique({ where: { id: leadId }, select: { meta: true } });
+  if (!lead) return;
+  await prisma.lead.update({
+    where: { id: leadId },
+    data: { meta: { ...((lead.meta as Record<string, string> | null) ?? {}), funnelStage } },
+  });
+}
+
 /** Automatic lead routing per the firm's spec. Flags are internal only — they
  *  go on the lead record and the staff notification, never to the visitor.
  *  - Non-EU/EEA citizenship + relocating → the immigration route is required.

@@ -27,16 +27,20 @@ export type CrmRecord = {
   /** Full record fields shown in the detail drawer, grouped in sections. */
   sections: { title: string; fields: { label: string; value: string }[] }[];
   /** Available actions */
-  leadId?: string;         // lead → "Create account"
+  leadId?: string;         // lead → "Send onboarding link" / "Create account"
+  activationSentAt?: string | null; // lead → when the post-call link last went out
+  existingAccount?: boolean;        // lead email already has an account
   prospectId?: string;     // approved applicant → "Make client"
   canMakeClient?: boolean;
+  /** Why "Make client" is unavailable right now (shown instead of a dead button). */
+  makeClientBlocker?: string;
   submissionHref?: string; // applicants/clients → open submission
   complianceHref?: string; // shown when conversion is blocked on compliance
   clientHref?: string;     // clients → open client profile
 };
 
-export function CrmTable({ records }: { records: CrmRecord[] }) {
-  const [openKey, setOpenKey] = useState<string | null>(null);
+export function CrmTable({ records, initialOpenKey = null }: { records: CrmRecord[]; initialOpenKey?: string | null }) {
+  const [openKey, setOpenKey] = useState<string | null>(initialOpenKey);
   const open = records.find((r) => r.key === openKey) ?? null;
 
   useEffect(() => {
@@ -87,7 +91,7 @@ export function CrmTable({ records }: { records: CrmRecord[] }) {
 /* Sort the pipeline by how far along it is, not alphabetically — "Client"
    after "approved" is the order staff think in. */
 const STAGE_ORDER: Record<string, number> = {
-  Lead: 0, registered: 1, pending: 2, needs_info: 3, approved: 4, Client: 5, rejected: 6,
+  Lead: 0, onboarding_sent: 1, registered: 2, pending: 3, needs_info: 4, approved: 5, Client: 6, rejected: 7,
 };
 
 function RecordDrawer({ record, onClose }: { record: CrmRecord; onClose: () => void }) {
@@ -95,6 +99,25 @@ function RecordDrawer({ record, onClose }: { record: CrmRecord; onClose: () => v
   const [pending, start] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [issued, setIssued] = useState<{ password?: string; existing?: boolean } | null>(null);
+  const [linkSent, setLinkSent] = useState(false);
+
+  /** Post-call: email the lead a single-use link that signs them in and turns
+   *  this record into their account — no blank sign-up, no password. */
+  function sendLink() {
+    start(async () => {
+      setError(null);
+      const res = await fetch(`/api/admin/leads/${record.leadId}/activation`, { method: "POST" });
+      const j = (await res.json().catch(() => ({}))) as { error?: string };
+      if (!res.ok) {
+        setError(j.error === "already_registered"
+          ? "This email already has an active account — they can sign in as usual."
+          : j.error ?? "Could not send the link");
+        return;
+      }
+      setLinkSent(true);
+      router.refresh();
+    });
+  }
 
   function createAccount() {
     start(async () => {
@@ -174,6 +197,15 @@ function RecordDrawer({ record, onClose }: { record: CrmRecord; onClose: () => v
               </dl>
             </section>
           )}
+          {linkSent && (
+            <div className="card mb-4">
+              <div className="eyebrow mb-2">Onboarding link sent</div>
+              <p style={{ fontSize: "var(--fs-sm)" }}>
+                Emailed to <strong>{record.email}</strong>. One click signs them in and opens their checklist — no password needed.
+                Sending again invalidates this link.
+              </p>
+            </div>
+          )}
           {issued ? (
             <div className="card">
               {issued.password ? (
@@ -228,14 +260,33 @@ function RecordDrawer({ record, onClose }: { record: CrmRecord; onClose: () => v
           ) : (
             <>
               {record.leadId && (
-                <button type="button" onClick={createAccount} disabled={pending} className="btn btn-primary" style={{ marginRight: "auto" }}>
-                  {pending ? "Creating…" : "Create account →"}
-                </button>
+                <div className="row" style={{ gap: ".5rem", alignItems: "center", marginRight: "auto", flexWrap: "wrap" }}>
+                  <button type="button" onClick={sendLink} disabled={pending || !!record.existingAccount} className="btn btn-primary"
+                          title={record.existingAccount ? "This email already has an account" : "Email a one-click activation link (after the call)"}>
+                    {pending ? "Sending…" : record.activationSentAt || linkSent ? "Resend onboarding link" : "Send onboarding link →"}
+                  </button>
+                  {!record.existingAccount && (
+                    <button type="button" onClick={createAccount} disabled={pending} className="btn btn-ghost btn-sm" title="Manual fallback: create the account now and hand over a one-time password">
+                      Create account manually
+                    </button>
+                  )}
+                </div>
               )}
-              {record.canMakeClient && (
-                <button type="button" onClick={makeClient} disabled={pending} className="btn btn-primary" style={{ marginRight: "auto" }}>
-                  {pending ? "Converting…" : "Make client →"}
-                </button>
+              {record.prospectId && !record.clientHref && (
+                <div className="row" style={{ gap: ".5rem", alignItems: "center", marginRight: "auto", flexWrap: "wrap" }}>
+                  <button type="button" onClick={makeClient} disabled={pending || !record.canMakeClient} className="btn btn-primary"
+                          title={record.makeClientBlocker}>
+                    {pending ? "Converting…" : "Make client →"}
+                  </button>
+                  {!record.canMakeClient && record.makeClientBlocker && (
+                    <span className="muted" style={{ fontSize: "var(--fs-xs)" }}>
+                      {record.makeClientBlocker}
+                      {record.complianceHref && record.makeClientBlocker.toLowerCase().includes("compliance") && (
+                        <> <Link href={record.complianceHref} style={{ textDecoration: "underline" }}>Open compliance →</Link></>
+                      )}
+                    </span>
+                  )}
+                </div>
               )}
               {record.stage === "registered" && (
                 <span className="muted" style={{ marginRight: "auto", fontSize: "var(--fs-xs)" }}>
@@ -269,6 +320,7 @@ function stageLabel(s: string) {
   return s === "Lead" ? "Lead"
     : s === "Client" ? "Client"
     : s === "registered" ? "Registered"
+    : s === "onboarding_sent" ? "Link sent"
     : s.replace("_", " ");
 }
 function stageClass(s: string) {
@@ -276,6 +328,7 @@ function stageClass(s: string) {
     : s === "approved" ? "badge-approved"
     : s === "needs_info" ? "badge-info"
     : s === "registered" ? "badge-info"
+    : s === "onboarding_sent" ? "badge-info"
     : s === "rejected" ? "badge-danger"
     : s === "pending" ? "badge-pending"
     : "badge-neutral";

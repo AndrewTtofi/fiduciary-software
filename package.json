@@ -34,6 +34,7 @@
     "@prisma/adapter-pg": "7.9.1",
     "@prisma/client": "7.9.1",
     "argon2": "^0.45.1",
+    "exceljs": "4.4.0",
     "ical-generator": "^11.1.0",
     "next": "16.3.2",
     "next-auth": "5.0.0-beta.31",

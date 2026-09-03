@@ -1,4 +1,6 @@
 "use client";
+
+import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 
 type ClientFields = {
@@ -13,11 +15,16 @@ type ClientFields = {
 export function SettingsForms({
   initial,
   clientFields,
+  hasPassword = true,
 }: {
   initial: { fullName: string; email: string; phone: string; languagePref: "en" | "ru" };
   clientFields?: ClientFields | null;
+  /** Accounts created by the post-call activation link have no password yet;
+   *  they set a first one here (no "current password" to ask for). */
+  hasPassword?: boolean;
 }) {
   const [profileMsg, setProfileMsg] = useState<string | null>(null);
+  const router = useRouter();
   const [pwdMsg, setPwdMsg] = useState<string | null>(null);
   const [companyMsg, setCompanyMsg] = useState<string | null>(null);
   // Separate transitions so submitting one form doesn't disable buttons on the others.
@@ -61,16 +68,23 @@ export function SettingsForms({
   async function changePassword(fd: FormData) {
     setPwdMsg(null);
     startPwd(async () => {
-      const res = await fetch("/api/account/password", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          currentPassword: fd.get("currentPassword"),
-          newPassword: fd.get("newPassword"),
-        }),
-      });
+      const res = hasPassword
+        ? await fetch("/api/account/password", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              currentPassword: fd.get("currentPassword"),
+              newPassword: fd.get("newPassword"),
+            }),
+          })
+        : await fetch("/api/account/set-password", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ password: fd.get("newPassword") }),
+          });
       const body = (await res.json().catch(() => ({}))) as { error?: string };
-      setPwdMsg(res.ok ? "Password updated" : body.error ?? "Could not update");
+      setPwdMsg(res.ok ? (hasPassword ? "Password updated" : "Password set — you can now sign in with email and password") : body.error ?? "Could not update");
+      if (res.ok && !hasPassword) router.refresh();
     });
   }
 
@@ -152,17 +166,24 @@ export function SettingsForms({
         className="surface rounded-card p-8 flex flex-col gap-6"
         onSubmit={(e) => { e.preventDefault(); changePassword(new FormData(e.currentTarget)); }}
       >
-        <h2 className="text-lg font-semibold">Password</h2>
-        <Field label="Current password">
-          <input className="input" name="currentPassword" type="password" required autoComplete="current-password" />
-        </Field>
-        <Field label="New password" hint="Minimum 8 characters.">
+        <h2 className="text-lg font-semibold">{hasPassword ? "Password" : "Set a password"}</h2>
+        {!hasPassword && (
+          <p className="text-meta text-muted -mt-3">
+            You signed in from your onboarding link. Add a password so you can return later with your email.
+          </p>
+        )}
+        {hasPassword && (
+          <Field label="Current password">
+            <input className="input" name="currentPassword" type="password" required autoComplete="current-password" />
+          </Field>
+        )}
+        <Field label={hasPassword ? "New password" : "Password"} hint="Minimum 8 characters.">
           <input className="input" name="newPassword" type="password" minLength={8} required autoComplete="new-password" />
         </Field>
         <div className="flex items-center justify-between">
           <div className="text-meta text-muted">{pwdMsg}</div>
           <button type="submit" disabled={pwdPending} className="btn btn-primary px-6 py-3 disabled:opacity-50">
-            Update password
+            {hasPassword ? "Update password" : "Set password"}
           </button>
         </div>
       </form>

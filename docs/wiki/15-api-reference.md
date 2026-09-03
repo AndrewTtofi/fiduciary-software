@@ -139,3 +139,15 @@ Gated by `NODE_ENV === "test"` OR `ALLOW_TEST_RESET=1`. Return 404 otherwise.
 `POST /api/auth/register`, `/api/auth/forgot`, `/api/auth/reset` are
 rate-limited by IP via `rateLimit()` in `src/lib/rate-limit.ts` (in-memory
 bucket; 5/600s by default). For production, swap the backend for Redis.
+
+
+## Added 2026-09 — activation, exports, funnel
+
+| Method | Path | Auth | Purpose |
+|---|---|---|---|
+| POST | `/api/admin/leads/:id/activation` | staff | Send / resend the post-call activation link (revokes the previous one). 409 `already_registered` when the email already has a password account. |
+| POST | `/api/auth/activation/resend` | public, rate-limited (`activation` bucket) | Body `{ token }` — re-issue a link from an expired/used token. Always 200. |
+| POST | `/api/account/set-password` | prospect/client/staff | First password for an account created by an activation link. 409 once a password exists. |
+| GET | `/api/admin/export/:kind` | staff | `kind` ∈ `submissions` · `leads` · `clients`; returns an `.xlsx` attachment. |
+| POST | `/api/leads` | public | Now accepts `partial: true` (booking-funnel step 3): stores the lead, no booking, no emails. |
+| POST | `/api/onboarding/submit` | prospect | Accepts the relaxed shape; the strict business-intent rules apply only to self-starters (prospects without `leadId`). |

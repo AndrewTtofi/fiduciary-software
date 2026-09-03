@@ -24,7 +24,10 @@ export default async function OnboardingStep3() {
   if (!Array.isArray(prospect.servicesSelected) || prospect.servicesSelected.length === 0) {
     redirect("/onboarding");
   }
-  if (!prospect.draft) redirect("/onboarding/details");
+  // Post-call prospects arrive here first (docs are the hot-moment task);
+  // self-starters must have saved their details before uploading.
+  const postCall = !!prospect.leadId;
+  if (!prospect.draft && !postCall) redirect("/onboarding/details");
 
   const passport = prospect.documents.find((d) => d.type === "passport") ?? null;
   const proof = prospect.documents.find((d) => d.type === "proof_of_address") ?? null;
@@ -32,12 +35,14 @@ export default async function OnboardingStep3() {
 
   return (
     <>
-      <ProgressBar step={3} totalSteps={3} />
+      {postCall ? <div className="pt-10" /> : <ProgressBar step={3} totalSteps={3} />}
       <main className="container max-w-[800px] pb-24">
         <PhaseIntro
           title="Secure document upload"
           subtitle={
-            documentsPhase === "optional"
+            postCall
+              ? "Passport and proof of address get your file moving — everything else can follow with your adviser."
+              : documentsPhase === "optional"
               ? "Upload supporting documents to speed up your review. These are optional — you can submit without them."
               : "Please provide the following documents to complete your application review."
           }
@@ -45,6 +50,7 @@ export default async function OnboardingStep3() {
 
         <DocumentUploader
           mode={documentsPhase}
+          postCall={postCall}
           initial={{
             passport: passport && { id: passport.id, name: passport.originalName, size: passport.sizeBytes },
             proof: proof && { id: proof.id, name: proof.originalName, size: proof.sizeBytes },

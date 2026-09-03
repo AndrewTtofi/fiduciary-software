@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
-import { Plus_Jakarta_Sans, Playfair_Display, IBM_Plex_Mono } from "next/font/google";
+import {
+  Plus_Jakarta_Sans, Playfair_Display, IBM_Plex_Mono,
+  Inter, Manrope, Space_Grotesk, Sora, Cormorant_Garamond,
+} from "next/font/google";
 import "./globals.css";
 import { getBranding, themeCss } from "@/lib/services/branding";
 
@@ -24,6 +27,20 @@ const plexMono = IBM_Plex_Mono({
   weight: ["400", "500"],
 });
 
+// Front-template font registry (src/lib/front-templates.ts). next/font can't
+// load a family picked from the DB at request time, so every selectable family
+// is declared here with `preload: false` — @font-face is lazy, so a browser
+// only downloads the families the active template's CSS actually uses.
+const inter = Inter({ subsets: ["latin"], display: "swap", variable: "--gf-inter", preload: false });
+const manrope = Manrope({ subsets: ["latin"], display: "swap", variable: "--gf-manrope", preload: false });
+const spaceGrotesk = Space_Grotesk({ subsets: ["latin"], display: "swap", variable: "--gf-space-grotesk", preload: false });
+const sora = Sora({ subsets: ["latin"], display: "swap", variable: "--gf-sora", preload: false });
+const cormorant = Cormorant_Garamond({ subsets: ["latin"], display: "swap", variable: "--gf-cormorant", preload: false, weight: ["400", "500", "600", "700"] });
+
+const fontVars = [jakarta, playfair, plexMono, inter, manrope, spaceGrotesk, sora, cormorant]
+  .map((f) => f.variable)
+  .join(" ");
+
 // Branding (name/theme) is read from the DB per request so white-label changes
 // apply live across every page without a rebuild.
 export const dynamic = "force-dynamic";
@@ -45,7 +62,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const { themePreset, accentColor } = await getBranding();
   return (
-    <html lang="en" className={`${jakarta.variable} ${playfair.variable} ${plexMono.variable}`}>
+    <html lang="en" className={fontVars}>
       <head>
         {/* White-label theme override — recolours brand/surfaces app-wide. */}
         <style dangerouslySetInnerHTML={{ __html: themeCss(themePreset, accentColor) }} />

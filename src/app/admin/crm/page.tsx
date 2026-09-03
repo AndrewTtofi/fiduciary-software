@@ -4,6 +4,7 @@ import { requireRole } from "@/lib/auth/guards";
 import { prisma } from "@/lib/db";
 import { computeLeadFlags, listLeads } from "@/lib/services/leads";
 import { Jurisdiction, JurisdictionStack, splitCountries } from "@/components/admin/Flag";
+import { ExportButton } from "@/components/admin/ExportButton";
 import { CrmTable, type CrmRecord } from "./CrmTable";
 
 export const metadata = { title: "Leads / CRM" };
@@ -39,9 +40,11 @@ function fmtDate(d: Date) {
   return d.toLocaleString("en-GB", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
 }
 
-export default async function CrmPage({ searchParams }: { searchParams: Promise<{ tab?: string }> }) {
+export default async function CrmPage({ searchParams }: { searchParams: Promise<{ tab?: string; open?: string }> }) {
   await requireRole("staff");
-  const tab = ((await searchParams).tab ?? "all") as Tab;
+  const sp = await searchParams;
+  const tab = (sp.tab ?? "all") as Tab;
+  const openKey = sp.open ?? null;
 
   const [leads, prospects, registeredOnly] = await Promise.all([
     listLeads(),
@@ -59,8 +62,20 @@ export default async function CrmPage({ searchParams }: { searchParams: Promise<
     }),
   ]);
 
-  // A lead whose email already has an account continues its journey as an
-  // applicant/client record — don't show the same person twice.
+  // Booked calls per lead — the drawer shows the slot and the activation
+  // action reads "after the call".
+  const leadBookings = await prisma.booking.findMany({
+    where: { leadId: { in: leads.map((l) => l.id) }, status: { in: ["confirmed", "completed"] } },
+    orderBy: { startsAt: "desc" },
+    select: { leadId: true, startsAt: true, timezone: true },
+  });
+  const bookingByLead = new Map<string, { startsAt: Date; timezone: string }>();
+  for (const b of leadBookings) if (b.leadId && !bookingByLead.has(b.leadId)) bookingByLead.set(b.leadId, b);
+
+  // A lead that has been activated (post-call link) or converted continues
+  // its journey as the applicant/client record — don't show it twice. A lead
+  // whose email merely matches an existing account (a returning client
+  // booking again, say) stays visible, flagged, so no enquiry disappears.
   const accountEmails = new Set([
     ...prospects.map((p) => p.user.email.toLowerCase()),
     ...registeredOnly.map((u) => u.email.toLowerCase()),
@@ -72,13 +87,17 @@ export default async function CrmPage({ searchParams }: { searchParams: Promise<
 
   {
     for (const l of leads) {
-      if (accountEmails.has(l.email.toLowerCase())) continue;
+      if (l.stage === "activated" || l.stage === "converted") continue;
+      const existingAccount = accountEmails.has(l.email.toLowerCase());
       const meta = (l.meta ?? {}) as Record<string, string>;
+      const booking = bookingByLead.get(l.id);
       const bits = [
-        l.note ?? (l.source === "contact" ? "Contact form" : l.source),
+        l.note ?? (l.source === "contact" ? "Website booking" : l.source),
+        booking ? `Call ${fmtDate(booking.startsAt)}` : meta.preferredSlotLabel && `Prefers ${meta.preferredSlotLabel}`,
         l.phone && `☎ ${l.phone}`,
         meta.country && `From ${meta.country}`,
-        meta.preferredSlotLabel && `Prefers ${meta.preferredSlotLabel}`,
+        l.activationSentAt && `Link sent ${fmtDate(l.activationSentAt)}`,
+        existingAccount && "Has an account",
       ].filter(Boolean);
       records.push({
         key: `lead-${l.id}`,
@@ -86,9 +105,11 @@ export default async function CrmPage({ searchParams }: { searchParams: Promise<
         email: l.email,
         service: pretty(l.serviceKey),
         type: "Lead",
-        stage: "Lead",
+        stage: l.stage === "onboarding_sent" ? "onboarding_sent" : "Lead",
         detail: bits.join(" · "),
         leadId: l.id,
+        activationSentAt: l.activationSentAt ? fmtDate(l.activationSentAt) : null,
+        existingAccount,
         country: meta.country ?? null,
         passports: meta.nationality ?? null,
         countryCell: <Jurisdiction country={meta.country ?? null} />,
@@ -107,6 +128,7 @@ export default async function CrmPage({ searchParams }: { searchParams: Promise<
             fields: [
               { label: "Service", value: pretty(l.serviceKey) },
               { label: "Source", value: pretty(l.source) },
+              ...(booking ? [{ label: "Booked call", value: `${fmtDate(booking.startsAt)} (${booking.timezone})` }] : []),
               ...(l.note ? [{ label: "Note", value: l.note }] : []),
               ...Object.entries(meta)
                 .filter(([k]) => k !== "preferredSlot")
@@ -118,6 +140,7 @@ export default async function CrmPage({ searchParams }: { searchParams: Promise<
             fields: [
               { label: "Created", value: fmtDate(l.createdAt) },
               { label: "Last activity", value: fmtDate(l.lastActivityAt) },
+              ...(l.activationSentAt ? [{ label: "Onboarding link sent", value: fmtDate(l.activationSentAt) }] : []),
             ],
           },
         ],
@@ -198,7 +221,13 @@ export default async function CrmPage({ searchParams }: { searchParams: Promise<
       stage: isClient ? "Client" : p.status,
       detail: p.referenceNumber,
       prospectId: p.id,
-      canMakeClient: !isClient && p.status === "approved",
+      canMakeClient: !isClient && p.status === "approved" && p.complianceFile?.status === "cleared",
+      makeClientBlocker: isClient ? undefined
+        : p.status !== "approved" ? "Approve the submission before converting."
+        : !p.complianceFile ? "No compliance file yet — open compliance to start it."
+        : p.complianceFile.status === "blocked" ? "Compliance file is blocked."
+        : p.complianceFile.status !== "cleared" ? "Clear the compliance review to convert."
+        : undefined,
       submissionHref: `/admin/submissions/${p.referenceNumber}`,
       complianceHref: `/admin/submissions/${p.referenceNumber}/compliance`,
       clientHref: p.client ? `/admin/clients/${p.client.id}` : undefined,
@@ -226,7 +255,9 @@ export default async function CrmPage({ searchParams }: { searchParams: Promise<
     { key: "applicants", label: "Applicants" }, { key: "clients", label: "Clients" },
   ];
   const counts = Object.fromEntries(TABS.map((t) => [t.key, records.filter((r) => inTab(r, t.key)).length])) as Record<Tab, number>;
-  const visible = records.filter((r) => inTab(r, tab));
+  // A deep link (?open=lead-…) must be able to open its record whatever tab
+  // is active.
+  const visible = records.filter((r) => inTab(r, tab) || r.key === openKey);
 
   return (
     <AdminShell active="leads">
@@ -239,15 +270,18 @@ export default async function CrmPage({ searchParams }: { searchParams: Promise<
         </p>
       </div>
 
-      <div className="chips mb-6">
-        {TABS.map((t) => (
-          <Link key={t.key} href={t.key === "all" ? "/admin/crm" : `/admin/crm?tab=${t.key}`} className={`chip${tab === t.key ? " active" : ""}`}>
-            {t.label}<span className="chip-n">{counts[t.key]}</span>
-          </Link>
-        ))}
+      <div className="row-between mb-6" style={{ flexWrap: "wrap", gap: "1rem" }}>
+        <div className="chips">
+          {TABS.map((t) => (
+            <Link key={t.key} href={t.key === "all" ? "/admin/crm" : `/admin/crm?tab=${t.key}`} className={`chip${tab === t.key ? " active" : ""}`}>
+              {t.label}<span className="chip-n">{counts[t.key]}</span>
+            </Link>
+          ))}
+        </div>
+        <ExportButton kind="leads" />
       </div>
 
-      <CrmTable records={visible} />
+      <CrmTable records={visible} initialOpenKey={openKey} />
     </AdminShell>
   );
 }

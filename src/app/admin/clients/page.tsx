@@ -6,6 +6,7 @@ import { Jurisdiction } from "@/components/admin/Flag";
 import { ConvertModal } from "./ConvertModal";
 import Link from "next/link";
 import { FilterSelect } from "./FilterSelect";
+import { ExportButton } from "@/components/admin/ExportButton";
 
 export const metadata = { title: "Clients" };
 
@@ -125,13 +126,16 @@ export default async function AdminClientsPage({ searchParams }: PageProps) {
             )}
           </p>
         </div>
-        <ConvertModal candidates={approvedProspects.map((p) => ({
-          prospectId: p.id,
-          referenceNumber: p.referenceNumber,
-          name: p.user.fullName,
-          services: (Array.isArray(p.servicesSelected) ? (p.servicesSelected as string[]) : []),
-          compliance: p.complianceFile?.status ?? "open",
-        }))} />
+        <div className="row" style={{ gap: ".75rem", alignItems: "center", flexWrap: "wrap" }}>
+          <ExportButton kind="clients" />
+          <ConvertModal candidates={approvedProspects.map((p) => ({
+            prospectId: p.id,
+            referenceNumber: p.referenceNumber,
+            name: p.user.fullName,
+            services: (Array.isArray(p.servicesSelected) ? (p.servicesSelected as string[]) : []),
+            compliance: p.complianceFile?.status ?? "open",
+          }))} />
+        </div>
       </div>
 
       {/* ── Filters ──────────────────────────────────────────────── */}
