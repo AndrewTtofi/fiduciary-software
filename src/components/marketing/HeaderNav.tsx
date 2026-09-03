@@ -61,20 +61,23 @@ export function HeaderNav({
             </span>
           )}
         </span>
-        <span
-          className="drop"
-          onMouseEnter={() => setDrop("tools")}
-          onMouseLeave={() => setDrop((d) => (d === "tools" ? null : d))}
-        >
-          <Link href="/tools" className={cls("/tools")} onClick={close}>Tools {ChevronIc}</Link>
-          {drop === "tools" && (
-            <span className="dmenu">
-              {tools.map((t) => (
-                <Link key={t.slug} href={`/tools/${t.slug}`} onClick={close}>{t.name}</Link>
-              ))}
-            </span>
-          )}
-        </span>
+        {/* A deployment with every tool switched off hides the section entirely. */}
+        {tools.length > 0 && (
+          <span
+            className="drop"
+            onMouseEnter={() => setDrop("tools")}
+            onMouseLeave={() => setDrop((d) => (d === "tools" ? null : d))}
+          >
+            <Link href="/tools" className={cls("/tools")} onClick={close}>Tools {ChevronIc}</Link>
+            {drop === "tools" && (
+              <span className="dmenu">
+                {tools.map((t) => (
+                  <Link key={t.slug} href={`/tools/${t.slug}`} onClick={close}>{t.name}</Link>
+                ))}
+              </span>
+            )}
+          </span>
+        )}
         <Link href="/insights" className={cls("/insights")}>Insights</Link>
         <Link href="/about" className={cls("/about")}>About</Link>
         <Link href="/contact" className={cls("/contact")}>Contact</Link>
@@ -96,7 +99,7 @@ export function HeaderNav({
           {services.map((s) => (
             <Link key={s.key} href={`/services/${s.key}`} className="sub">{s.title}</Link>
           ))}
-          <Link href="/tools">Tools</Link>
+          {tools.length > 0 && <Link href="/tools">Tools</Link>}
           {tools.map((t) => (
             <Link key={t.slug} href={`/tools/${t.slug}`} className="sub">{t.name}</Link>
           ))}

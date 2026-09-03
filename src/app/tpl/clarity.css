@@ -1,0 +1,140 @@
+/* =====================================================================
+   Clarity — minimal monochrome front-face template
+   Scoped under .shell-marketing.tpl-clarity; palette/fonts arrive as
+   --mk-* tokens from frontThemeStyle() (navy/gold/ink are all near-black
+   here — everything reads as ink, greys and hairlines). Namespace: .cl-*
+   ===================================================================== */
+
+.shell-marketing.tpl-clarity .cl-wrap { max-width: 1060px; margin: 0 auto; padding: 0 24px; }
+
+/* ── shared primitives ──────────────────────────────────────────────── */
+.shell-marketing.tpl-clarity .cl-btn { display: inline-flex; align-items: center; justify-content: center; background: var(--mk-navy); color: #fff; font-weight: 600; font-size: 14px; line-height: 1.2; border: 1px solid var(--mk-navy); border-radius: 8px; padding: 13px 24px; cursor: pointer; transition: background .18s, border-color .18s; }
+.shell-marketing.tpl-clarity .cl-btn:hover { background: var(--mk-navy-soft); border-color: var(--mk-navy-soft); }
+.shell-marketing.tpl-clarity .cl-btn-sm { padding: 9px 16px; font-size: 13px; }
+.shell-marketing.tpl-clarity .cl-textlink { display: inline-flex; align-items: center; gap: 6px; font-size: .92rem; font-weight: 500; color: var(--mk-grey); text-decoration: underline; text-underline-offset: 3px; transition: color .18s; }
+.shell-marketing.tpl-clarity .cl-textlink:hover { color: var(--mk-ink); }
+.shell-marketing.tpl-clarity .cl-textlink .ic { display: none; }
+.shell-marketing.tpl-clarity .cl-label { display: block; font-size: 11px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; color: var(--mk-grey-2); margin-bottom: 14px; }
+
+/* ── header: plain white bar, hairline bottom ───────────────────────── */
+.shell-marketing.tpl-clarity .cl-head { position: sticky; top: 0; z-index: 200; background: var(--mk-bg); border-bottom: 1px solid var(--mk-line); }
+.shell-marketing.tpl-clarity .cl-head-in { display: flex; align-items: center; gap: clamp(12px, 2vw, 28px); height: 60px; }
+.shell-marketing.tpl-clarity .cl-head .mk-logo { font-size: .95rem; font-weight: 650; letter-spacing: -0.02em; gap: 8px; }
+.shell-marketing.tpl-clarity .cl-head .mk-logo img { height: 28px; }
+.shell-marketing.tpl-clarity .cl-head .mk-logo .mark { width: 26px; height: 26px; border-radius: 6px; background: var(--mk-navy); color: #fff; font-size: 13px; }
+.shell-marketing.tpl-clarity .cl-head .nav-links { margin-left: auto; font-size: 13.5px; gap: clamp(12px, 1.6vw, 24px); }
+.shell-marketing.tpl-clarity .cl-head .nav-links > a,
+.shell-marketing.tpl-clarity .cl-head .nav-links .drop > a { color: var(--mk-grey); opacity: 1; padding-bottom: 0; }
+.shell-marketing.tpl-clarity .cl-head .nav-links > a::after,
+.shell-marketing.tpl-clarity .cl-head .nav-links .drop > a::after { display: none; }
+.shell-marketing.tpl-clarity .cl-head .nav-links > a:hover,
+.shell-marketing.tpl-clarity .cl-head .nav-links .drop > a:hover,
+.shell-marketing.tpl-clarity .cl-head .nav-links > a.on { color: var(--mk-ink); }
+.shell-marketing.tpl-clarity .cl-head .dmenu { border-radius: 8px; box-shadow: 0 8px 24px rgba(0, 0, 0, .07); }
+.shell-marketing.tpl-clarity .cl-head .dmenu a { border-radius: 6px; color: var(--mk-grey); }
+.shell-marketing.tpl-clarity .cl-head .dmenu a:hover { background: var(--mk-cream); color: var(--mk-ink); }
+.shell-marketing.tpl-clarity .cl-head-cta { display: flex; align-items: center; gap: 18px; }
+.shell-marketing.tpl-clarity .cl-login { font-size: 13.5px; font-weight: 500; color: var(--mk-grey); transition: color .18s; }
+.shell-marketing.tpl-clarity .cl-login:hover { color: var(--mk-ink); }
+.shell-marketing.tpl-clarity .cl-head .mnav-btn { margin-left: auto; }
+@media (max-width: 1100px) {
+  .shell-marketing.tpl-clarity .cl-head-in { position: relative; }
+  .shell-marketing.tpl-clarity .cl-head .mnav.open { left: 24px; right: 24px; }
+}
+
+/* ── hero: left-aligned, whitespace-heavy ───────────────────────────── */
+.shell-marketing.tpl-clarity .cl-hero { padding: clamp(70px, 12vh, 140px) 0 0; }
+.shell-marketing.tpl-clarity .cl-hero h1 { font-family: var(--mk-font-display); font-size: clamp(2.1rem, 4.2vw, 3.3rem); font-weight: 650; letter-spacing: -0.03em; line-height: 1.12; color: var(--mk-ink); max-width: 760px; }
+.shell-marketing.tpl-clarity .cl-hero .gold { color: inherit; font-style: normal; }
+.shell-marketing.tpl-clarity .cl-lead { max-width: 560px; margin: 20px 0 30px; font-size: 1.04rem; line-height: 1.65; color: var(--mk-grey); }
+.shell-marketing.tpl-clarity .cl-hero-btns { display: flex; align-items: center; gap: 24px; flex-wrap: wrap; }
+.shell-marketing.tpl-clarity .cl-hero-rule { border-top: 1px solid var(--mk-line); margin-top: clamp(48px, 7vh, 72px); }
+.shell-marketing.tpl-clarity .cl-stats { display: flex; flex-wrap: wrap; margin-top: 28px; }
+.shell-marketing.tpl-clarity .cl-stat { padding: 0 32px; }
+.shell-marketing.tpl-clarity .cl-stat:first-child { padding-left: 0; }
+.shell-marketing.tpl-clarity .cl-stat + .cl-stat { border-left: 1px solid var(--mk-line); }
+.shell-marketing.tpl-clarity .cl-stat b { display: block; font-size: 1.4rem; font-weight: 650; letter-spacing: -0.02em; color: var(--mk-ink); }
+.shell-marketing.tpl-clarity .cl-stat span { display: block; margin-top: 4px; font-size: .78rem; line-height: 1.5; color: var(--mk-grey); max-width: 220px; }
+.shell-marketing.tpl-clarity .cl-reg { margin-top: 30px; font-family: var(--mk-font-mono); font-size: .7rem; letter-spacing: .06em; color: var(--mk-grey-2); }
+
+/* ── section scaffolding ────────────────────────────────────────────── */
+.shell-marketing.tpl-clarity .cl-sec { padding: clamp(64px, 9vh, 96px) 0 0; }
+.shell-marketing.tpl-clarity .cl-sec h2 { font-family: var(--mk-font-display); font-size: clamp(1.4rem, 2.4vw, 1.8rem); font-weight: 650; letter-spacing: -0.02em; color: var(--mk-ink); }
+.shell-marketing.tpl-clarity .cl-sec .gold { color: inherit; font-style: normal; }
+
+/* ── services: definition list ──────────────────────────────────────── */
+.shell-marketing.tpl-clarity .cl-svc-intro { max-width: 560px; color: var(--mk-grey); margin-bottom: 34px; }
+.shell-marketing.tpl-clarity .cl-svcs { border-top: 1px solid var(--mk-line); }
+.shell-marketing.tpl-clarity .cl-svc { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.7fr) 20px; gap: 24px; align-items: baseline; padding: 22px 0; border-bottom: 1px solid var(--mk-line); }
+.shell-marketing.tpl-clarity .cl-svc h3 { font-family: var(--mk-font-body); font-size: 1.02rem; font-weight: 600; color: var(--mk-ink); }
+.shell-marketing.tpl-clarity .cl-svc p { font-size: .9rem; line-height: 1.6; color: var(--mk-grey); }
+.shell-marketing.tpl-clarity .cl-svc-go { justify-self: end; color: var(--mk-ink); opacity: 0; transition: opacity .18s; }
+.shell-marketing.tpl-clarity .cl-svc:hover h3 { text-decoration: underline; text-underline-offset: 3px; }
+.shell-marketing.tpl-clarity .cl-svc:hover .cl-svc-go { opacity: 1; }
+
+/* ── how it works: narrow numbered column ───────────────────────────── */
+.shell-marketing.tpl-clarity .cl-how { max-width: 640px; }
+.shell-marketing.tpl-clarity .cl-how-sub { color: var(--mk-grey); margin: 12px 0 34px; }
+.shell-marketing.tpl-clarity .cl-steps { border-top: 1px solid var(--mk-line); margin-bottom: 36px; }
+.shell-marketing.tpl-clarity .cl-step { padding: 24px 0; border-bottom: 1px solid var(--mk-line); }
+.shell-marketing.tpl-clarity .cl-step h3 { font-family: var(--mk-font-body); font-size: 1rem; font-weight: 600; color: var(--mk-ink); margin-bottom: 8px; }
+.shell-marketing.tpl-clarity .cl-step-n { font-family: var(--mk-font-mono); font-size: .82rem; font-weight: 400; color: var(--mk-grey-2); }
+.shell-marketing.tpl-clarity .cl-step p { font-size: .92rem; line-height: 1.65; color: var(--mk-grey); }
+
+/* ── calculator, quietly ────────────────────────────────────────────── */
+.shell-marketing.tpl-clarity .cl-calc-note { max-width: 560px; color: var(--mk-grey); margin-bottom: 26px; }
+.shell-marketing.tpl-clarity .cl-calc-box { max-width: 540px; border: 1px solid var(--mk-border); border-radius: 10px; overflow: hidden; margin-bottom: 18px; }
+.shell-marketing.tpl-clarity .cl-calc-box .calc { border: 0; border-radius: 0; box-shadow: none; }
+
+/* ── insights: datelines ────────────────────────────────────────────── */
+.shell-marketing.tpl-clarity .cl-ins-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; flex-wrap: wrap; margin-bottom: 26px; }
+.shell-marketing.tpl-clarity .cl-ins { border-top: 1px solid var(--mk-line); }
+.shell-marketing.tpl-clarity .cl-ins-row { display: grid; grid-template-columns: 140px minmax(0, 1fr) auto; gap: 20px; align-items: baseline; padding: 18px 0; border-bottom: 1px solid var(--mk-line); }
+.shell-marketing.tpl-clarity .cl-ins-date { font-family: var(--mk-font-mono); font-size: .74rem; color: var(--mk-grey-2); white-space: nowrap; }
+.shell-marketing.tpl-clarity .cl-ins-row h3 { font-family: var(--mk-font-body); font-size: .98rem; font-weight: 600; color: var(--mk-ink); }
+.shell-marketing.tpl-clarity .cl-ins-row:hover h3 { text-decoration: underline; text-underline-offset: 3px; }
+.shell-marketing.tpl-clarity .cl-ins-cat { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--mk-grey-2); white-space: nowrap; }
+
+/* ── who takes your call ────────────────────────────────────────────── */
+.shell-marketing.tpl-clarity .cl-consult { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: clamp(28px, 5vw, 64px); align-items: start; }
+.shell-marketing.tpl-clarity .cl-consult-photo { max-width: 300px; aspect-ratio: 3 / 4; border-radius: 10px; border: 1px solid var(--mk-border); background: var(--mk-cream) center/cover no-repeat; display: grid; place-items: center; color: var(--mk-grey-2); font-family: var(--mk-font-mono); font-size: .78rem; text-align: center; padding: 12px; overflow: hidden; }
+.shell-marketing.tpl-clarity .cl-consult-name { margin-top: 12px; font-size: .82rem; line-height: 1.55; color: var(--mk-grey); }
+.shell-marketing.tpl-clarity .cl-consult-copy h2 { margin-bottom: 18px; }
+.shell-marketing.tpl-clarity .cl-consult-copy p { color: var(--mk-grey); line-height: 1.7; margin-bottom: 14px; max-width: 560px; }
+.shell-marketing.tpl-clarity .cl-consult-copy p b { color: var(--mk-ink); font-weight: 600; }
+.shell-marketing.tpl-clarity .cl-points { list-style: none; margin: 22px 0 0; padding: 0; display: grid; gap: 10px; }
+.shell-marketing.tpl-clarity .cl-points li { font-size: .92rem; line-height: 1.6; color: var(--mk-ink); padding-left: 26px; position: relative; }
+.shell-marketing.tpl-clarity .cl-points li::before { content: "—"; position: absolute; left: 0; top: 0; color: var(--mk-grey-2); }
+.shell-marketing.tpl-clarity .cl-consult-actions { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; margin-top: 28px; }
+
+/* ── closing CTA ────────────────────────────────────────────────────── */
+.shell-marketing.tpl-clarity .cl-cta { margin-top: clamp(64px, 9vh, 96px); border-top: 1px solid var(--mk-line); padding: clamp(64px, 10vh, 110px) 0; text-align: center; }
+.shell-marketing.tpl-clarity .cl-cta h2 { font-family: var(--mk-font-display); font-size: clamp(1.6rem, 3vw, 2.2rem); font-weight: 650; letter-spacing: -0.025em; color: var(--mk-ink); }
+.shell-marketing.tpl-clarity .cl-cta .gold { color: inherit; font-style: normal; }
+.shell-marketing.tpl-clarity .cl-cta p { max-width: 520px; margin: 14px auto 28px; color: var(--mk-grey); line-height: 1.65; }
+
+/* ── footer: hairline top, two rows ─────────────────────────────────── */
+.shell-marketing.tpl-clarity .cl-foot { border-top: 1px solid var(--mk-line); padding: 36px 0 30px; }
+.shell-marketing.tpl-clarity .cl-foot-top { display: flex; align-items: center; justify-content: space-between; gap: 20px 28px; flex-wrap: wrap; }
+.shell-marketing.tpl-clarity .cl-foot .mk-logo { font-size: .95rem; font-weight: 650; letter-spacing: -0.02em; gap: 8px; }
+.shell-marketing.tpl-clarity .cl-foot .mk-logo img { height: 24px; }
+.shell-marketing.tpl-clarity .cl-foot .mk-logo .mark { width: 24px; height: 24px; border-radius: 6px; background: var(--mk-navy); color: #fff; font-size: 12px; }
+.shell-marketing.tpl-clarity .cl-foot-nav { display: flex; align-items: center; gap: 8px 18px; flex-wrap: wrap; }
+.shell-marketing.tpl-clarity .cl-foot-nav a { font-size: 13px; color: var(--mk-grey); transition: color .18s; }
+.shell-marketing.tpl-clarity .cl-foot-nav a:hover { color: var(--mk-ink); }
+.shell-marketing.tpl-clarity .cl-foot-meta { display: flex; align-items: baseline; gap: 6px 20px; flex-wrap: wrap; margin-top: 22px; font-size: 12.5px; color: var(--mk-grey-2); }
+.shell-marketing.tpl-clarity .cl-foot-meta a { color: var(--mk-grey-2); transition: color .18s; }
+.shell-marketing.tpl-clarity .cl-foot-meta a:hover { color: var(--mk-ink); }
+
+/* ── responsive ─────────────────────────────────────────────────────── */
+@media (max-width: 1000px) {
+  .shell-marketing.tpl-clarity .cl-consult { grid-template-columns: 1fr; }
+}
+@media (max-width: 640px) {
+  .shell-marketing.tpl-clarity .cl-stats { flex-direction: column; gap: 18px; }
+  .shell-marketing.tpl-clarity .cl-stat { padding: 0; }
+  .shell-marketing.tpl-clarity .cl-stat + .cl-stat { border-left: 0; border-top: 1px solid var(--mk-line); padding-top: 18px; }
+  .shell-marketing.tpl-clarity .cl-svc { grid-template-columns: 1fr; gap: 6px; }
+  .shell-marketing.tpl-clarity .cl-svc-go { display: none; }
+  .shell-marketing.tpl-clarity .cl-ins-row { grid-template-columns: 1fr; gap: 4px; }
+}

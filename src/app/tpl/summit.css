@@ -1,0 +1,165 @@
+/* =====================================================================
+   Summit — bold, conversion-first, dark-forward front-face template
+   Scoped under .shell-marketing.tpl-summit; palette/fonts arrive as
+   --mk-* tokens from frontThemeStyle(). Namespace: .sm-*
+   ===================================================================== */
+
+.shell-marketing.tpl-summit .sm-wrap { max-width: 1160px; margin: 0 auto; padding: 0 24px; }
+.shell-marketing.tpl-summit .sm-btn-xl { padding: 18px 34px; font-size: 15.5px; }
+.shell-marketing.tpl-summit .sm-ghost-w { color: #fff; border-color: color-mix(in srgb, #fff 45%, transparent); }
+.shell-marketing.tpl-summit .sm-ghost-w:hover { color: #fff; border-color: #fff; background: transparent; }
+.shell-marketing.tpl-summit .sm-kicker { display: block; font-size: 12px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--mk-gold); margin-bottom: 10px; }
+.shell-marketing.tpl-summit .sm-more { display: inline-flex; align-items: center; gap: 6px; font-weight: 700; font-size: .92rem; color: var(--mk-gold); }
+.shell-marketing.tpl-summit .sm-more:hover { text-decoration: underline; }
+
+/* ── header: solid dark sticky bar ──────────────────────────────────── */
+.shell-marketing.tpl-summit .sm-head { position: sticky; top: 0; z-index: 200; background: var(--mk-navy-deep); border-bottom: 1px solid color-mix(in srgb, #fff 12%, transparent); }
+.shell-marketing.tpl-summit .sm-head-in { display: flex; align-items: center; gap: clamp(12px, 2vw, 28px); height: 72px; }
+.shell-marketing.tpl-summit .sm-head .mk-logo { color: #fff; font-size: 1.1rem; letter-spacing: -0.01em; }
+.shell-marketing.tpl-summit .sm-head .mk-logo img { filter: brightness(0) invert(1); opacity: .95; }
+.shell-marketing.tpl-summit .sm-head .nav-links { margin-left: auto; }
+.shell-marketing.tpl-summit .sm-head .nav-links > a,
+.shell-marketing.tpl-summit .sm-head .nav-links .drop > a { color: #fff; opacity: .85; }
+.shell-marketing.tpl-summit .sm-head .nav-links > a:hover,
+.shell-marketing.tpl-summit .sm-head .nav-links .drop > a:hover,
+.shell-marketing.tpl-summit .sm-head .nav-links > a.on { color: var(--mk-gold-bright); opacity: 1; }
+.shell-marketing.tpl-summit .sm-head .nav-links > a::after,
+.shell-marketing.tpl-summit .sm-head .nav-links .drop > a::after { background: var(--mk-gold-bright); }
+.shell-marketing.tpl-summit .sm-head .dmenu { background: var(--mk-navy-soft); border-color: color-mix(in srgb, #fff 14%, transparent); border-radius: 12px; }
+.shell-marketing.tpl-summit .sm-head .dmenu a { color: #fff; }
+.shell-marketing.tpl-summit .sm-head .dmenu a:hover { background: color-mix(in srgb, #fff 8%, transparent); color: var(--mk-gold-bright); }
+.shell-marketing.tpl-summit .sm-head .pill.ghost { color: #fff; border-color: color-mix(in srgb, #fff 45%, transparent); }
+.shell-marketing.tpl-summit .sm-head .pill.ghost:hover { color: #fff; border-color: #fff; background: transparent; }
+.shell-marketing.tpl-summit .sm-head .mnav-btn { margin-left: auto; color: #fff; border-color: color-mix(in srgb, #fff 35%, transparent); }
+.shell-marketing.tpl-summit .sm-head .mnav.open { background: var(--mk-navy-deep); border-color: color-mix(in srgb, #fff 14%, transparent); }
+.shell-marketing.tpl-summit .sm-head .mnav a { color: #fff; border-bottom-color: color-mix(in srgb, #fff 10%, transparent); }
+.shell-marketing.tpl-summit .sm-head .mnav a:hover { color: var(--mk-gold-bright); }
+.shell-marketing.tpl-summit .sm-head .mnav .sub { color: color-mix(in srgb, #fff 65%, transparent); }
+.shell-marketing.tpl-summit .sm-head .mnav .mnav-cta { color: var(--mk-gold-bright); }
+@media (max-width: 1100px) {
+  .shell-marketing.tpl-summit .sm-head-in { position: relative; }
+  .shell-marketing.tpl-summit .sm-head .mnav.open { left: 24px; right: 24px; }
+}
+
+/* ── hero: full-bleed dark band, copy + calculator, big stats ───────── */
+.shell-marketing.tpl-summit .sm-hero { background: linear-gradient(160deg, var(--mk-navy-deep), var(--mk-navy)); color: #fff; padding: clamp(56px, 8vh, 96px) 0 48px; }
+.shell-marketing.tpl-summit .sm-hero-grid { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: clamp(28px, 5vw, 72px); align-items: center; }
+.shell-marketing.tpl-summit .sm-eyebrow { display: block; font-size: 12.5px; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: var(--mk-gold-bright); margin-bottom: 18px; }
+.shell-marketing.tpl-summit .sm-hero h1 { font-size: clamp(2.6rem, 5.5vw, 4.4rem); font-weight: 800; line-height: 1.04; letter-spacing: -0.025em; color: #fff; }
+.shell-marketing.tpl-summit .sm-hero .gold { color: var(--mk-gold-bright); }
+.shell-marketing.tpl-summit .sm-lead { margin: 20px 0 28px; max-width: 540px; font-size: 1.08rem; line-height: 1.65; color: color-mix(in srgb, #fff 74%, transparent); }
+.shell-marketing.tpl-summit .sm-hero-btns { display: flex; gap: 14px; flex-wrap: wrap; }
+.shell-marketing.tpl-summit .sm-hero-calc .calc { box-shadow: 0 30px 70px color-mix(in srgb, #000 40%, transparent); }
+.shell-marketing.tpl-summit .sm-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0 28px; margin-top: clamp(40px, 6vh, 64px); padding-top: 34px; border-top: 1px solid color-mix(in srgb, #fff 14%, transparent); }
+.shell-marketing.tpl-summit .sm-stat + .sm-stat { border-left: 1px solid color-mix(in srgb, #fff 14%, transparent); padding-left: 28px; }
+.shell-marketing.tpl-summit .sm-stat b { display: block; font-family: var(--mk-font-display); font-size: clamp(2rem, 3.4vw, 2.8rem); font-weight: 800; letter-spacing: -0.02em; color: var(--mk-gold-bright); }
+.shell-marketing.tpl-summit .sm-stat span { display: block; margin-top: 6px; font-size: .84rem; line-height: 1.5; color: color-mix(in srgb, #fff 62%, transparent); }
+.shell-marketing.tpl-summit .sm-reg { margin-top: 26px; font-family: var(--mk-font-mono); font-size: .72rem; letter-spacing: .06em; color: color-mix(in srgb, #fff 45%, transparent); }
+
+/* ── shared light-section scaffolding ───────────────────────────────── */
+.shell-marketing.tpl-summit .sm-sec { padding: 76px 0; }
+.shell-marketing.tpl-summit .sm-sec-head { max-width: 760px; margin-bottom: 42px; }
+.shell-marketing.tpl-summit .sm-sec-head h2 { font-size: clamp(1.7rem, 3vw, 2.4rem); font-weight: 800; letter-spacing: -0.02em; }
+.shell-marketing.tpl-summit .sm-sec-head p { margin-top: 12px; font-size: 1.02rem; line-height: 1.65; color: var(--mk-grey); }
+
+/* ── services: numbered tiles, accent left border on hover ──────────── */
+.shell-marketing.tpl-summit .sm-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+.shell-marketing.tpl-summit .sm-tile { display: flex; flex-direction: column; gap: 10px; background: #fff; border: 1px solid var(--mk-border); border-left: 4px solid transparent; border-radius: 14px; padding: clamp(24px, 3vw, 34px); transition: border-color .2s, transform .2s, box-shadow .2s; }
+.shell-marketing.tpl-summit .sm-tile:hover { border-left-color: var(--mk-gold); transform: translateY(-4px); box-shadow: 0 18px 40px color-mix(in srgb, var(--mk-navy) 10%, transparent); }
+.shell-marketing.tpl-summit .sm-tile-top { display: flex; align-items: flex-start; justify-content: space-between; }
+.shell-marketing.tpl-summit .sm-tile-num { font-family: var(--mk-font-display); font-size: clamp(2.2rem, 3vw, 2.8rem); font-weight: 800; line-height: 1; letter-spacing: -0.02em; color: color-mix(in srgb, var(--mk-ink) 14%, transparent); }
+.shell-marketing.tpl-summit .sm-tile-ic { color: var(--mk-gold); }
+.shell-marketing.tpl-summit .sm-tile-ic svg { width: 28px; height: 28px; }
+.shell-marketing.tpl-summit .sm-tile h3 { font-size: 1.15rem; font-weight: 700; }
+.shell-marketing.tpl-summit .sm-tile p { font-size: .92rem; line-height: 1.6; color: var(--mk-grey); flex: 1; }
+.shell-marketing.tpl-summit .sm-tile-go { display: inline-flex; align-items: center; gap: 6px; font-size: .88rem; font-weight: 700; color: var(--mk-gold); }
+
+/* ── how it works: dark band, three large cards, arrows between ─────── */
+.shell-marketing.tpl-summit .sm-how { background: linear-gradient(150deg, var(--mk-navy), var(--mk-navy-deep)); color: #fff; padding: 84px 0; }
+.shell-marketing.tpl-summit .sm-how .sm-sec-head h2 { color: #fff; }
+.shell-marketing.tpl-summit .sm-how .sm-sec-head p { color: color-mix(in srgb, #fff 70%, transparent); }
+.shell-marketing.tpl-summit .sm-steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(20px, 3vw, 40px); }
+.shell-marketing.tpl-summit .sm-step { position: relative; background: var(--mk-navy-soft); border-radius: 16px; padding: clamp(26px, 3vw, 36px); }
+.shell-marketing.tpl-summit .sm-step:not(:last-child)::after { content: "→"; position: absolute; top: 50%; right: calc(-.5 * clamp(20px, 3vw, 40px)); transform: translate(50%, -50%); color: var(--mk-gold-bright); font-size: 1.5rem; font-weight: 800; z-index: 1; }
+.shell-marketing.tpl-summit .sm-step-n { display: block; font-family: var(--mk-font-display); font-size: clamp(2.4rem, 3.4vw, 3.2rem); font-weight: 800; line-height: 1; letter-spacing: -0.02em; color: var(--mk-gold-bright); margin-bottom: 16px; }
+.shell-marketing.tpl-summit .sm-step h3 { font-size: 1.15rem; font-weight: 700; color: #fff; margin-bottom: 10px; }
+.shell-marketing.tpl-summit .sm-step p { font-size: .92rem; line-height: 1.65; color: color-mix(in srgb, #fff 68%, transparent); }
+.shell-marketing.tpl-summit .sm-how-cta { text-align: center; margin-top: 48px; }
+
+/* ── tools: full-width accent strip ─────────────────────────────────── */
+.shell-marketing.tpl-summit .sm-tools { background: var(--mk-gold); color: var(--mk-on-accent, #fff); padding: 26px 0; }
+.shell-marketing.tpl-summit .sm-tools-row { display: flex; align-items: center; gap: 14px 22px; flex-wrap: wrap; }
+.shell-marketing.tpl-summit .sm-tools-label { font-weight: 800; font-size: .84rem; letter-spacing: .1em; text-transform: uppercase; }
+.shell-marketing.tpl-summit .sm-tool-link { color: inherit; font-weight: 700; font-size: .95rem; text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1.5px; }
+.shell-marketing.tpl-summit .sm-tool-link:hover { text-decoration-thickness: 3px; }
+.shell-marketing.tpl-summit .sm-tools-all { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; color: inherit; font-weight: 800; font-size: .95rem; }
+.shell-marketing.tpl-summit .sm-tools-all:hover { text-decoration: underline; text-underline-offset: 4px; }
+
+/* ── insights: cards with a thick accent top bar ────────────────────── */
+.shell-marketing.tpl-summit .sm-ins-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; flex-wrap: wrap; margin-bottom: 38px; }
+.shell-marketing.tpl-summit .sm-ins-head h2 { font-size: clamp(1.7rem, 3vw, 2.4rem); font-weight: 800; letter-spacing: -0.02em; }
+.shell-marketing.tpl-summit .sm-ins-head .gold { color: var(--mk-gold); }
+.shell-marketing.tpl-summit .sm-ins-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+.shell-marketing.tpl-summit .sm-ins-card { display: flex; flex-direction: column; gap: 10px; background: #fff; border: 1px solid var(--mk-border); border-top: 4px solid var(--mk-gold); border-radius: 12px; padding: 26px 24px; transition: transform .2s, box-shadow .2s; }
+.shell-marketing.tpl-summit .sm-ins-card:hover { transform: translateY(-4px); box-shadow: 0 16px 36px color-mix(in srgb, var(--mk-navy) 10%, transparent); }
+.shell-marketing.tpl-summit .sm-ins-cat { font-size: .72rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--mk-gold); }
+.shell-marketing.tpl-summit .sm-ins-card h3 { font-size: 1.08rem; font-weight: 700; line-height: 1.35; }
+.shell-marketing.tpl-summit .sm-ins-card p { font-size: .88rem; line-height: 1.6; color: var(--mk-grey); flex: 1; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.shell-marketing.tpl-summit .sm-ins-date { font-family: var(--mk-font-mono); font-size: .74rem; color: var(--mk-grey-2); }
+
+/* ── consultation: framed photo + bold check list ───────────────────── */
+.shell-marketing.tpl-summit .sm-consult { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: clamp(32px, 5vw, 64px); align-items: start; }
+.shell-marketing.tpl-summit .sm-consult-photo { position: relative; min-height: 380px; margin: 0 16px 16px 0; border-radius: 16px; background: var(--mk-cream) center/cover no-repeat; box-shadow: 16px 16px 0 var(--mk-gold); display: grid; place-items: center; color: var(--mk-grey-2); font-family: var(--mk-font-mono); font-size: .8rem; overflow: hidden; }
+.shell-marketing.tpl-summit .sm-consult-name { position: absolute; left: 0; right: 0; bottom: 0; padding: 14px 18px; background: linear-gradient(transparent, color-mix(in srgb, var(--mk-navy-deep) 80%, transparent)); color: #fff; font-family: var(--mk-font-body); }
+.shell-marketing.tpl-summit .sm-consult-name b { display: block; font-size: 1.05rem; }
+.shell-marketing.tpl-summit .sm-consult-name span { font-size: .82rem; opacity: .85; }
+.shell-marketing.tpl-summit .sm-consult-copy h2 { font-size: clamp(1.5rem, 2.6vw, 2.1rem); font-weight: 800; letter-spacing: -0.02em; margin-bottom: 16px; }
+.shell-marketing.tpl-summit .sm-consult-copy p { color: var(--mk-grey); margin-bottom: 12px; line-height: 1.65; }
+.shell-marketing.tpl-summit .sm-consult-copy ul { margin-top: 18px; display: grid; gap: 10px; }
+.shell-marketing.tpl-summit .sm-consult-copy li { position: relative; padding-left: 28px; font-size: .95rem; font-weight: 700; color: var(--mk-ink); }
+.shell-marketing.tpl-summit .sm-consult-copy li::before { content: "✓"; position: absolute; left: 0; top: 0; color: var(--mk-gold); font-weight: 800; }
+.shell-marketing.tpl-summit .sm-consult-btns { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 26px; }
+
+/* ── closing CTA: full-width dark band ──────────────────────────────── */
+.shell-marketing.tpl-summit .sm-cta { background: linear-gradient(160deg, var(--mk-navy-deep), var(--mk-navy)); color: #fff; text-align: center; padding: clamp(64px, 9vw, 110px) 0; }
+.shell-marketing.tpl-summit .sm-cta h2 { font-size: clamp(2rem, 4.5vw, 3.2rem); font-weight: 800; letter-spacing: -0.025em; color: #fff; }
+.shell-marketing.tpl-summit .sm-cta .gold { color: var(--mk-gold-bright); }
+.shell-marketing.tpl-summit .sm-cta p { max-width: 620px; margin: 16px auto 30px; font-size: 1.05rem; line-height: 1.65; color: color-mix(in srgb, #fff 70%, transparent); }
+.shell-marketing.tpl-summit .sm-cta-btns { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+.shell-marketing.tpl-summit .sm-cta-nums { display: flex; gap: 24px; justify-content: center; flex-wrap: wrap; margin-top: 26px; font-size: .9rem; }
+.shell-marketing.tpl-summit .sm-cta-nums a { color: color-mix(in srgb, #fff 65%, transparent); }
+.shell-marketing.tpl-summit .sm-cta-nums a:hover { color: #fff; }
+
+/* ── footer: near-black ─────────────────────────────────────────────── */
+.shell-marketing.tpl-summit .sm-foot { background: var(--mk-navy-deep); color: color-mix(in srgb, #fff 70%, transparent); border-top: 1px solid color-mix(in srgb, #fff 10%, transparent); padding: 60px 0 30px; }
+.shell-marketing.tpl-summit .sm-foot .mk-logo { color: #fff; }
+.shell-marketing.tpl-summit .sm-foot .mk-logo img { filter: brightness(0) invert(1); opacity: .95; }
+.shell-marketing.tpl-summit .sm-foot-grid { display: grid; grid-template-columns: minmax(0, 1.4fr) repeat(3, minmax(0, 1fr)) minmax(0, 1.2fr); gap: 32px; }
+.shell-marketing.tpl-summit .sm-foot-brand p { font-size: .88rem; line-height: 1.6; color: color-mix(in srgb, #fff 60%, transparent); margin-top: 14px; max-width: 280px; }
+.shell-marketing.tpl-summit .sm-foot-col { display: flex; flex-direction: column; gap: 8px; }
+.shell-marketing.tpl-summit .sm-foot-col h4 { font-family: var(--mk-font-body); font-size: .76rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: color-mix(in srgb, #fff 45%, transparent); margin-bottom: 4px; }
+.shell-marketing.tpl-summit .sm-foot-col a { font-size: .88rem; color: color-mix(in srgb, #fff 78%, transparent); }
+.shell-marketing.tpl-summit .sm-foot-col a:hover { color: var(--mk-gold-bright); }
+.shell-marketing.tpl-summit .sm-foot-addr { font-size: .88rem; line-height: 1.55; color: color-mix(in srgb, #fff 60%, transparent); white-space: pre-line; }
+.shell-marketing.tpl-summit .sm-foot-meta { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-top: 44px; padding-top: 20px; border-top: 1px solid color-mix(in srgb, #fff 10%, transparent); font-size: .78rem; color: color-mix(in srgb, #fff 50%, transparent); }
+.shell-marketing.tpl-summit .sm-foot-legal { display: inline-flex; gap: 14px; }
+.shell-marketing.tpl-summit .sm-foot-legal a { color: color-mix(in srgb, #fff 65%, transparent); }
+.shell-marketing.tpl-summit .sm-foot-legal a:hover { color: var(--mk-gold-bright); }
+
+/* ── responsive ─────────────────────────────────────────────────────── */
+@media (max-width: 1000px) {
+  .shell-marketing.tpl-summit .sm-hero-grid { grid-template-columns: 1fr; }
+  .shell-marketing.tpl-summit .sm-grid { grid-template-columns: 1fr; }
+  .shell-marketing.tpl-summit .sm-steps { grid-template-columns: 1fr; }
+  .shell-marketing.tpl-summit .sm-step:not(:last-child)::after { display: none; }
+  .shell-marketing.tpl-summit .sm-ins-grid { grid-template-columns: 1fr; }
+  .shell-marketing.tpl-summit .sm-consult { grid-template-columns: 1fr; }
+  .shell-marketing.tpl-summit .sm-foot-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 640px) {
+  .shell-marketing.tpl-summit .sm-stats { grid-template-columns: 1fr; gap: 18px; }
+  .shell-marketing.tpl-summit .sm-stat + .sm-stat { border-left: 0; padding-left: 0; border-top: 1px solid color-mix(in srgb, #fff 14%, transparent); padding-top: 18px; }
+  .shell-marketing.tpl-summit .sm-tools-all { margin-left: 0; }
+  .shell-marketing.tpl-summit .sm-consult-photo { min-height: 300px; }
+  .shell-marketing.tpl-summit .sm-foot-grid { grid-template-columns: 1fr; }
+}

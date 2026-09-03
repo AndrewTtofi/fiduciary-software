@@ -1,10 +1,12 @@
 import Link from "next/link";
-import { HOME_TOOL_KEYS, TOOLS } from "@/lib/data/tools";
+import { getFeaturedTools } from "@/lib/services/tools-enabled";
 
 /** Homepage tools block — four compact cards, each linking to its own tool
- *  page, in the space freed by deleting the duplicated hero. */
-export function ToolsBlock() {
-  const featured = HOME_TOOL_KEYS.map((k) => TOOLS.find((t) => t.key === k)!);
+ *  page, in the space freed by deleting the duplicated hero. Lists only the
+ *  tools this deployment has enabled; renders nothing when there are none. */
+export async function ToolsBlock() {
+  const featured = await getFeaturedTools();
+  if (featured.length === 0) return null;
   return (
     <section className="sec-tight tools-home">
       <div className="mk-container">

@@ -1,0 +1,141 @@
+/* =====================================================================
+   Meridian — modern product-led front-face template
+   Scoped under .shell-marketing.tpl-meridian; palette/fonts arrive as
+   --mk-* tokens from frontThemeStyle(). Namespace: .md-*
+   ===================================================================== */
+
+.shell-marketing.tpl-meridian .md-wrap { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+
+/* ── header: flat sticky bar ────────────────────────────────────────── */
+.shell-marketing.tpl-meridian .md-head { position: sticky; top: 0; z-index: 200; background: color-mix(in srgb, var(--mk-bg) 88%, transparent); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid var(--mk-border); }
+.shell-marketing.tpl-meridian .md-head-in { display: flex; align-items: center; gap: clamp(12px, 2vw, 28px); height: 68px; }
+.shell-marketing.tpl-meridian .md-head .nav-links { margin-left: auto; }
+.shell-marketing.tpl-meridian .md-head .mk-logo { font-size: 1.1rem; letter-spacing: -0.01em; }
+.shell-marketing.tpl-meridian .md-head .dmenu { border-radius: 12px; }
+.shell-marketing.tpl-meridian .md-head .mnav-btn { margin-left: auto; }
+@media (max-width: 1100px) {
+  .shell-marketing.tpl-meridian .md-head-in { position: relative; }
+  .shell-marketing.tpl-meridian .md-head .mnav.open { left: 24px; right: 24px; }
+}
+
+/* ── hero: centred with stat chips ──────────────────────────────────── */
+.shell-marketing.tpl-meridian .md-hero { padding: clamp(64px, 10vh, 120px) 0 34px; text-align: center; background: radial-gradient(900px 420px at 50% -12%, color-mix(in srgb, var(--mk-gold) 9%, transparent), transparent 65%); }
+.shell-marketing.tpl-meridian .md-chip { display: inline-flex; align-items: center; gap: 8px; font-size: 12.5px; font-weight: 600; letter-spacing: .04em; color: var(--mk-navy); background: #fff; border: 1px solid var(--mk-border); border-radius: 999px; padding: 7px 14px; margin-bottom: 22px; }
+.shell-marketing.tpl-meridian .md-chip-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--mk-gold); }
+.shell-marketing.tpl-meridian .md-hero h1 { font-size: clamp(2.4rem, 5.4vw, 4rem); max-width: 850px; margin: 0 auto; }
+.shell-marketing.tpl-meridian .md-hero .gold { color: var(--mk-gold); }
+.shell-marketing.tpl-meridian .md-lead { max-width: 640px; margin: 18px auto 26px; font-size: 1.06rem; color: var(--mk-grey); }
+.shell-marketing.tpl-meridian .md-hero-btns { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.shell-marketing.tpl-meridian .md-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; max-width: 780px; margin: 44px auto 0; }
+.shell-marketing.tpl-meridian .md-stat { background: #fff; border: 1px solid var(--mk-border); border-radius: 14px; padding: 18px 16px; text-align: left; }
+.shell-marketing.tpl-meridian .md-stat b { display: block; font-family: var(--mk-font-display); font-size: 1.7rem; font-weight: 700; letter-spacing: -0.02em; color: var(--mk-navy); }
+.shell-marketing.tpl-meridian .md-stat span { display: block; margin-top: 4px; font-size: .8rem; line-height: 1.45; color: var(--mk-grey); }
+.shell-marketing.tpl-meridian .md-reg { margin-top: 20px; font-family: var(--mk-font-mono); font-size: .72rem; letter-spacing: .06em; color: var(--mk-grey-2); }
+
+/* ── shared section scaffolding ─────────────────────────────────────── */
+.shell-marketing.tpl-meridian .md-sec { padding: 64px 0; }
+.shell-marketing.tpl-meridian .md-sec-head { max-width: 720px; margin-bottom: 38px; }
+.shell-marketing.tpl-meridian .md-sec-head h2 { font-size: clamp(1.5rem, 2.6vw, 2.1rem); }
+.shell-marketing.tpl-meridian .md-sec-head-row { max-width: none; display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
+.shell-marketing.tpl-meridian .md-overline { display: block; font-size: 12px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--mk-gold); margin-bottom: 10px; }
+.shell-marketing.tpl-meridian .md-more { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; font-size: .92rem; color: var(--mk-gold); }
+.shell-marketing.tpl-meridian .md-more:hover { text-decoration: underline; }
+
+/* ── calculator product panel ───────────────────────────────────────── */
+.shell-marketing.tpl-meridian .md-panel-sec { padding: 30px 0 10px; }
+.shell-marketing.tpl-meridian .md-panel { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: clamp(24px, 4vw, 56px); align-items: center; background: #fff; border: 1px solid var(--mk-border); border-radius: 20px; padding: clamp(24px, 4vw, 48px); box-shadow: 0 20px 50px color-mix(in srgb, var(--mk-navy) 7%, transparent); }
+.shell-marketing.tpl-meridian .md-panel-copy h2 { font-size: clamp(1.4rem, 2.4vw, 1.85rem); margin-bottom: 12px; }
+.shell-marketing.tpl-meridian .md-panel-copy p { color: var(--mk-grey); margin-bottom: 16px; }
+.shell-marketing.tpl-meridian .md-panel-calc .calc { box-shadow: none; border: 1px solid var(--mk-line); }
+
+/* ── services bento ─────────────────────────────────────────────────── */
+.shell-marketing.tpl-meridian .md-bento { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+.shell-marketing.tpl-meridian .md-cell { display: flex; flex-direction: column; gap: 8px; background: #fff; border: 1px solid var(--mk-border); border-radius: 16px; padding: 22px; transition: border-color .2s, transform .2s, box-shadow .2s; }
+.shell-marketing.tpl-meridian .md-cell:hover { border-color: var(--mk-gold); transform: translateY(-3px); box-shadow: 0 14px 34px color-mix(in srgb, var(--mk-navy) 8%, transparent); }
+.shell-marketing.tpl-meridian .md-cell-wide { grid-column: span 2; }
+.shell-marketing.tpl-meridian .md-cell-ic { color: var(--mk-gold); }
+.shell-marketing.tpl-meridian .md-cell-ic svg { width: 26px; height: 26px; }
+.shell-marketing.tpl-meridian .md-cell h3 { font-size: 1.02rem; font-weight: 650; }
+.shell-marketing.tpl-meridian .md-cell p { font-size: .86rem; line-height: 1.55; color: var(--mk-grey); flex: 1; }
+.shell-marketing.tpl-meridian .md-cell-go { display: inline-flex; align-items: center; gap: 6px; font-size: .82rem; font-weight: 600; color: var(--mk-gold); }
+
+/* ── process steps with connector ───────────────────────────────────── */
+.shell-marketing.tpl-meridian .md-how { background: #fff; border-top: 1px solid var(--mk-line); border-bottom: 1px solid var(--mk-line); }
+.shell-marketing.tpl-meridian .md-steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(18px, 3vw, 40px); position: relative; }
+.shell-marketing.tpl-meridian .md-step { position: relative; }
+.shell-marketing.tpl-meridian .md-step-n { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; background: var(--mk-gold); color: var(--mk-on-accent, #fff); font-weight: 700; margin-bottom: 14px; position: relative; z-index: 1; }
+.shell-marketing.tpl-meridian .md-step:not(:last-child)::before { content: ""; position: absolute; top: 20px; left: 48px; right: -20px; height: 1px; background: var(--mk-border); }
+.shell-marketing.tpl-meridian .md-step h3 { font-size: 1.05rem; font-weight: 650; margin-bottom: 8px; }
+.shell-marketing.tpl-meridian .md-step p { font-size: .9rem; line-height: 1.6; color: var(--mk-grey); }
+.shell-marketing.tpl-meridian .md-how-cta { margin-top: 36px; }
+
+/* ── tool chips ─────────────────────────────────────────────────────── */
+.shell-marketing.tpl-meridian .md-tools-sec { padding: 26px 0; }
+.shell-marketing.tpl-meridian .md-tools-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.shell-marketing.tpl-meridian .md-tools-row .md-overline { margin: 0 6px 0 0; }
+.shell-marketing.tpl-meridian .md-tool-chip { font-size: .88rem; font-weight: 600; color: var(--mk-navy); background: #fff; border: 1px solid var(--mk-border); border-radius: 999px; padding: 9px 16px; transition: border-color .2s, color .2s; }
+.shell-marketing.tpl-meridian .md-tool-chip:hover { border-color: var(--mk-gold); color: var(--mk-gold); }
+
+/* ── insight rows ───────────────────────────────────────────────────── */
+.shell-marketing.tpl-meridian .md-ins { border-top: 1px solid var(--mk-line); }
+.shell-marketing.tpl-meridian .md-ins-row { display: grid; grid-template-columns: 140px minmax(0, 1fr) auto; gap: 20px; align-items: center; padding: 20px 4px; border-bottom: 1px solid var(--mk-line); transition: background .15s; }
+.shell-marketing.tpl-meridian .md-ins-row:hover { background: color-mix(in srgb, var(--mk-cream) 40%, transparent); }
+.shell-marketing.tpl-meridian .md-ins-cat { font-size: .74rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--mk-gold); }
+.shell-marketing.tpl-meridian .md-ins-main h3 { font-size: 1.05rem; font-weight: 650; }
+.shell-marketing.tpl-meridian .md-ins-main p { font-size: .86rem; color: var(--mk-grey); margin-top: 3px; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
+.shell-marketing.tpl-meridian .md-ins-date { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mk-font-mono); font-size: .74rem; color: var(--mk-grey-2); white-space: nowrap; }
+
+/* ── consult ────────────────────────────────────────────────────────── */
+.shell-marketing.tpl-meridian .md-consult { display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr); gap: clamp(24px, 4vw, 56px); align-items: start; }
+.shell-marketing.tpl-meridian .md-consult-photo { position: relative; min-height: 340px; border-radius: 18px; background: var(--mk-cream) center/cover no-repeat; border: 1px solid var(--mk-border); display: grid; place-items: center; color: var(--mk-grey-2); font-family: var(--mk-font-mono); font-size: .8rem; overflow: hidden; }
+.shell-marketing.tpl-meridian .md-consult-name { position: absolute; left: 0; right: 0; bottom: 0; padding: 14px 18px; background: linear-gradient(transparent, color-mix(in srgb, var(--mk-navy-deep) 78%, transparent)); color: #fff; font-family: var(--mk-font-body); }
+.shell-marketing.tpl-meridian .md-consult-name b { display: block; font-size: 1.05rem; }
+.shell-marketing.tpl-meridian .md-consult-name span { font-size: .82rem; opacity: .85; }
+.shell-marketing.tpl-meridian .md-consult-copy h2 { font-size: clamp(1.4rem, 2.4vw, 1.9rem); margin-bottom: 14px; }
+.shell-marketing.tpl-meridian .md-consult-copy p { color: var(--mk-grey); margin-bottom: 12px; line-height: 1.65; }
+.shell-marketing.tpl-meridian .md-consult-copy ul { margin-top: 16px; display: grid; gap: 10px; }
+.shell-marketing.tpl-meridian .md-consult-copy li { position: relative; padding-left: 26px; font-size: .93rem; }
+.shell-marketing.tpl-meridian .md-consult-copy li::before { content: "✓"; position: absolute; left: 0; top: 0; color: var(--mk-gold); font-weight: 700; }
+
+/* ── gradient CTA panel ─────────────────────────────────────────────── */
+.shell-marketing.tpl-meridian .md-cta { text-align: center; background: linear-gradient(135deg, var(--mk-navy-deep), var(--mk-navy-soft)); border-radius: 22px; padding: clamp(40px, 6vw, 72px) 28px; }
+.shell-marketing.tpl-meridian .md-cta h2 { color: #fff; font-size: clamp(1.6rem, 3vw, 2.3rem); }
+.shell-marketing.tpl-meridian .md-cta .gold { color: var(--mk-gold-bright); }
+.shell-marketing.tpl-meridian .md-cta p { color: color-mix(in srgb, #fff 72%, transparent); max-width: 560px; margin: 12px auto 24px; }
+.shell-marketing.tpl-meridian .md-cta-btns { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.shell-marketing.tpl-meridian .md-cta-ghost { border-color: color-mix(in srgb, #fff 40%, transparent); color: #fff; }
+.shell-marketing.tpl-meridian .md-cta-ghost:hover { border-color: #fff; }
+
+/* ── footer ─────────────────────────────────────────────────────────── */
+.shell-marketing.tpl-meridian .md-foot { border-top: 1px solid var(--mk-border); background: #fff; padding: 52px 0 28px; margin-top: 30px; }
+.shell-marketing.tpl-meridian .md-foot-grid { display: grid; grid-template-columns: minmax(0, 1.4fr) repeat(3, minmax(0, 1fr)); gap: 32px; }
+.shell-marketing.tpl-meridian .md-foot-brand p { font-size: .88rem; color: var(--mk-grey); margin: 14px 0; max-width: 300px; }
+.shell-marketing.tpl-meridian .md-foot-contact { display: flex; flex-direction: column; gap: 6px; font-size: .88rem; }
+.shell-marketing.tpl-meridian .md-foot-contact a { color: var(--mk-navy); }
+.shell-marketing.tpl-meridian .md-foot-contact a:hover { color: var(--mk-gold); }
+.shell-marketing.tpl-meridian .md-foot-col { display: flex; flex-direction: column; gap: 8px; }
+.shell-marketing.tpl-meridian .md-foot-col h4 { font-family: var(--mk-font-body); font-size: .78rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--mk-grey-2); margin-bottom: 4px; }
+.shell-marketing.tpl-meridian .md-foot-col a { font-size: .88rem; color: var(--mk-navy); }
+.shell-marketing.tpl-meridian .md-foot-col a:hover { color: var(--mk-gold); }
+.shell-marketing.tpl-meridian .md-foot-meta { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--mk-line); font-size: .78rem; color: var(--mk-grey-2); }
+.shell-marketing.tpl-meridian .md-foot-legal { display: inline-flex; gap: 14px; }
+.shell-marketing.tpl-meridian .md-foot-legal a { color: var(--mk-grey); }
+.shell-marketing.tpl-meridian .md-foot-legal a:hover { color: var(--mk-gold); }
+
+/* ── responsive ─────────────────────────────────────────────────────── */
+@media (max-width: 1000px) {
+  .shell-marketing.tpl-meridian .md-bento { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .shell-marketing.tpl-meridian .md-cell-wide { grid-column: span 2; }
+  .shell-marketing.tpl-meridian .md-panel { grid-template-columns: 1fr; }
+  .shell-marketing.tpl-meridian .md-consult { grid-template-columns: 1fr; }
+  .shell-marketing.tpl-meridian .md-foot-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 640px) {
+  .shell-marketing.tpl-meridian .md-stats { grid-template-columns: 1fr; }
+  .shell-marketing.tpl-meridian .md-steps { grid-template-columns: 1fr; }
+  .shell-marketing.tpl-meridian .md-step:not(:last-child)::before { display: none; }
+  .shell-marketing.tpl-meridian .md-bento { grid-template-columns: 1fr; }
+  .shell-marketing.tpl-meridian .md-cell-wide { grid-column: auto; }
+  .shell-marketing.tpl-meridian .md-ins-row { grid-template-columns: 1fr; gap: 6px; }
+  .shell-marketing.tpl-meridian .md-foot-grid { grid-template-columns: 1fr; }
+}

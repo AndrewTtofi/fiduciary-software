@@ -2,22 +2,24 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { TOOL_TABS, TOOLS, type ToolTab } from "@/lib/data/tools";
+import { TOOL_TABS, type Tool, type ToolTab } from "@/lib/data/tools";
 
-/** Tools hub: four category tabs filtering the ten tool cards. Every tool
- *  has its own page and URL; the hub only lists them. */
-export function ToolsHub() {
+/** Tools hub: category tabs filtering the tool cards. Every tool has its own
+ *  page and URL; the hub only lists them. Receives the deployment's enabled
+ *  tools from the server page — tabs with no tools in them are not shown. */
+export function ToolsHub({ tools }: { tools: Tool[] }) {
   const [tab, setTab] = useState<ToolTab | "all">("all");
-  const list = tab === "all" ? TOOLS : TOOLS.filter((t) => t.tab === tab);
+  const list = tab === "all" ? tools : tools.filter((t) => t.tab === tab);
+  const tabs = TOOL_TABS.filter((t) => tools.some((x) => x.tab === t.key));
   return (
     <>
       <div className="ins-filters" role="tablist" aria-label="Tool categories">
         <button role="tab" aria-selected={tab === "all"} className={`ins-chip${tab === "all" ? " on" : ""}`} onClick={() => setTab("all")}>
           All tools
         </button>
-        {TOOL_TABS.map((t) => (
+        {tabs.map((t) => (
           <button key={t.key} role="tab" aria-selected={tab === t.key} className={`ins-chip${tab === t.key ? " on" : ""}`} onClick={() => setTab(t.key)}>
-            {t.label} · {TOOLS.filter((x) => x.tab === t.key).length}
+            {t.label} · {tools.filter((x) => x.tab === t.key).length}
           </button>
         ))}
       </div>

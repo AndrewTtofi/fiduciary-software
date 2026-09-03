@@ -4,6 +4,7 @@ import { getTool, TOOLS } from "@/lib/data/tools";
 import { nextDue, fmtPct } from "@/lib/data/tax-rates";
 import { RATES_REVIEWED } from "@/lib/data/jurisdictions";
 import { getToolSettings } from "@/lib/services/tool-settings";
+import { isToolEnabled } from "@/lib/services/tools-enabled";
 import { getSiteContent } from "@/lib/services/content";
 import { ToolShell } from "@/components/marketing/tools/ToolShell";
 import { TaxCalculator } from "@/components/marketing/TaxCalculator";
@@ -33,6 +34,8 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 export default async function ToolPage({ params }: { params: Promise<{ slug: string }> }) {
   const tool = getTool((await params).slug);
   if (!tool) notFound();
+  // Tool switched off for this deployment → the page does not exist here.
+  if (!(await isToolEnabled(tool.key))) notFound();
   const [rates, { contact }] = await Promise.all([getToolSettings(), getSiteContent()]);
   const wa = contact.whatsapp;
     const eur = (n: number) => "€" + n.toLocaleString("en-US");

@@ -442,6 +442,19 @@ model OrgSettings {
   jurisdiction String?  // governing-law country for legal pages; defaults to "Cyprus"
   accentColor  String?  // hex; overrides the theme preset's brand colour
   themePreset  String   @default("indigo") // indigo | emerald | gold | burgundy | slate
+  // Front-face (marketing + auth) UI template — key into FRONT_TEMPLATES
+  // (src/lib/front-templates.ts): heritage | meridian | atelier | summit | clarity.
+  // Super-admin managed (Settings → Site template).
+  frontTemplate String  @default("heritage")
+  // Per-deployment template overrides as { primary?, accent?, bg?,
+  // displayFont?, bodyFont? } — validated by parseFrontOverrides(); invalid
+  // keys are ignored so a broken row can never break the public site.
+  frontTheme    Json?
+  // Which public tools this deployment offers, as a { [toolKey]: boolean }
+  // map over the code catalog (src/lib/data/tools.ts). Absent keys default
+  // to enabled, so new tools ship on and a broken row shows everything.
+  // Super-admin managed (Settings → Site tools).
+  toolsEnabled  Json?
   // Plan tier gates feature availability (starter | professional | scale).
   // Defaults to the entry product: a deployment nobody has configured should
   // receive what was bought, not the full compliance suite by accident. Set

@@ -1,0 +1,80 @@
+/* =====================================================================
+   Front-face UI templates — structural variants
+   =====================================================================
+   One block per template key (`.shell-marketing.tpl-<key>`), layered on
+   the base marketing skin in globals.css. Colours and fonts are NOT set
+   here — frontThemeStyle() (src/lib/front-templates.ts) applies them as
+   inline `--mk-*` custom properties on the shell root, so the super
+   admin's per-deployment overrides always win. These blocks only change
+   shape and voice: radii, weights, casing, shadows, header treatment.
+
+   `.tpl-heritage` is the base look and deliberately has no block.
+   ===================================================================== */
+
+/* Text on the accent colour (buttons, logo mark) — computed per palette so
+   a custom accent can never produce unreadable buttons. Scoped to templated
+   shells; the base skin keeps its original navy-on-gold. */
+.shell-marketing[class*=" tpl-"] .pill,
+.shell-marketing[class*=" tpl-"] .mk-logo .mark,
+.shell-marketing[class*=" tpl-"] .auth-wrap .wordmark .mk,
+.shell-marketing[class*=" tpl-"] .auth-card .btn-primary {
+  color: var(--mk-on-accent, var(--mk-navy));
+}
+.shell-marketing[class*=" tpl-"] .auth-card .btn-primary:hover { color: var(--mk-on-accent, var(--mk-navy)); }
+/* Accent-tinted glow follows the accent instead of staying gold. */
+.shell-marketing[class*=" tpl-"] .pill {
+  box-shadow: 0 8px 20px color-mix(in srgb, var(--mk-gold) 28%, transparent);
+}
+
+/* ── Meridian — modern, product-led ─────────────────────────────────── */
+.shell-marketing.tpl-meridian .mk-logo .mark { border-radius: 8px; }
+.shell-marketing.tpl-meridian h1, .shell-marketing.tpl-meridian h2,
+.shell-marketing.tpl-meridian h3, .shell-marketing.tpl-meridian h4 { font-weight: 600; letter-spacing: -0.02em; }
+.shell-marketing.tpl-meridian .gold { font-style: normal; }
+.shell-marketing.tpl-meridian .kicker { letter-spacing: .16em; }
+.shell-marketing.tpl-meridian .pill { border-radius: 10px; box-shadow: none; }
+.shell-marketing.tpl-meridian .auth-card { border-radius: 14px; }
+.shell-marketing.tpl-meridian .auth-card .btn-primary,
+.shell-marketing.tpl-meridian .auth-card .btn-outline,
+.shell-marketing.tpl-meridian .auth-card .btn-secondary { border-radius: 10px; }
+
+/* ── Atelier — boutique, editorial ──────────────────────────────────── */
+.shell-marketing.tpl-atelier .mk-logo .mark { border-radius: 0; }
+.shell-marketing.tpl-atelier h1, .shell-marketing.tpl-atelier h2,
+.shell-marketing.tpl-atelier h3, .shell-marketing.tpl-atelier h4 { font-weight: 500; letter-spacing: .005em; }
+.shell-marketing.tpl-atelier .kicker { letter-spacing: .3em; }
+.shell-marketing.tpl-atelier .pill {
+  border-radius: 2px; box-shadow: none;
+  font-size: 13px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase;
+  padding: 16px 26px;
+}
+.shell-marketing.tpl-atelier { --mk-shadow: 0 1px 2px rgba(37, 23, 51, .05), 0 10px 26px rgba(37, 23, 51, .07); --mk-shadow-lg: 0 20px 48px rgba(37, 23, 51, .12); }
+.shell-marketing.tpl-atelier .auth-card { border-radius: 2px; }
+.shell-marketing.tpl-atelier .auth-card .btn-primary,
+.shell-marketing.tpl-atelier .auth-card .btn-outline,
+.shell-marketing.tpl-atelier .auth-card .btn-secondary { border-radius: 2px; font-size: 13px; letter-spacing: .1em; text-transform: uppercase; }
+.shell-marketing.tpl-atelier .auth-card .input,
+.shell-marketing.tpl-atelier .auth-card .select,
+.shell-marketing.tpl-atelier .auth-card .textarea { border-radius: 2px; }
+
+/* ── Summit — bold, heavyweight ─────────────────────────────────────── */
+.shell-marketing.tpl-summit .mk-logo .mark { border-radius: 12px; }
+.shell-marketing.tpl-summit h1, .shell-marketing.tpl-summit h2,
+.shell-marketing.tpl-summit h3, .shell-marketing.tpl-summit h4 { font-weight: 700; letter-spacing: -0.015em; }
+.shell-marketing.tpl-summit .gold { font-style: normal; }
+.shell-marketing.tpl-summit .kicker { font-weight: 600; }
+.shell-marketing.tpl-summit .pill { border-radius: 12px; font-weight: 700; }
+.shell-marketing.tpl-summit .auth-card { border-radius: 16px; }
+.shell-marketing.tpl-summit .auth-card .btn-primary { border-radius: 12px; font-weight: 700; }
+
+/* ── Clarity — quiet monochrome ─────────────────────────────────────── */
+.shell-marketing.tpl-clarity { --mk-shadow: 0 1px 2px rgba(0, 0, 0, .05); --mk-shadow-lg: 0 10px 30px rgba(0, 0, 0, .08); }
+.shell-marketing.tpl-clarity .mk-logo .mark { border-radius: 6px; }
+.shell-marketing.tpl-clarity h1, .shell-marketing.tpl-clarity h2,
+.shell-marketing.tpl-clarity h3, .shell-marketing.tpl-clarity h4 { font-weight: 650; letter-spacing: -0.03em; }
+.shell-marketing.tpl-clarity .gold { font-style: normal; }
+.shell-marketing.tpl-clarity .pill { border-radius: 8px; box-shadow: none; }
+.shell-marketing.tpl-clarity .auth-card { border-radius: 12px; box-shadow: none; }
+.shell-marketing.tpl-clarity .auth-card .btn-primary,
+.shell-marketing.tpl-clarity .auth-card .btn-outline,
+.shell-marketing.tpl-clarity .auth-card .btn-secondary { border-radius: 8px; }

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { getBranding } from "@/lib/services/branding";
 import { getClientLoginEnabled } from "@/lib/services/settings";
 import { SERVICES } from "@/components/marketing/ServiceIcons";
-import { TOOLS } from "@/lib/data/tools";
+import { getEnabledTools } from "@/lib/services/tools-enabled";
 import { HeaderNav } from "@/components/marketing/HeaderNav";
 
 /** Sticky public-site header, rendered as a contained "pill": the navigation
@@ -11,9 +11,10 @@ import { HeaderNav } from "@/components/marketing/HeaderNav";
  *  for existing clients (when client login is on), gold for prospects. The
  *  header CTA is the short form; in-page buttons keep the full wording. */
 export async function SiteHeader() {
-  const [{ brandName, brandMark, logo }, clientLogin] = await Promise.all([
+  const [{ brandName, brandMark, logo }, clientLogin, tools] = await Promise.all([
     getBranding(),
     getClientLoginEnabled(),
+    getEnabledTools(),
   ]);
   return (
     <header className="mk-header">
@@ -32,7 +33,7 @@ export async function SiteHeader() {
           </Link>
           <HeaderNav
             services={SERVICES.map(({ key, title }) => ({ key, title }))}
-            tools={TOOLS.map(({ slug, name }) => ({ slug, name }))}
+            tools={tools.map(({ slug, name }) => ({ slug, name }))}
             clientLogin={clientLogin}
           />
           <div className="nav-cta">

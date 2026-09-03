@@ -1,4 +1,13 @@
 @import "tailwindcss";
+/* Front-face UI template structural variants (.shell-marketing.tpl-*) —
+   palettes/fonts come from frontThemeStyle() (src/lib/front-templates.ts).
+   Each template's own site layout lives in src/app/tpl/<key>.css; heritage
+   is the base skin below (no extra file). */
+@import "./front-templates.css";
+@import "./tpl/meridian.css";
+@import "./tpl/atelier.css";
+@import "./tpl/summit.css";
+@import "./tpl/clarity.css";
 
 /* Keep the existing JS design-system config (theme tokens, content globs)
    authoritative — Tailwind v4 no longer auto-discovers tailwind.config.ts. */
@@ -412,16 +421,22 @@
   --mk-max: 1160px; --mk-ease: cubic-bezier(.22, .75, .25, 1);
   /* prototype-v2 motion curve (slight overshoot-free ease-out) */
   --mk-ease2: cubic-bezier(.22, 1, .36, 1);
+  /* Font tokens — overridden per deployment by the active front template
+     (inline vars from frontThemeStyle()); these are the Heritage defaults. */
+  --mk-font-display: var(--font-display), Georgia, serif;
+  --mk-font-body: var(--font-body), system-ui, sans-serif;
+  --mk-font-mono: var(--font-mono), ui-monospace, monospace;
+  font-family: var(--mk-font-body);
   background: var(--mk-bg);
   color: var(--mk-ink);
   min-height: 100vh;
   line-height: 1.65;
   overflow-x: hidden; /* edge rails + travelling decorations must never widen the page */
 }
-.shell-marketing h1, .shell-marketing h2, .shell-marketing h3, .shell-marketing h4 { font-family: var(--font-display), Georgia, serif; font-weight: 600; line-height: 1.15; letter-spacing: 0; color: var(--mk-navy); }
+.shell-marketing h1, .shell-marketing h2, .shell-marketing h3, .shell-marketing h4 { font-family: var(--mk-font-display); font-weight: 600; line-height: 1.15; letter-spacing: 0; color: var(--mk-navy); }
 .shell-marketing .mk-container { max-width: var(--mk-max); margin: 0 auto; padding: 0 24px; }
 .shell-marketing .gold { color: var(--mk-gold); font-style: italic; }
-.shell-marketing .kicker { display: inline-block; font-family: var(--font-mono); font-size: 11.5px; font-weight: 500; letter-spacing: .22em; text-transform: uppercase; color: var(--mk-gold); margin-bottom: 18px; }
+.shell-marketing .kicker { display: inline-block; font-family: var(--mk-font-mono); font-size: 11.5px; font-weight: 500; letter-spacing: .22em; text-transform: uppercase; color: var(--mk-gold); margin-bottom: 18px; }
 .shell-marketing .grid-bg { background-image: radial-gradient(1200px 500px at 80% -10%, rgba(196, 158, 84, .10), transparent 60%); }
 
 /* ── header / nav (contained "pill" header) ─────────────────────── */
@@ -500,12 +515,12 @@
 /* ── tax calculator card ─────────────────────────────────────────── */
 .shell-marketing .calc { background: #fff; border: 1px solid var(--mk-border); border-radius: 18px; box-shadow: var(--mk-shadow); overflow: hidden; }
 .shell-marketing .calc-head { background: var(--mk-navy); color: #fff; padding: 20px 24px; }
-.shell-marketing .calc-head .eyebrow { font-family: var(--font-mono); font-size: 11px; letter-spacing: .22em; text-transform: uppercase; color: var(--mk-gold-bright); }
+.shell-marketing .calc-head .eyebrow { font-family: var(--mk-font-mono); font-size: 11px; letter-spacing: .22em; text-transform: uppercase; color: var(--mk-gold-bright); }
 .shell-marketing .calc-head h3 { color: #fff; margin: .2em 0 0; font-size: 1.3rem; }
 .shell-marketing .calc-body { padding: 24px; }
 .shell-marketing .calc .cfield { margin-bottom: 18px; }
 .shell-marketing .calc .cfield > label { display: flex; justify-content: space-between; align-items: baseline; font-size: .82rem; font-weight: 600; color: var(--mk-navy); margin-bottom: 8px; }
-.shell-marketing .calc .cfield .val { font-family: var(--font-mono); color: var(--mk-gold); font-size: .92rem; }
+.shell-marketing .calc .cfield .val { font-family: var(--mk-font-mono); color: var(--mk-gold); font-size: .92rem; }
 .shell-marketing .calc input[type="range"] { width: 100%; accent-color: var(--mk-gold); height: 4px; }
 .shell-marketing .calc select { width: 100%; font-family: inherit; font-size: .95rem; color: var(--mk-navy); padding: 12px 14px; border: 1px solid var(--mk-border); border-radius: 8px; background: #fff; transition: border-color .2s, box-shadow .2s; }
 .shell-marketing .calc select:focus { outline: none; border-color: var(--mk-gold); box-shadow: 0 0 0 3px rgba(196, 158, 84, .15); }
@@ -516,18 +531,18 @@
 .shell-marketing .calc .toggle input:checked + .switch { background: var(--mk-gold); }
 .shell-marketing .calc .toggle input:checked + .switch::after { transform: translateX(18px); }
 .shell-marketing .calc .result { background: linear-gradient(180deg, var(--mk-cream), #fff); border: 1px solid var(--mk-border); border-radius: 14px; padding: 22px; margin-top: 8px; text-align: center; }
-.shell-marketing .calc .result .big { font-family: var(--font-display), Georgia, serif; font-size: 3rem; line-height: 1; color: var(--mk-navy); font-weight: 700; }
+.shell-marketing .calc .result .big { font-family: var(--mk-font-display); font-size: 3rem; line-height: 1; color: var(--mk-navy); font-weight: 700; }
 .shell-marketing .calc .result .big small { font-size: 1.1rem; color: var(--mk-grey); font-weight: 400; }
 .shell-marketing .calc .result .cap { font-size: .8rem; color: var(--mk-grey); margin-top: 4px; }
 .shell-marketing .calc .breakdown { display: flex; flex-direction: column; gap: 0; margin: 18px 0 0; font-size: .86rem; text-align: left; }
 .shell-marketing .calc .breakdown .r { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed var(--mk-line); }
-.shell-marketing .calc .breakdown .r span:last-child { font-family: var(--font-mono); }
+.shell-marketing .calc .breakdown .r span:last-child { font-family: var(--mk-font-mono); }
 .shell-marketing .calc .breakdown .r.total { border-bottom: none; font-weight: 700; color: var(--mk-navy); border-top: 2px solid var(--mk-navy); margin-top: 2px; padding-top: 12px; }
 .shell-marketing .calc .tc-compare { margin-top: 16px; background: var(--mk-navy); color: #fff; border-radius: 12px; padding: 18px 18px 16px; }
 .shell-marketing .calc .tc-compare .row { display: flex; justify-content: space-between; font-size: .8rem; margin-bottom: 8px; gap: 12px; }
-.shell-marketing .calc .tc-compare .row span:last-child { font-family: var(--font-mono); white-space: nowrap; }
+.shell-marketing .calc .tc-compare .row span:last-child { font-family: var(--mk-font-mono); white-space: nowrap; }
 .shell-marketing .calc .bar-track { height: 26px; border-radius: 6px; background: rgba(255, 255, 255, .12); position: relative; overflow: hidden; margin-bottom: 6px; }
-.shell-marketing .calc .bar-fill { position: absolute; top: 0; left: 0; height: 100%; border-radius: 6px; display: flex; align-items: center; padding-left: 10px; font-family: var(--font-mono); font-size: .72rem; color: #fff; transition: width .3s var(--mk-ease); }
+.shell-marketing .calc .bar-fill { position: absolute; top: 0; left: 0; height: 100%; border-radius: 6px; display: flex; align-items: center; padding-left: 10px; font-family: var(--mk-font-mono); font-size: .72rem; color: #fff; transition: width .3s var(--mk-ease); }
 .shell-marketing .calc .bar-fill.cy { background: linear-gradient(90deg, var(--mk-gold), var(--mk-gold-bright)); color: var(--mk-navy); }
 .shell-marketing .calc .bar-fill.other { background: #3a4a66; }
 .shell-marketing .calc .keep { margin-top: 12px; text-align: center; font-size: .95rem; color: var(--mk-gold-bright); font-weight: 600; }
@@ -560,7 +575,7 @@
 .shell-marketing .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
 @media (max-width: 760px) { .shell-marketing .stats { grid-template-columns: 1fr; } }
 .shell-marketing .stat { background: #fff; border: 1px solid var(--mk-border); border-radius: 12px; padding: 30px 26px; text-align: center; }
-.shell-marketing .stat .num { font-family: var(--font-display), Georgia, serif; font-size: 2.4rem; font-weight: 700; color: var(--mk-gold); line-height: 1; }
+.shell-marketing .stat .num { font-family: var(--mk-font-display); font-size: 2.4rem; font-weight: 700; color: var(--mk-gold); line-height: 1; }
 .shell-marketing .stat .num sup { font-size: .45em; color: var(--mk-grey-2); font-weight: 700; }
 .shell-marketing .stat .lbl { color: var(--mk-grey); font-size: .9rem; font-weight: 500; margin-top: 8px; }
 
@@ -609,7 +624,7 @@
 .shell-marketing .post:hover { transform: translateY(-4px); box-shadow: var(--mk-shadow); }
 .shell-marketing .post .ph { height: 150px; background-size: cover; background-position: center; background-color: var(--mk-navy); position: relative; }
 .shell-marketing .post .pb { padding: 20px 22px; }
-.shell-marketing .post .date { font-family: var(--font-mono); font-size: 10.5px; font-weight: 500; letter-spacing: .14em; text-transform: uppercase; color: var(--mk-gold); }
+.shell-marketing .post .date { font-family: var(--mk-font-mono); font-size: 10.5px; font-weight: 500; letter-spacing: .14em; text-transform: uppercase; color: var(--mk-gold); }
 .shell-marketing .post h3 { font-size: 1.08rem; color: var(--mk-navy); margin-top: 10px; line-height: 1.35; }
 
 /* ── page hero (inner pages) ─────────────────────────────────────── */
@@ -640,7 +655,7 @@
 .shell-marketing .people { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; margin-top: 26px; }
 @media (max-width: 700px) { .shell-marketing .people { grid-template-columns: 1fr; } }
 .shell-marketing .person { background: #fff; border: 1px solid var(--mk-border); border-radius: 14px; padding: 24px; }
-.shell-marketing .person b { display: block; font-family: var(--font-display), Georgia, serif; font-size: 1.25rem; color: var(--mk-navy); }
+.shell-marketing .person b { display: block; font-family: var(--mk-font-display); font-size: 1.25rem; color: var(--mk-navy); }
 .shell-marketing .person .role { display: block; font-size: .86rem; color: var(--mk-gold); margin-top: 2px; }
 .shell-marketing .person p { font-size: .92rem; color: var(--mk-grey); margin: 12px 0 0; }
 .shell-marketing .about-where { margin-top: 48px; padding-top: 32px; border-top: 1px solid var(--mk-line); }
@@ -651,8 +666,8 @@
 .shell-marketing .ccard { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; background: #fff; border: 1px solid var(--mk-border); border-radius: 16px; padding: 24px; color: var(--mk-ink); transition: transform .25s var(--mk-ease2), box-shadow .25s, border-color .25s; }
 .shell-marketing .ccard:hover { transform: translateY(-4px); border-color: var(--mk-gold); box-shadow: var(--mk-shadow); }
 .shell-marketing .ccard .cic { width: 42px; height: 42px; border-radius: 11px; background: var(--mk-cream); color: var(--mk-gold); display: grid; place-items: center; margin-bottom: 6px; }
-.shell-marketing .ccard b { font-family: var(--font-display), Georgia, serif; font-size: 1.15rem; color: var(--mk-navy); }
-.shell-marketing .ccard .cval { font-family: var(--font-mono); font-size: .95rem; color: var(--mk-navy); }
+.shell-marketing .ccard b { font-family: var(--mk-font-display); font-size: 1.15rem; color: var(--mk-navy); }
+.shell-marketing .ccard .cval { font-family: var(--mk-font-mono); font-size: .95rem; color: var(--mk-navy); }
 .shell-marketing .ccard .cnote { font-size: .82rem; color: var(--mk-grey); }
 .shell-marketing .office-grid { display: grid; grid-template-columns: 1fr 1.2fr; gap: 44px; align-items: start; }
 @media (max-width: 900px) { .shell-marketing .office-grid { grid-template-columns: 1fr; } }
@@ -670,7 +685,7 @@
 .shell-marketing .sd-item svg { color: var(--mk-gold); flex: none; margin-top: 3px; width: 18px; height: 18px; }
 .shell-marketing .steps { counter-reset: s; margin-top: 26px; }
 .shell-marketing .step { background: #fff; border: 1px solid var(--mk-border); border-radius: 14px; padding: 24px; margin-bottom: 14px; counter-increment: s; }
-.shell-marketing .step::before { content: "0" counter(s); font-family: var(--font-mono); font-size: 12px; font-weight: 500; letter-spacing: .1em; color: var(--mk-gold); }
+.shell-marketing .step::before { content: "0" counter(s); font-family: var(--mk-font-mono); font-size: 12px; font-weight: 500; letter-spacing: .1em; color: var(--mk-gold); }
 .shell-marketing .step h3 { font-size: 1.1rem; margin: 8px 0 6px; }
 .shell-marketing .step p { font-size: .9rem; color: var(--mk-grey); }
 
@@ -695,9 +710,9 @@
 .shell-marketing .wtc-grid { display: grid; grid-template-columns: .9fr 1.1fr; gap: 48px; align-items: center; }
 @media (max-width: 860px) { .shell-marketing .wtc-grid { grid-template-columns: 1fr; gap: 30px; } }
 .shell-marketing .wtc-photo { aspect-ratio: 4 / 5; border-radius: 16px; background: linear-gradient(160deg, var(--mk-navy), var(--mk-navy-soft)); position: relative; overflow: hidden; box-shadow: var(--mk-shadow-lg); background-size: cover; background-position: center; }
-.shell-marketing .wtc-photo .ph-note { position: absolute; inset: 0; display: grid; place-items: center; color: rgba(255, 255, 255, .4); font-family: var(--font-mono); font-size: .78rem; text-align: center; padding: 24px; }
+.shell-marketing .wtc-photo .ph-note { position: absolute; inset: 0; display: grid; place-items: center; color: rgba(255, 255, 255, .4); font-family: var(--mk-font-mono); font-size: .78rem; text-align: center; padding: 24px; }
 .shell-marketing .wtc-photo .name { position: absolute; bottom: 0; left: 0; right: 0; padding: 22px; background: linear-gradient(0deg, rgba(17, 27, 44, .9), transparent); }
-.shell-marketing .wtc-photo .name b { color: #fff; font-family: var(--font-display), Georgia, serif; font-size: 1.3rem; display: block; }
+.shell-marketing .wtc-photo .name b { color: #fff; font-family: var(--mk-font-display); font-size: 1.3rem; display: block; }
 .shell-marketing .wtc-photo .name span { color: var(--mk-gold-bright); font-size: .82rem; }
 .shell-marketing .wtc h2 b { color: var(--mk-gold); }
 .shell-marketing .pts { list-style: none; padding: 0; margin: 20px 0 0; display: flex; flex-direction: column; gap: 14px; }
@@ -719,7 +734,7 @@
 .shell-marketing .fld.full { grid-column: 1 / -1; }
 .shell-marketing .charcount { font-size: 11.5px; color: var(--mk-grey-2); text-align: right; margin-top: 5px; }
 .shell-marketing .slots { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; margin-top: 10px; }
-.shell-marketing .slot-b { border: 1px solid var(--mk-border); border-radius: 8px; padding: 12px; font-size: .86rem; font-family: var(--font-mono); cursor: pointer; background: #fff; color: var(--mk-navy); text-align: center; transition: border-color .15s, background .15s; }
+.shell-marketing .slot-b { border: 1px solid var(--mk-border); border-radius: 8px; padding: 12px; font-size: .86rem; font-family: var(--mk-font-mono); cursor: pointer; background: #fff; color: var(--mk-navy); text-align: center; transition: border-color .15s, background .15s; }
 .shell-marketing .slot-b:hover { border-color: var(--mk-gold); }
 .shell-marketing .slot-b.sel { background: var(--mk-gold); border-color: var(--mk-gold); color: var(--mk-navy); font-weight: 600; }
 .shell-marketing .optlist { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -735,7 +750,7 @@
 .shell-marketing .slotcal-head button:disabled { opacity: .35; cursor: default; }
 .shell-marketing .slotcal-head button:not(:disabled):hover { border-color: var(--mk-gold); }
 .shell-marketing .slotcal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
-.shell-marketing .slotcal-dow { text-align: center; font-family: var(--font-mono); font-size: .68rem; text-transform: uppercase; letter-spacing: .05em; color: var(--mk-grey-2); padding: 4px 0; }
+.shell-marketing .slotcal-dow { text-align: center; font-family: var(--mk-font-mono); font-size: .68rem; text-transform: uppercase; letter-spacing: .05em; color: var(--mk-grey-2); padding: 4px 0; }
 .shell-marketing .slotcal-day { aspect-ratio: 1; border: 0; border-radius: 50%; background: transparent; font-family: inherit; font-size: .85rem; color: var(--mk-grey-2); cursor: default; }
 .shell-marketing .slotcal-day.avail { background: var(--mk-cream); color: var(--mk-navy); font-weight: 600; cursor: pointer; }
 .shell-marketing .slotcal-day.avail:hover { background: var(--mk-gold-bright); }
@@ -758,7 +773,7 @@
 .shell-marketing .pi-code { display: inline-flex; align-items: center; gap: 7px; border: 1px solid var(--mk-border); border-radius: 8px; background: #fff; padding: 0 12px; font-family: inherit; font-size: .92rem; color: var(--mk-navy); cursor: pointer; white-space: nowrap; transition: border-color .15s; }
 .shell-marketing .pi-code:hover { border-color: var(--mk-gold); }
 .shell-marketing .pi-flag { font-size: 1rem; line-height: 1; }
-.shell-marketing .pi-dial { font-family: var(--font-mono); font-size: .86rem; }
+.shell-marketing .pi-dial { font-family: var(--mk-font-mono); font-size: .86rem; }
 .shell-marketing .pi-list { position: absolute; top: calc(100% + 4px); left: 0; right: 0; z-index: 40; background: #fff; border: 1px solid var(--mk-border); border-radius: 10px; box-shadow: var(--mk-shadow-lg); padding: 8px; }
 .shell-marketing .pi-search { width: 100%; border: 1px solid var(--mk-border); border-radius: 8px; padding: 10px 12px; font-size: .9rem; font-family: inherit; margin-bottom: 6px; }
 .shell-marketing .pi-search:focus { outline: none; border-color: var(--mk-gold); }
@@ -771,7 +786,7 @@
 .shell-marketing .fsteps { display: flex; gap: 8px; margin-bottom: 8px; }
 .shell-marketing .fsteps .fs { flex: 1; height: 5px; border-radius: 3px; background: var(--mk-border); transition: background .3s; }
 .shell-marketing .fsteps .fs.on { background: var(--mk-gold); }
-.shell-marketing .fstep-label { font-family: var(--font-mono); font-size: .74rem; letter-spacing: .1em; text-transform: uppercase; color: var(--mk-grey); margin-bottom: 20px; }
+.shell-marketing .fstep-label { font-family: var(--mk-font-mono); font-size: .74rem; letter-spacing: .1em; text-transform: uppercase; color: var(--mk-grey); margin-bottom: 20px; }
 .shell-marketing .fnav { display: flex; justify-content: space-between; gap: 12px; margin-top: 30px; }
 .shell-marketing .under-form { font-size: .82rem; color: var(--mk-grey); text-align: center; margin-top: 18px; }
 .shell-marketing .c-info { display: flex; flex-direction: column; gap: 0; }
@@ -803,7 +818,7 @@
 .shell-marketing .socials { display: flex; gap: 12px; margin-top: 24px; }
 .shell-marketing .socials a { width: 40px; height: 40px; border-radius: 50%; background: rgba(255, 255, 255, .08); display: grid; place-items: center; color: #cfd6e2; transition: background .2s, color .2s; }
 .shell-marketing .socials a:hover { background: var(--mk-gold); color: var(--mk-navy); }
-.shell-marketing .mk-footer h4 { font-family: var(--font-body); font-size: .82rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: #fff; margin-bottom: 16px; }
+.shell-marketing .mk-footer h4 { font-family: var(--mk-font-body); font-size: .82rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: #fff; margin-bottom: 16px; }
 .shell-marketing .mk-footer .col a { display: block; font-size: .9rem; color: #aeb7c7; padding: 5px 0; cursor: pointer; transition: color .2s; }
 .shell-marketing .mk-footer .col a:hover { color: var(--mk-gold-bright); }
 .shell-marketing .f-contact div { margin-bottom: 14px; font-size: .9rem; color: #aeb7c7; }
@@ -824,7 +839,7 @@
 .shell-marketing .price-card { border: 1px solid var(--mk-border); border-radius: 14px; background: #fff; padding: 30px; position: relative; display: flex; flex-direction: column; transition: transform .25s var(--mk-ease), box-shadow .25s; }
 .shell-marketing .price-card:hover { transform: translateY(-4px); box-shadow: var(--mk-shadow); }
 .shell-marketing .price-card.feat { border: 1.5px solid var(--mk-gold); box-shadow: var(--mk-shadow); }
-.shell-marketing .price-card .tier { font-family: var(--font-mono); font-size: .68rem; text-transform: uppercase; letter-spacing: .16em; color: var(--mk-gold); font-weight: 500; }
+.shell-marketing .price-card .tier { font-family: var(--mk-font-mono); font-size: .68rem; text-transform: uppercase; letter-spacing: .16em; color: var(--mk-gold); font-weight: 500; }
 .shell-marketing .price-card h3 { margin: 6px 0 6px; font-size: 1.4rem; }
 .shell-marketing .price-card .psub { font-size: .86rem; color: var(--mk-grey); margin-bottom: 18px; }
 .shell-marketing .price-card ul { list-style: none; padding: 0; margin: 0 0 22px; display: flex; flex-direction: column; gap: 11px; }
@@ -870,7 +885,7 @@
 .shell-marketing .vh-calc .calc { box-shadow: var(--mk-shadow-lg); }
 /* the "NICOSIA, CYPRUS" eyebrow was too faint on cream — solid, darker gold, no shine */
 .shell-marketing .vhero .kicker { background: none; -webkit-text-fill-color: initial; color: #9C7A34; animation: none; font-weight: 600; }
-.shell-marketing .vh-h1 { font-family: var(--font-display), Georgia, serif; font-weight: 600; color: var(--mk-navy); letter-spacing: -.02em; font-size: clamp(2.1rem, 4.6vw, 4rem); line-height: 1.06; margin: 12px 0 18px; }
+.shell-marketing .vh-h1 { font-family: var(--mk-font-display); font-weight: 600; color: var(--mk-navy); letter-spacing: -.02em; font-size: clamp(2.1rem, 4.6vw, 4rem); line-height: 1.06; margin: 12px 0 18px; }
 .shell-marketing .vh-h1 .gold { font-style: italic; color: var(--mk-gold); }
 .shell-marketing .vh-h1 .wd { display: inline-block; white-space: nowrap; }
 .shell-marketing .vh-h1 .ch { display: inline-block; opacity: 0; transform: translateY(18px); transition: opacity .55s var(--mk-ease2), transform .55s var(--mk-ease2); }
@@ -884,8 +899,8 @@
 .shell-marketing .vh-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
 @media (max-width: 640px) { .shell-marketing .vh-stats { grid-template-columns: 1fr; gap: 12px; } }
 .shell-marketing .vh-stat { display: flex; align-items: baseline; gap: 12px; }
-.shell-marketing .vh-stat b { font-family: var(--font-display), Georgia, serif; font-size: 1.9rem; font-weight: 700; color: var(--mk-navy); line-height: 1; white-space: nowrap; }
-.shell-marketing .vh-stat span { font-family: var(--font-body); font-size: .86rem; font-weight: 500; color: var(--mk-grey); line-height: 1.35; }
+.shell-marketing .vh-stat b { font-family: var(--mk-font-display); font-size: 1.9rem; font-weight: 700; color: var(--mk-navy); line-height: 1; white-space: nowrap; }
+.shell-marketing .vh-stat span { font-family: var(--mk-font-body); font-size: .86rem; font-weight: 500; color: var(--mk-grey); line-height: 1.35; }
 .shell-marketing .vh-reg { margin-top: 14px; font-size: .74rem; color: var(--mk-grey-2); letter-spacing: .04em; }
 
 
@@ -963,7 +978,7 @@
 
 /* ── services ticker (static centred row) ─────────────────────────── */
 .shell-marketing .mo-ticker { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px 34px; padding: 14px 0; border-top: 1px solid var(--mk-line); border-bottom: 1px solid var(--mk-line); }
-.shell-marketing .mo-ticker .it { display: inline-flex; align-items: center; gap: 10px; white-space: nowrap; font-family: var(--font-mono); font-size: .74rem; letter-spacing: .14em; text-transform: uppercase; color: var(--mk-grey); }
+.shell-marketing .mo-ticker .it { display: inline-flex; align-items: center; gap: 10px; white-space: nowrap; font-family: var(--mk-font-mono); font-size: .74rem; letter-spacing: .14em; text-transform: uppercase; color: var(--mk-grey); }
 .shell-marketing .mo-ticker .it b { color: var(--mk-gold); font-weight: 600; }
 
 /* ── services: static grid of eight (4 × 2) ───────────────────────── */
@@ -977,7 +992,7 @@
 .shell-marketing .svc8-ic { position: absolute; left: 18px; bottom: 16px; z-index: 2; width: 42px; height: 42px; border-radius: 11px; background: rgba(250, 248, 245, .94); display: grid; place-items: center; color: var(--mk-gold); transition: transform .45s cubic-bezier(.34, 1.5, .6, 1); }
 .shell-marketing .svc8-card:hover .svc8-ic { transform: rotate(-8deg) scale(1.1); }
 .shell-marketing .svc8-ic svg { width: 22px; height: 22px; }
-.shell-marketing .svc8-tag { position: absolute; top: 14px; right: 14px; z-index: 2; font-family: var(--font-mono); font-size: .58rem; letter-spacing: .12em; padding: 4px 9px; border-radius: 6px; background: rgba(196, 158, 84, .92); color: var(--mk-navy); font-weight: 600; }
+.shell-marketing .svc8-tag { position: absolute; top: 14px; right: 14px; z-index: 2; font-family: var(--mk-font-mono); font-size: .58rem; letter-spacing: .12em; padding: 4px 9px; border-radius: 6px; background: rgba(196, 158, 84, .92); color: var(--mk-navy); font-weight: 600; }
 .shell-marketing .svc8-body { display: flex; flex-direction: column; flex: 1; padding: 20px 20px 22px; }
 .shell-marketing .svc8-body h3 { font-size: 1.12rem; line-height: 1.28; margin: 0 0 9px; }
 .shell-marketing .svc8-body p { font-size: .88rem; color: var(--mk-grey); line-height: 1.6; margin: 0 0 16px; }
@@ -992,7 +1007,7 @@
 .shell-marketing .how-cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: 26px; }
 @media (max-width: 860px) { .shell-marketing .how-cols { grid-template-columns: 1fr; } }
 .shell-marketing .how-col { border-top: 1px solid rgba(255, 255, 255, .16); padding-top: 18px; }
-.shell-marketing .how-col .n { font-family: var(--font-mono); color: var(--mk-gold-bright); font-size: .8rem; letter-spacing: .14em; }
+.shell-marketing .how-col .n { font-family: var(--mk-font-mono); color: var(--mk-gold-bright); font-size: .8rem; letter-spacing: .14em; }
 .shell-marketing .how-col h3 { color: #fff; font-size: 1.25rem; margin: 8px 0 8px; }
 .shell-marketing .how-col p { color: rgba(255, 255, 255, .78); font-size: .95rem; margin: 0; }
 
@@ -1009,13 +1024,13 @@
 @media (max-width: 600px) { .shell-marketing .tools-grid { grid-template-columns: 1fr; } }
 .shell-marketing .tool-card { display: flex; flex-direction: column; gap: 8px; background: #fff; border: 1px solid var(--mk-border); border-radius: 16px; padding: 22px; color: inherit; transition: transform .3s var(--mk-ease2), box-shadow .3s, border-color .3s; }
 .shell-marketing .tool-card:hover { transform: translateY(-4px); border-color: var(--mk-gold); box-shadow: var(--mk-shadow); }
-.shell-marketing .tool-name { font-family: var(--font-mono); font-size: .68rem; letter-spacing: .16em; text-transform: uppercase; color: var(--mk-gold); }
+.shell-marketing .tool-name { font-family: var(--mk-font-mono); font-size: .68rem; letter-spacing: .16em; text-transform: uppercase; color: var(--mk-gold); }
 .shell-marketing .tool-card h3 { font-size: 1.08rem; line-height: 1.3; margin: 0; }
 .shell-marketing .tool-card p { font-size: .86rem; color: var(--mk-grey); margin: 0; }
 .shell-marketing .tool-go { margin-top: auto; padding-top: 8px; font-size: .84rem; font-weight: 600; color: var(--mk-navy); }
 .shell-marketing .tool-card:hover .tool-go { color: var(--mk-gold); }
 .shell-marketing .tool-badges { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 16px; }
-.shell-marketing .tool-badge { display: inline-flex; align-items: center; background: rgba(196, 158, 84, .18); color: var(--mk-gold-bright); border: 1px solid rgba(196, 158, 84, .5); border-radius: 99px; padding: 5px 12px; font-size: .74rem; font-weight: 600; font-family: var(--font-mono); letter-spacing: .06em; }
+.shell-marketing .tool-badge { display: inline-flex; align-items: center; background: rgba(196, 158, 84, .18); color: var(--mk-gold-bright); border: 1px solid rgba(196, 158, 84, .5); border-radius: 99px; padding: 5px 12px; font-size: .74rem; font-weight: 600; font-family: var(--mk-font-mono); letter-spacing: .06em; }
 .shell-marketing .tool-asat { font-size: .8rem; color: rgba(255, 255, 255, .7); }
 .shell-marketing .tool-aside .body { margin-top: 14px; }
 .shell-marketing .calc .lbl { display: block; font-size: .82rem; font-weight: 600; color: var(--mk-navy); margin-bottom: 8px; }
@@ -1025,7 +1040,7 @@
 .shell-marketing .seg button { border: 0; background: transparent; font: inherit; font-size: .84rem; font-weight: 600; color: var(--mk-grey); padding: 8px 14px; border-radius: 999px; cursor: pointer; transition: background .2s, color .2s; }
 .shell-marketing .seg button.on { background: #fff; color: var(--mk-navy); box-shadow: 0 2px 8px rgba(26, 39, 63, .12); }
 .shell-marketing .calc .three { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; text-align: center; }
-.shell-marketing .calc .three b { display: block; font-family: var(--font-display), Georgia, serif; font-size: 1.5rem; color: var(--mk-navy); }
+.shell-marketing .calc .three b { display: block; font-family: var(--mk-font-display); font-size: 1.5rem; color: var(--mk-navy); }
 .shell-marketing .calc .three .lbl { margin-bottom: 4px; color: var(--mk-grey); font-weight: 500; }
 .shell-marketing .calc-compact .calc-body { padding: 20px; }
 .shell-marketing .calc-compact .result { padding: 16px; margin-top: 4px; }
@@ -1035,7 +1050,7 @@
 .shell-marketing .keepbox.keep-light .kl { color: var(--mk-grey); }
 .shell-marketing .keepbox.keep-light .keep-val { color: var(--mk-navy); font-size: 2rem; }
 .shell-marketing .result-cta { margin-top: 18px; background: linear-gradient(160deg, var(--mk-navy-deep), var(--mk-navy)); color: #fff; border-radius: 14px; padding: 22px; text-align: center; }
-.shell-marketing .result-cta .ra { font-family: var(--font-display), Georgia, serif; font-size: 1.7rem; line-height: 1.1; color: var(--mk-gold-bright); font-weight: 700; }
+.shell-marketing .result-cta .ra { font-family: var(--mk-font-display); font-size: 1.7rem; line-height: 1.1; color: var(--mk-gold-bright); font-weight: 700; }
 .shell-marketing .result-cta .ra small { font-size: .95rem; color: rgba(255, 255, 255, .8); font-weight: 400; margin-left: 4px; }
 .shell-marketing .result-cta p { color: rgba(255, 255, 255, .78); font-size: .88rem; margin: 10px auto 16px; max-width: 52ch; }
 .shell-marketing .result-cta .pill.ghost, .shell-marketing .cta-box .pill.ghost, .shell-marketing .final .pill.ghost { color: #fff; border-color: rgba(255, 255, 255, .45); }
@@ -1052,17 +1067,17 @@
 .shell-marketing .route-rules { margin: 12px 0; font-size: .88rem; }
 .shell-marketing .route-rules b { display: block; margin-bottom: 6px; color: var(--mk-navy); }
 .shell-marketing .cal-next { background: var(--mk-cream); border: 1px solid var(--mk-gold); border-radius: 12px; padding: 14px 18px; margin-bottom: 16px; display: flex; flex-direction: column; }
-.shell-marketing .cal-next b { font-family: var(--font-display), Georgia, serif; font-size: 1.3rem; color: var(--mk-navy); }
+.shell-marketing .cal-next b { font-family: var(--mk-font-display); font-size: 1.3rem; color: var(--mk-navy); }
 .shell-marketing .cal-next span { font-size: .9rem; color: var(--mk-grey); }
 .shell-marketing .cal-list { list-style: none; padding: 0; margin: 0; }
 .shell-marketing .cal-list li { display: grid; grid-template-columns: 170px 1fr; gap: 16px; padding: 14px 0; border-bottom: 1px dashed var(--mk-line); }
 @media (max-width: 600px) { .shell-marketing .cal-list li { grid-template-columns: 1fr; gap: 4px; } }
 .shell-marketing .cal-list li.on .cal-date { color: var(--mk-gold); }
-.shell-marketing .cal-date { font-family: var(--font-mono); font-size: .8rem; color: var(--mk-navy); font-weight: 500; }
+.shell-marketing .cal-date { font-family: var(--mk-font-mono); font-size: .8rem; color: var(--mk-navy); font-weight: 500; }
 .shell-marketing .cal-body b { display: block; color: var(--mk-navy); }
 .shell-marketing .cal-body p { font-size: .86rem; color: var(--mk-grey); margin: 6px 0 0; }
 .shell-marketing .cal-tags { display: inline-flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
-.shell-marketing .cal-tags em { font-style: normal; font-family: var(--font-mono); font-size: .66rem; letter-spacing: .08em; text-transform: uppercase; background: var(--mk-cream); border-radius: 6px; padding: 2px 7px; color: var(--mk-grey); }
+.shell-marketing .cal-tags em { font-style: normal; font-family: var(--mk-font-mono); font-size: .66rem; letter-spacing: .08em; text-transform: uppercase; background: var(--mk-cream); border-radius: 6px; padding: 2px 7px; color: var(--mk-grey); }
 
 /* ── insight cards (prototype ins4/ic, renamed icard) ─────────────── */
 .shell-marketing .ins4-head { display: grid; grid-template-columns: 1fr 370px; gap: 44px; align-items: start; }
@@ -1087,7 +1102,7 @@
 .shell-marketing .icard-img { height: 190px; }
 .shell-marketing .icard-body { padding: 18px 22px 20px; display: flex; flex-direction: column; flex: 1; }
 /* category tag: proper name, never a raw search phrase; title sits below the image */
-.shell-marketing .icard-cat { align-self: flex-start; font-family: var(--font-mono); font-size: .66rem; letter-spacing: .14em; text-transform: uppercase; color: var(--mk-gold); background: rgba(196, 158, 84, .12); border: 1px solid rgba(196, 158, 84, .34); border-radius: 99px; padding: 4px 10px; }
+.shell-marketing .icard-cat { align-self: flex-start; font-family: var(--mk-font-mono); font-size: .66rem; letter-spacing: .14em; text-transform: uppercase; color: var(--mk-gold); background: rgba(196, 158, 84, .12); border: 1px solid rgba(196, 158, 84, .34); border-radius: 99px; padding: 4px 10px; }
 .shell-marketing .icard h3 { font-size: 1.12rem; margin: 11px 0 7px; line-height: 1.3; }
 .shell-marketing .icard p { font-size: .87rem; color: var(--mk-grey); margin: 0 0 15px; }
 .shell-marketing .icard-by { margin-top: auto; font-size: .8rem; color: var(--mk-grey); }
@@ -1105,13 +1120,13 @@
 
 /* ── reveal team card (gcard) ─────────────────────────────────────── */
 .shell-marketing .gcard { position: relative; aspect-ratio: 4 / 5; border-radius: 16px; overflow: hidden; box-shadow: var(--mk-shadow); background: linear-gradient(160deg, var(--mk-navy), var(--mk-navy-soft)); background-size: cover; background-position: 50% 22%; }
-.shell-marketing .gcard .ph-note { position: absolute; inset: 0; display: grid; place-items: center; color: rgba(255, 255, 255, .4); font-size: .78rem; text-align: center; padding: 22px; font-family: var(--font-mono); }
+.shell-marketing .gcard .ph-note { position: absolute; inset: 0; display: grid; place-items: center; color: rgba(255, 255, 255, .4); font-size: .78rem; text-align: center; padding: 22px; font-family: var(--mk-font-mono); }
 .shell-marketing .gcard-soc { position: absolute; right: -56px; top: 16px; z-index: 3; display: flex; flex-direction: column; gap: 12px; padding: 12px 9px; border-radius: 99px; background: rgba(250, 248, 245, .94); backdrop-filter: blur(8px); box-shadow: 0 6px 20px rgba(17, 27, 44, .22); transition: right .4s cubic-bezier(.12, .23, .5, 1); }
 .shell-marketing .gcard:hover .gcard-soc, .shell-marketing .gcard:focus-within .gcard-soc { right: 16px; }
 .shell-marketing .gcard-soc a { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; color: var(--mk-navy); transition: background .25s, color .25s; }
 .shell-marketing .gcard-soc a:hover { background: var(--mk-gold); color: #fff; }
 .shell-marketing .gcard-txt { position: absolute; left: 0; right: 0; bottom: 0; z-index: 2; padding: 20px; background: linear-gradient(0deg, rgba(17, 27, 44, .94) 0%, rgba(17, 27, 44, .72) 55%, transparent 100%); }
-.shell-marketing .gcard-txt b { color: #fff; font-family: var(--font-display), Georgia, serif; font-size: 1.3rem; display: block; line-height: 1.2; }
+.shell-marketing .gcard-txt b { color: #fff; font-family: var(--mk-font-display); font-size: 1.3rem; display: block; line-height: 1.2; }
 .shell-marketing .gcard-txt .role { color: var(--mk-gold-bright); font-size: .8rem; display: block; margin-top: 2px; }
 .shell-marketing .gcard-txt .reveal-txt { display: block; margin-top: 9px; color: rgba(255, 255, 255, .82); font-size: .83rem; line-height: 1.5; opacity: 0; transform: translateY(7px); transition: opacity .4s cubic-bezier(.12, .23, .5, 1), transform .4s cubic-bezier(.12, .23, .5, 1); }
 .shell-marketing .gcard:hover .gcard-txt .reveal-txt, .shell-marketing .gcard:focus-within .gcard-txt .reveal-txt { opacity: 1; transform: none; }
@@ -1119,7 +1134,7 @@
 /* ── two-column FAQ accordion (fq4) ───────────────────────────────── */
 .shell-marketing .faq4-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 26px; margin-bottom: 42px; flex-wrap: wrap; }
 .shell-marketing .faq4-head .l { max-width: 560px; }
-.shell-marketing .faq-badge { display: inline-flex; align-items: center; background: rgba(196, 158, 84, .12); color: var(--mk-gold); border: 1px solid rgba(196, 158, 84, .34); border-radius: 99px; padding: 5px 14px; font-size: .76rem; font-weight: 600; margin-bottom: 16px; font-family: var(--font-mono); letter-spacing: .06em; }
+.shell-marketing .faq-badge { display: inline-flex; align-items: center; background: rgba(196, 158, 84, .12); color: var(--mk-gold); border: 1px solid rgba(196, 158, 84, .34); border-radius: 99px; padding: 5px 14px; font-size: .76rem; font-weight: 600; margin-bottom: 16px; font-family: var(--mk-font-mono); letter-spacing: .06em; }
 .shell-marketing .faq4-head h2 { font-size: clamp(1.85rem, 3.5vw, 2.9rem); margin: 0 0 13px; }
 .shell-marketing .faq4-head p { color: var(--mk-grey); font-size: 1.01rem; margin: 0; }
 .shell-marketing .faq4-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; align-items: start; }
@@ -1136,10 +1151,10 @@
 .shell-marketing .fq4 .qb p { font-size: .89rem; color: var(--mk-grey); line-height: 1.68; margin: 0; padding-bottom: 20px; }
 
 /* ── adaptive pill slider + animated digits (calculator) ──────────── */
-.shell-marketing .aslider { position: relative; display: flex; align-items: center; height: 52px; width: 100%; border-radius: 999px; background: #F1EDE7; overflow: hidden; margin-top: 5px; }
+.shell-marketing .aslider { position: relative; display: flex; align-items: center; height: 52px; width: 100%; border-radius: 999px; background: var(--mk-cream); overflow: hidden; margin-top: 5px; }
 .shell-marketing .aslider .dots { position: absolute; inset: 0; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; pointer-events: none; z-index: 30; }
-.shell-marketing .aslider .dots i { width: 6px; height: 6px; border-radius: 50%; background: rgba(26, 39, 63, .22); display: block; }
-.shell-marketing .aslider .fill { position: absolute; left: 0; top: 0; height: 100%; border-radius: 999px; pointer-events: none; z-index: 20; background: linear-gradient(90deg, #E7C878, var(--mk-gold)); transition: width .13s var(--mk-ease2), background .3s ease; }
+.shell-marketing .aslider .dots i { width: 6px; height: 6px; border-radius: 50%; background: color-mix(in srgb, var(--mk-navy) 22%, transparent); display: block; }
+.shell-marketing .aslider .fill { position: absolute; left: 0; top: 0; height: 100%; border-radius: 999px; pointer-events: none; z-index: 20; background: linear-gradient(90deg, var(--mk-gold-bright), var(--mk-gold)); transition: width .13s var(--mk-ease2), background .3s ease; }
 .shell-marketing .aslider .thumb { position: absolute; top: 0; z-index: 40; width: 52px; height: 52px; display: grid; place-items: center; pointer-events: none; transition: left .13s var(--mk-ease2); }
 .shell-marketing .aslider .thumb b { width: 40px; height: 40px; border-radius: 50%; background: #fff; display: block; transition: transform .15s; box-shadow: inset 0 2px 4px rgba(0, 0, 0, .06), 0 3px 10px rgba(26, 39, 63, .18); }
 .shell-marketing .aslider:active .thumb b { transform: scale(.94); }
@@ -1152,13 +1167,13 @@
 @keyframes mk-digit-in { from { opacity: 0; transform: translateY(-.55em) scale(.92); } to { opacity: 1; transform: none; } }
 .shell-marketing .animnum span.pop { animation: mk-digit-in .3s var(--mk-ease2); }
 .shell-marketing .calc .crow { display: flex; justify-content: space-between; align-items: baseline; font-size: .8rem; margin-bottom: 7px; gap: 12px; }
-.shell-marketing .calc .crow b { font-family: var(--font-mono); font-weight: 500; white-space: nowrap; }
+.shell-marketing .calc .crow b { font-family: var(--mk-font-mono); font-weight: 500; white-space: nowrap; }
 .shell-marketing .keepbox { margin-top: 16px; padding-top: 15px; border-top: 1px solid rgba(255, 255, 255, .14); text-align: center; }
-.shell-marketing .keepbox .kl { font-size: .72rem; letter-spacing: .14em; text-transform: uppercase; color: rgba(255, 255, 255, .55); font-family: var(--font-mono); }
+.shell-marketing .keepbox .kl { font-size: .72rem; letter-spacing: .14em; text-transform: uppercase; color: rgba(255, 255, 255, .55); font-family: var(--mk-font-mono); }
 /* "keep-val", not "kv": the admin skin owns a global .kv key-value grid
    (grid-template-columns: 132px 1fr) which squeezed this figure into a
    132px column — clipping its last digit and pinning it left. */
-.shell-marketing .keepbox .keep-val { font-family: var(--font-display), Georgia, serif; font-size: 2.5rem; font-weight: 700; line-height: 1.05; color: var(--mk-gold-bright); margin: 3px 0; }
+.shell-marketing .keepbox .keep-val { font-family: var(--mk-font-display); font-size: 2.5rem; font-weight: 700; line-height: 1.05; color: var(--mk-gold-bright); margin: 3px 0; }
 @media (max-width: 420px) { .shell-marketing .keepbox .keep-val { font-size: 2rem; } }
 
 /* ── booking (prototype .book column + step motion) ───────────────── */
@@ -1175,7 +1190,7 @@
 .shell-marketing .final .wrap-in { position: relative; z-index: 1; padding: 64px 24px 60px; max-width: var(--mk-max); margin: 0 auto; }
 .shell-marketing .final h2 { color: #fff; font-size: clamp(1.6rem, 3.2vw, 2.4rem); }
 .shell-marketing .final p { color: rgba(255, 255, 255, .72); max-width: 52ch; margin: 14px auto 24px; }
-.shell-marketing .final .phones { font-family: var(--font-mono); font-size: .82rem; color: rgba(255, 255, 255, .7); margin-top: 22px; display: flex; gap: 22px; justify-content: center; flex-wrap: wrap; }
+.shell-marketing .final .phones { font-family: var(--mk-font-mono); font-size: .82rem; color: rgba(255, 255, 255, .7); margin-top: 22px; display: flex; gap: 22px; justify-content: center; flex-wrap: wrap; }
 .shell-marketing .final .phones a:hover { color: var(--mk-gold-bright); }
 
 /* ── strip knot line-drawing ──────────────────────────────────────── */
@@ -1191,7 +1206,7 @@
 .shell-marketing .edge.r .edge-txt { animation: mk-edge-down 110s linear infinite; }
 @keyframes mk-edge-up { from { transform: translate(-50%, 0); } to { transform: translate(-50%, -50%); } }
 @keyframes mk-edge-down { from { transform: translate(-50%, -50%); } to { transform: translate(-50%, 0); } }
-.shell-marketing .edge-txt span { writing-mode: vertical-rl; text-orientation: mixed; white-space: nowrap; font-family: var(--font-mono); font-size: .66rem; letter-spacing: .42em; text-transform: uppercase; color: var(--mk-navy); opacity: .20; }
+.shell-marketing .edge-txt span { writing-mode: vertical-rl; text-orientation: mixed; white-space: nowrap; font-family: var(--mk-font-mono); font-size: .66rem; letter-spacing: .42em; text-transform: uppercase; color: var(--mk-navy); opacity: .20; }
 .shell-marketing .edge.r .edge-txt span { transform: rotate(180deg); }
 .shell-marketing .edge-knot { position: absolute; left: 50%; width: 58px; height: 58px; margin-left: -29px; opacity: .30; will-change: transform; }
 .shell-marketing .edge.l .edge-knot { top: 26%; } .shell-marketing .edge.r .edge-knot { top: 62%; }
@@ -1216,7 +1231,7 @@
 .shell-marketing .article-table th, .shell-marketing .article-table td { border: 1px solid var(--mk-border); padding: 9px 12px; text-align: left; vertical-align: top; }
 .shell-marketing .article-table th { background: var(--mk-cream); color: var(--mk-navy); font-weight: 600; }
 .shell-marketing .author-block { margin-top: 36px; padding: 22px; border: 1px solid var(--mk-border); border-radius: 14px; background: #fff; }
-.shell-marketing .author-block b { display: block; font-family: var(--font-display), Georgia, serif; font-size: 1.15rem; color: var(--mk-navy); }
+.shell-marketing .author-block b { display: block; font-family: var(--mk-font-display); font-size: 1.15rem; color: var(--mk-navy); }
 .shell-marketing .author-block .role { display: block; font-size: .84rem; color: var(--mk-gold); margin-top: 2px; }
 .shell-marketing .author-block p { font-size: .9rem; color: var(--mk-grey); margin: 10px 0 0; }
 .shell-marketing .article-body h2 { position: relative; padding-top: 14px; }
@@ -1227,7 +1242,7 @@
 .shell-marketing .cards3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
 @media (max-width: 900px) { .shell-marketing .cards3 { grid-template-columns: 1fr; } }
 .shell-marketing .cards3 .how-card { background: #fff; border: 1px solid var(--mk-border); border-radius: 12px; padding: 22px; }
-.shell-marketing .cards3 .how-card .n { font-family: var(--font-mono); color: var(--mk-gold); font-size: .8rem; margin-bottom: 6px; }
+.shell-marketing .cards3 .how-card .n { font-family: var(--mk-font-mono); color: var(--mk-gold); font-size: .8rem; margin-bottom: 6px; }
 .shell-marketing .cards3 .how-card h3 { font-size: 1.02rem; }
 .shell-marketing .cards3 .how-card p { font-size: .88rem; color: var(--mk-grey); margin: 0; }
 .shell-marketing .belief-list { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 12px; margin: 18px 0 0; }
