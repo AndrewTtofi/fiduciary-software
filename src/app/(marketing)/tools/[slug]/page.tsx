@@ -163,7 +163,7 @@ export default async function ToolPage({ params }: { params: Promise<{ slug: str
     }
     case "compare":
       return (
-        <ToolShell {...shell} intro="Select the jurisdictions you are weighing up. Best value in each column is highlighted; every row links to its source.">
+        <ToolShell {...shell} wide intro="Select the jurisdictions you are weighing up. Best value in each column is highlighted; every row links to its source.">
           <div className="calc" style={{ padding: 22 }}>
             <CompareTool />
             <p className="fine" style={{ marginTop: 18 }}>

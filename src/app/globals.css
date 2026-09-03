@@ -306,16 +306,32 @@
   .kpi-tile { width: 32px; height: 32px; border-radius: var(--radius-sm); background: var(--brand-50); color: var(--brand); display: grid; place-items: center; }
 
   /* ─── Tables ───────────────────────────────────────────────────── */
-  .tbl-wrap { border: 1px solid var(--border); border-radius: var(--radius-md); overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch; background: var(--surface); }
+  /* The wrapper is NOT a scroll container on desktop. It used to be
+     `overflow-x: auto` at every width, and combined with the 1200px cap on
+     .appmain an eight-column table (Submissions) scrolled sideways on a
+     1450px screen — the table itself was fine, its container was ~830px.
+     Now the main column takes the full width and cells may wrap, so the
+     table fits; the scrollbar only returns below 1000px, where the sidebar
+     collapses and a wide table genuinely needs it. */
+  .tbl-wrap { border: 1px solid var(--border); border-radius: var(--radius-md); overflow: visible; background: var(--surface); }
   table.tbl { width: 100%; border-collapse: collapse; }
-  /* keep multi-column tables readable inside a horizontal scroll on small screens */
-  @media (max-width: 640px) { table.tbl { min-width: 560px; } }
+  /* With no clipping wrapper the header row's square corners would poke past
+     the rounded border when there is no toolbar above it. */
+  .tbl-wrap > table.tbl:first-child thead th:first-child { border-top-left-radius: calc(var(--radius-md) - 1px); }
+  .tbl-wrap > table.tbl:first-child thead th:last-child { border-top-right-radius: calc(var(--radius-md) - 1px); }
+  @media (max-width: 1000px) {
+    .tbl-wrap { overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch; }
+    /* keep multi-column tables readable inside the horizontal scroll */
+    table.tbl { min-width: 560px; }
+  }
   table.tbl thead th {
     background: var(--surface-2); text-align: left;
     font-size: 0.6875rem; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted);
     padding: 12px 16px; white-space: nowrap;
   }
-  table.tbl tbody td { padding: 12px 16px; font-size: 0.875rem; border-top: 1px solid var(--border); vertical-align: middle; }
+  /* Long free text (names, key dates, applicant notes) wraps inside the cell
+     instead of widening the table; badges and tags opt back out below. */
+  table.tbl tbody td { padding: 12px 16px; font-size: 0.875rem; border-top: 1px solid var(--border); vertical-align: middle; overflow-wrap: anywhere; }
   table.tbl tbody tr { transition: background var(--dur-fast); }
   table.tbl tbody tr:hover { background: var(--brand-50); }
   table.tbl .t-num { text-align: right; @apply font-mono; font-variant-numeric: tabular-nums; }
@@ -1325,7 +1341,10 @@
   .searchbox input:focus { outline: none; border-color: var(--brand); box-shadow: var(--shadow-focus); }
   .bell { position: relative; color: var(--muted); cursor: pointer; }
   .bell .dot { position: absolute; top: -2px; right: -2px; width: 8px; height: 8px; border-radius: 50%; background: var(--danger); border: 1.5px solid var(--surface); }
-  .appmain { padding: 32px; max-width: 1200px; min-width: 0; overflow-x: clip; }
+  /* No max-width: the 1200px cap left tables scrolling sideways on wide
+     screens while a third of the viewport sat empty. Content that reads
+     better narrow (forms, prose) constrains itself with its own max-width. */
+  .appmain { padding: 32px; min-width: 0; overflow-x: clip; }
   /* Any prose inside an admin/portal card wraps long unbroken strings rather
      than poking out of the card (applicant free text, pasted URLs). */
   .card p, .card dd, .card td, .card li { overflow-wrap: anywhere; }
