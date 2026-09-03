@@ -64,6 +64,10 @@ const schema = z.object({
   MS_CLIENT_SECRET: z.string().optional(),
   MS_CALENDAR_USERS: z.string().optional(),
 
+  // Post-call account activation link (lead → prospect account). How many
+  // days the emailed link stays valid; a resend revokes the previous one.
+  ACTIVATION_LINK_TTL_DAYS: z.coerce.number().int().min(1).max(60).default(7),
+
   // App behavior
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   SEED_ON_BOOT: z.coerce.boolean().default(false),

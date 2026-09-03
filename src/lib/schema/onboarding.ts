@@ -79,6 +79,16 @@ export const submitSchema = personalAndIntentSchema.merge(serviceSpecificsSchema
   services: z.array(z.enum(SERVICE_KEYS)).min(1),
 });
 
+/** Post-call prospects (activated from a lead after their first consultation)
+ *  are not made to write a business essay before they can act: the intent
+ *  block is optional and collected progressively with their adviser. Identity
+ *  fields stay required — compliance needs them. */
+export const submitSchemaRelaxed = personalAndIntentSchema
+  .partial({ businessDescription: true, expectedTurnover: true, timeline: true, source: true })
+  .extend({ businessDescription: z.string().max(2000).optional() })
+  .merge(serviceSpecificsSchema)
+  .extend({ services: z.array(z.enum(SERVICE_KEYS)).min(1) });
+
 /** Tightens the conditional fields based on selected services. */
 export function refineForSubmit(input: z.infer<typeof submitSchema>) {
   const errors: { field: string; message: string }[] = [];
@@ -108,3 +118,4 @@ export function refineForSubmit(input: z.infer<typeof submitSchema>) {
 
 export type FullDraft = z.infer<typeof fullDraftSchema>;
 export type SubmitInput = z.infer<typeof submitSchema>;
+export type SubmitInputRelaxed = z.infer<typeof submitSchemaRelaxed>;

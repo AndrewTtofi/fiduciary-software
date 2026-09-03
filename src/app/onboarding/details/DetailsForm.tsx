@@ -39,14 +39,21 @@ export function DetailsForm({
   reference,
   userFullName,
   documentsPhase,
+  relaxed = false,
+  initialSection = "personal",
 }: {
   services: string[];
   initialDraft: Record<string, unknown>;
   reference: string;
   userFullName: string;
   documentsPhase: "mandatory" | "optional" | "off";
+  /** Post-call prospects: the intent block and per-service specifics are
+   *  optional for now (adviser-assisted), and finishing returns to the
+   *  checklist rather than marching on to documents. */
+  relaxed?: boolean;
+  initialSection?: Section;
 }) {
-  const [section, setSection] = useState<Section>("personal");
+  const [section, setSection] = useState<Section>(initialSection);
   const [draft, setDraft] = useState<Record<string, unknown>>({ fullLegalName: userFullName, ...initialDraft });
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
@@ -117,6 +124,12 @@ export function DetailsForm({
     const v = draft[field];
     return v === undefined || v === null ? "" : String(v);
   }
+  // The booking form accepts any country; the wizard's dropdown is a short
+  // list. Keep a pre-filled value selectable instead of silently blanking it.
+  function countryOptions(field: string): string[] {
+    const v = g(field);
+    return v && !COUNTRIES.includes(v) ? [v, ...COUNTRIES] : COUNTRIES;
+  }
   function bool(field: string): boolean | undefined {
     const v = draft[field];
     return typeof v === "boolean" ? v : v === "true" ? true : v === "false" ? false : undefined;
@@ -131,13 +144,15 @@ export function DetailsForm({
       setSection("intent"); window.scrollTo(0, 0); return;
     }
     if (section === "intent") {
-      const errs = collectErrors(intentSchema);
+      const errs = relaxed ? {} : collectErrors(intentSchema);
       if (Object.keys(errs).length) { showErrors(errs); return; }
       setSection("specifics"); window.scrollTo(0, 0); return;
     }
     // section === specifics → validate conditional requireds client-side first
+    // (post-call prospects fill these in with their adviser, so nothing is
+    // enforced here).
     const refineErrs: Record<string, string> = {};
-    for (const e of refineForSubmit({ ...draft, services } as never)) {
+    for (const e of relaxed ? [] : refineForSubmit({ ...draft, services } as never)) {
       if (!refineErrs[e.field]) refineErrs[e.field] = e.message;
     }
     if (Object.keys(refineErrs).length) { showErrors(refineErrs); return; }
@@ -170,6 +185,7 @@ export function DetailsForm({
         );
         return;
       }
+      if (relaxed) { router.push("/onboarding/checklist"); return; }
       // When the documents phase is disabled, step 2 is the final step:
       // finalise the application here instead of continuing to documents.
       if (documentsPhase === "off") {
@@ -189,7 +205,7 @@ export function DetailsForm({
   function onBack() {
     if (section === "intent") setSection("personal");
     else if (section === "specifics") setSection("intent");
-    else router.push("/onboarding");
+    else router.push(relaxed ? "/onboarding/checklist" : "/onboarding");
   }
 
   function jump(target: Section) {
@@ -226,14 +242,14 @@ export function DetailsForm({
                 <Field label="Nationality" name="nationality">
                   <select className="select" value={g("nationality")} onChange={(e) => set("nationality", e.target.value)}>
                     <option value="">Select…</option>
-                    {COUNTRIES.map((c) => <option key={c} value={c}>{c}</option>)}
+                    {countryOptions("nationality").map((c) => <option key={c} value={c}>{c}</option>)}
                   </select>
                 </Field>
               </div>
               <Field label="Country of current residence" name="residenceCountry">
                 <select className="select" value={g("residenceCountry")} onChange={(e) => set("residenceCountry", e.target.value)}>
                   <option value="">Select…</option>
-                  {COUNTRIES.map((c) => <option key={c} value={c}>{c}</option>)}
+                  {countryOptions("residenceCountry").map((c) => <option key={c} value={c}>{c}</option>)}
                 </select>
               </Field>
               <Field label="Current address" name="address">
@@ -246,13 +262,16 @@ export function DetailsForm({
 
         {section === "intent" && (
           <section>
-            <h2 className="font-display text-2xl mb-8">Business Intent</h2>
-            <div className="flex flex-col gap-8">
-              <Field label="Brief description of your business activity" name="businessDescription"
-                     hint="Minimum 100 characters. Describe what your company does or will do.">
-                <textarea className="textarea" rows={5} value={g("businessDescription")}
+            <h2 className="font-display text-2xl mb-2">{relaxed ? "A little on your plans" : "Business Intent"}</h2>
+            {relaxed && (
+              <p className="text-muted mb-8">Rough is fine — we&apos;ll refine it together with your adviser. Skip and come back anytime.</p>
+            )}
+            <div className={`flex flex-col gap-8${relaxed ? "" : " mt-6"}`}>
+              <Field label={relaxed ? "What will the company do?" : "Brief description of your business activity"} name="businessDescription"
+                     hint={relaxed ? "A sentence is plenty for now." : "Minimum 100 characters. Describe what your company does or will do."}>
+                <textarea className="textarea" rows={relaxed ? 3 : 5} value={g("businessDescription")}
                           onChange={(e) => set("businessDescription", e.target.value)} />
-                <div className="text-meta text-muted text-right">{g("businessDescription").length} / 100</div>
+                {!relaxed && <div className="text-meta text-muted text-right">{g("businessDescription").length} / 100</div>}
               </Field>
               <div className="grid gap-6 sm:grid-cols-2">
                 <Field label="Expected annual turnover" name="expectedTurnover">
@@ -322,7 +341,7 @@ export function DetailsForm({
                   <Field label="Current tax residency country" name="currentTaxResidency">
                     <select className="select" value={g("currentTaxResidency")} onChange={(e) => set("currentTaxResidency", e.target.value)}>
                       <option value="">Select…</option>
-                      {COUNTRIES.map((c) => <option key={c}>{c}</option>)}
+                      {countryOptions("currentTaxResidency").map((c) => <option key={c}>{c}</option>)}
                     </select>
                   </Field>
                   <Toggle label="60+ days in Cyprus this year?" name="daysInCyprus60Plus" value={bool("daysInCyprus60Plus")}
@@ -422,9 +441,11 @@ export function DetailsForm({
               {section === "specifics"
                 ? pending
                   ? "Submitting…"
-                  : documentsPhase === "off"
-                    ? "Submit application"
-                    : "Continue to documents"
+                  : relaxed
+                    ? "Save & back to checklist"
+                    : documentsPhase === "off"
+                      ? "Submit application"
+                      : "Continue to documents"
                 : "Continue"}
             </button>
           </div>

@@ -53,6 +53,7 @@ export default async function SettingsPage() {
             languagePref: dbUser.languagePref,
           }}
           clientFields={clientFields}
+          hasPassword={!!dbUser.passwordHash}
         />
       </div>
     </ClientShell>

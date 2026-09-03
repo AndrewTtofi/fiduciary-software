@@ -3,7 +3,7 @@ import { allocateReferenceNumber } from "./reference";
 import { logActivity } from "./activity";
 import { createComplianceFileForProspect } from "@/lib/services/compliance/files";
 import { ProspectStatus, type Prisma } from "@prisma/client";
-import { submitSchema, type SubmitInput, type FullDraft, refineForSubmit, SERVICE_KEYS } from "@/lib/schema/onboarding";
+import { submitSchema, submitSchemaRelaxed, type SubmitInputRelaxed, type FullDraft, refineForSubmit, SERVICE_KEYS } from "@/lib/schema/onboarding";
 import { computeCompleteness } from "@/lib/services/prospect-intel";
 import { getDocumentsPhase } from "@/lib/services/settings";
 
@@ -64,10 +64,26 @@ export async function saveDraft(userId: string, draft: FullDraft) {
   return updated;
 }
 
+/** Whether this prospect came in through the post-call activation link. Those
+ *  applications are adviser-assisted: the business-intent essay and the
+ *  per-service specifics are optional at commit time (spec §10, screens 4–5). */
+export async function isPostCallProspect(userId: string) {
+  const p = await prisma.prospect.findUnique({ where: { userId }, select: { leadId: true } });
+  return !!p?.leadId;
+}
+
 /** Finalize Step-2 — promotes draft to ProspectDetail rows + advances to documents. */
-export async function commitFormAnswers(userId: string, input: SubmitInput) {
-  const parsed = submitSchema.parse(input);
-  const conditionalErrors = refineForSubmit(parsed);
+export async function commitFormAnswers(userId: string, input: SubmitInputRelaxed) {
+  const relaxed = await isPostCallProspect(userId);
+  const strict = relaxed ? null : submitSchema.safeParse(input);
+  if (strict && !strict.success) {
+    return {
+      ok: false as const,
+      errors: strict.error.issues.map((i) => ({ field: String(i.path[0] ?? ""), message: i.message })),
+    };
+  }
+  const parsed = submitSchemaRelaxed.parse(input);
+  const conditionalErrors = relaxed ? [] : refineForSubmit(parsed as never);
   if (conditionalErrors.length) {
     return { ok: false as const, errors: conditionalErrors };
   }

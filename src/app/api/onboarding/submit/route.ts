@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { assertRole } from "@/lib/auth/guards";
-import { submitSchema } from "@/lib/schema/onboarding";
+import { submitSchemaRelaxed } from "@/lib/schema/onboarding";
 import { commitFormAnswers, submitProspect } from "@/lib/services/onboarding";
 
 export const runtime = "nodejs";
@@ -9,7 +9,9 @@ export const runtime = "nodejs";
 export async function POST(req: Request) {
   const user = await assertRole("prospect", "client", "staff");
   const body = await req.json().catch(() => ({}));
-  const parsed = submitSchema.safeParse(body);
+  // The relaxed shape is the superset; the service re-applies the strict
+  // rules for self-starters and lets post-call prospects through.
+  const parsed = submitSchemaRelaxed.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json({ error: parsed.error.issues }, { status: 422 });
   }

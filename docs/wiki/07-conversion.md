@@ -108,3 +108,14 @@ The conversion service is covered by:
 Before conversion, signing in lands them on `/onboarding`. After
 conversion, the same user signing in lands on `/app` — see
 [12 — Client portal](./12-client-portal.md).
+
+
+> **Where the code actually lives (2026-09):** conversion is
+> `convertProspectToClient()` in `src/lib/services/submissions.ts`, called by
+> `POST /api/admin/clients/convert`. It requires `Prospect.status = approved`
+> **and** a `ComplianceFile` with status `cleared`
+> (`checkComplianceGateForProspect()` in `src/lib/services/compliance/gate.ts`).
+> The CRM drawer's **Make client** button is disabled with the blocking reason
+> shown next to it (approve first / clear compliance) instead of failing after
+> the click. Leads are converted through the post-call activation link — see
+> [03 — Roles & auth](./03-roles-and-auth.md).

@@ -9,9 +9,14 @@ type DocType = "passport" | "proof_of_address" | "other";
 export function DocumentUploader({
   initial,
   mode = "mandatory",
+  postCall = false,
 }: {
   initial: { passport: DocPill | null; proof: DocPill | null; extras: DocPill[] };
   mode?: "mandatory" | "optional";
+  /** Activated-from-a-lead flow: documents are step 1 of a checklist, not the
+   *  last page of the wizard, so this saves and returns to the checklist
+   *  instead of finalising the application. */
+  postCall?: boolean;
 }) {
   const [passport, setPassport] = useState<DocPill | null>(initial.passport);
   const [proof, setProof] = useState<DocPill | null>(initial.proof);
@@ -96,13 +101,20 @@ export function DocumentUploader({
       )}
 
       <div className="surface rounded-card p-6 flex justify-between items-center flex-wrap gap-3">
-        <button type="button" onClick={() => router.push("/onboarding/details")} className="btn btn-ghost px-6 py-3">
-          Back to form
+        <button type="button" onClick={() => router.push(postCall ? "/onboarding/checklist" : "/onboarding/details")} className="btn btn-ghost px-6 py-3">
+          {postCall ? "Back to checklist" : "Back to form"}
         </button>
-        <button type="button" disabled={!canSubmit || submitting} onClick={onSubmit}
-                className="btn btn-accent px-8 py-3.5 disabled:opacity-40 disabled:cursor-not-allowed">
-          {submitting ? "Submitting…" : "Submit Application"}
-        </button>
+        {postCall ? (
+          <button type="button" onClick={() => router.push("/onboarding/checklist")}
+                  className="btn btn-accent px-8 py-3.5">
+            Save &amp; continue →
+          </button>
+        ) : (
+          <button type="button" disabled={!canSubmit || submitting} onClick={onSubmit}
+                  className="btn btn-accent px-8 py-3.5 disabled:opacity-40 disabled:cursor-not-allowed">
+            {submitting ? "Submitting…" : "Submit Application"}
+          </button>
+        )}
       </div>
     </>
   );

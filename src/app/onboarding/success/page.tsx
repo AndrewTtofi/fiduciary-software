@@ -11,6 +11,10 @@ export default async function OnboardingSuccess() {
   if (!prospect) notFound();
 
   const submittedDate = new Date().toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+  // Post-call prospects already had their consultation — never tell them to
+  // wait for approval before "booking a call" (spec §10, screens 6–7).
+  const postCall = !!prospect.consultationDoneAt;
+  const first = (user.fullName ?? "").split(" ")[0] || "there";
   const services = Array.isArray(prospect.servicesSelected)
     ? (prospect.servicesSelected as string[]).map(prettyService).join(", ")
     : "—";
@@ -22,9 +26,11 @@ export default async function OnboardingSuccess() {
              style={{ background: "var(--accent)", color: "var(--dark)" }}>
           ✓
         </div>
-        <h1 className="font-display text-4xl mb-4">Application Submitted Successfully</h1>
+        <h1 className="font-display text-4xl mb-4">{postCall ? "Documents received" : "Application Submitted Successfully"}</h1>
         <p className="text-lg text-muted mb-12">
-          Thank you, {user.fullName ?? "—"}. Your application is now being reviewed by our compliance team.
+          {postCall
+            ? `Thanks, ${first}. Your documents are with our compliance team — we'll message you here as your file progresses.`
+            : `Thank you, ${user.fullName ?? "—"}. Your application is now being reviewed by our compliance team.`}
         </p>
 
         <div className="surface rounded-card p-8 text-left mb-12">
@@ -39,13 +45,13 @@ export default async function OnboardingSuccess() {
         <div className="text-left mb-12">
           <h2 className="text-lg font-semibold mb-3">What happens next?</h2>
           <p className="text-meta text-muted leading-relaxed">
-            Our team will review your application within 24–48 business hours. You&apos;ll receive an email
-            notification when your application has been reviewed. Once approved, you&apos;ll be able to book
-            your free consultation with one of our experts.
+            {postCall
+              ? "Compliance verifies your documents, usually within 24–48 business hours. Your adviser will pick up anything still open with you directly — nothing more to do right now."
+              : "Our team will review your application within 24–48 business hours. You'll receive an email notification when it has been reviewed, and we'll be in touch to arrange your consultation."}
           </p>
         </div>
 
-        <Link href="/app/dashboard" className="btn btn-primary px-10 py-3.5">Go to Dashboard</Link>
+        <Link href="/app/dashboard" className="btn btn-primary px-10 py-3.5">{postCall ? "Go to your dashboard" : "Go to Dashboard"}</Link>
       </div>
     </main>
   );

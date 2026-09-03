@@ -31,6 +31,9 @@ export type ActivityAction =
   | "booking.rescheduled"
   | "user.email_verified"
   | "user.created"
+  | "user.password_set"
+  | "lead.activation_sent"
+  | "lead.activated"
   | "compliance.file_created"
   | "compliance.party_added"
   | "compliance.party_removed"
@@ -51,7 +54,7 @@ export type ActivityAction =
   | "doc_request.fulfilled";
 
 export async function logActivity(args: {
-  entityType: "prospect" | "client" | "document" | "booking" | "user"
+  entityType: "prospect" | "client" | "document" | "booking" | "user" | "lead"
     | "compliance_file" | "party" | "kyc_case" | "screening_run" | "review_task"
     | "message" | "doc_request";
   entityId: string;

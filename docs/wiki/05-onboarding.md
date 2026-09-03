@@ -114,3 +114,24 @@ If staff need additional documents *before* approval, they can issue a
 Prospects who are rejected are *not* deleted. Their data remains for
 audit but the prospect cannot log in to advance the wizard (status is
 locked). This is a compliance requirement, not a UX choice.
+
+
+## Post-call path (activated from a lead)
+
+Prospects who arrive through the activation link skip the blank sign-up and
+the linear wizard:
+
+1. `/onboarding/welcome` — confirm name and phone (pre-filled), email locked,
+   password optional.
+2. `/onboarding/checklist` — consultation shown as done; **Upload documents**
+   is the first action; **Confirm your details** is mostly pre-filled;
+   **A little on your business** is optional (adviser-assisted). Services
+   chosen at booking arrive pre-ticked (`/onboarding?edit=1` to adjust).
+3. **Send to compliance** on the checklist finalises the application
+   (`PUT /api/onboarding/submit`); the success page and the dashboard say the
+   documents are with compliance and show the consultation as complete —
+   never "book a call once approved".
+
+The business-intent essay and per-service specifics are optional for these
+prospects (`submitSchemaRelaxed`; `isPostCallProspect()` in
+`src/lib/services/onboarding.ts`). Self-starters keep the strict rules.
