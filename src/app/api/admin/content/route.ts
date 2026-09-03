@@ -31,6 +31,11 @@ const schema = z.object({
     heading: str(200), body: str(3000),
     personName: str(120), personTitle: str(160), photoUrl: str(500), photoNote: str(300),
     points: z.array(str(300)).max(8),
+    prepVideos: z.array(z.object({
+      tag: str(40), title: str(160), blurb: str(300), duration: str(12),
+      // Only http(s) links are accepted; an empty string means "no video yet".
+      url: z.string().max(500).refine((u) => u === "" || /^https?:\/\//i.test(u), "Must be an http(s) URL"),
+    })).max(8),
   }),
   about: z.object({
     story: str(3000), how: str(3000), whatWeDoIntro: str(300),

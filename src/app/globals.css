@@ -1918,3 +1918,28 @@ table.tbl tbody tr:focus-visible { outline: 2px solid var(--brand); outline-offs
 @media (prefers-reduced-motion: reduce) {
   .shell-client .ptl::before, .shell-client .pti, .shell-client .pti.act .d { animation: none; }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   Booking funnel (marketing) — step intros + the non-dead-end confirmation
+   (calendar link, prep videos, next-step note). Marketing shell only.
+   ═══════════════════════════════════════════════════════════════════════ */
+.shell-marketing .bk-sub { color: var(--mk-grey); font-size: .95rem; line-height: 1.55; margin-top: 8px; }
+.shell-marketing .bk-opt { font-weight: 400; color: var(--mk-grey-2); }
+.shell-marketing .bk-done { text-align: left; }
+.shell-marketing .bk-tick { width: 56px; height: 56px; border-radius: 50%; display: grid; place-items: center; background: var(--mk-good-bg); color: var(--mk-good); font-size: 1.5rem; font-weight: 700; margin-bottom: 18px; }
+.shell-marketing .bk-tz { font-family: var(--mk-font-mono); font-size: .74rem; letter-spacing: .08em; text-transform: uppercase; color: var(--mk-grey-2); margin-top: 6px; }
+.shell-marketing .bk-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
+.shell-marketing .bk-actions .pill { text-decoration: none; }
+.shell-marketing .bk-videos { margin-top: 34px; padding-top: 26px; border-top: 1px solid var(--mk-border); }
+.shell-marketing .bk-videos .fstep-label { margin-bottom: 6px; }
+.shell-marketing .bk-videos-intro { color: var(--mk-grey); font-size: .92rem; margin-bottom: 16px; }
+.shell-marketing .bk-vgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.shell-marketing .bk-vcard { display: block; border: 1px solid var(--mk-border); border-radius: 12px; padding: 16px 18px; background: #fff; color: var(--mk-ink); text-decoration: none; transition: border-color .15s, transform .18s, box-shadow .2s; }
+.shell-marketing .bk-vcard.is-link:hover { border-color: var(--mk-gold); transform: translateY(-2px); box-shadow: var(--mk-shadow); }
+.shell-marketing .bk-vtop { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.shell-marketing .bk-vtag { font-family: var(--mk-font-mono); font-size: .68rem; letter-spacing: .1em; text-transform: uppercase; color: var(--mk-grey); }
+.shell-marketing .bk-vplay { margin-left: auto; width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; background: var(--mk-navy); color: var(--mk-gold); font-size: .6rem; }
+.shell-marketing .bk-vdur { font-family: var(--mk-font-mono); font-size: .72rem; color: var(--mk-grey-2); }
+.shell-marketing .bk-vcard h3 { font-size: 1rem; font-weight: 600; color: var(--mk-navy); margin: 0 0 4px; }
+.shell-marketing .bk-vcard p { font-size: .85rem; color: var(--mk-grey); margin: 0; line-height: 1.45; }
+@media (max-width: 640px) { .shell-marketing .bk-vgrid { grid-template-columns: 1fr; } }

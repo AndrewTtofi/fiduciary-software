@@ -31,6 +31,9 @@ export type Faq = { q: string; a: string };
 export type Feature = { t: string; d: string };
 export type Step = { t: string; d: string };
 export type Person = { name: string; title: string; bio: string };
+/** A short (≈60s) objection/prep video shown on the booking confirmation.
+ *  `url` empty → the card renders without a link until a video exists. */
+export type PrepVideo = { tag: string; title: string; blurb: string; duration: string; url: string };
 
 export type Consultation = {
   heading: string;
@@ -41,6 +44,10 @@ export type Consultation = {
   photoUrl: string;
   photoNote: string;
   points: string[];
+  /** Booking confirmation: the questions almost everyone asks before the call,
+   *  answered in a minute each. Shown at the hot moment (right after booking)
+   *  to lift show-rate; managed in Admin → Content → Consultation. */
+  prepVideos: PrepVideo[];
 };
 
 export type SiteContent = {
@@ -161,6 +168,12 @@ export const DEFAULT_CONTENT: SiteContent = {
       "If we think there is a better option, we will explain why.",
       "If we believe something carries unnecessary risk, we will advise against it.",
     ],
+    prepVideos: [
+      { tag: "Costs", title: "What does it actually cost?", blurb: "Real numbers, no hidden fees - the full picture.", duration: "1:02", url: "" },
+      { tag: "Fit", title: "Do I even need a Cyprus company?", blurb: "When it makes sense - and when it doesn't.", duration: "0:58", url: "" },
+      { tag: "Non-Dom", title: "Non-dom, in plain English", blurb: "What the status means for your tax, simply put.", duration: "1:10", url: "" },
+      { tag: "Speed", title: "How fast can this be done?", blurb: "Realistic timelines from day one to done.", duration: "0:49", url: "" },
+    ],
   },
   about: {
     story: "{brand} began with a simple observation: moving yourself or your business to a new country involves too many offices, too many forms and too little straight talk.\n\nWe set out to be the firm we would want on our own side - one that maps the whole route before asking for a commitment, and says plainly when a route is not the right one.\n\nThat is still how we work today.",
@@ -188,6 +201,7 @@ export function mergeContent(stored: (Partial<SiteContent> & { _v?: number }) | 
   how.steps = arr<Step>((s.how as Partial<SiteContent["how"]> | undefined)?.steps, DEFAULT_CONTENT.how.steps);
   const consultation = obj<Consultation>("consultation");
   consultation.points = arr<string>((s.consultation as Partial<Consultation> | undefined)?.points, DEFAULT_CONTENT.consultation.points);
+  consultation.prepVideos = arr<PrepVideo>((s.consultation as Partial<Consultation> | undefined)?.prepVideos, DEFAULT_CONTENT.consultation.prepVideos);
   const about = obj<SiteContent["about"]>("about");
   const sa = s.about as Partial<SiteContent["about"]> | undefined;
   about.why = arr<Feature>(sa?.why, DEFAULT_CONTENT.about.why);

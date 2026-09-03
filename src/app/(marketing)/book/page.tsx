@@ -16,7 +16,7 @@ export const dynamic = "force-dynamic";
  *  Consultation" button. The Contact page links here rather than carrying a
  *  second form (Contact spec, Part 3). */
 export default async function BookPage() {
-  const [{ contact }, slotDates] = await Promise.all([
+  const [{ contact, consultation }, slotDates] = await Promise.all([
     getSiteContent(),
     listPublicAvailability().catch(() => [] as Date[]),
   ]);
@@ -35,7 +35,7 @@ export default async function BookPage() {
         </div>
       </section>
       <div className="book">
-        <ContactBookingForm slots={slots} inquiries={inquiries} />
+        <ContactBookingForm slots={slots} inquiries={inquiries} prepVideos={consultation.prepVideos} />
         <p style={{ textAlign: "center", fontSize: ".88rem", color: "var(--mk-grey)", marginTop: 22 }}>
           Prefer to talk first?{" "}
           {contact.phone && <a href={telLink(contact.phone)} style={{ color: "var(--mk-gold)", fontWeight: 600 }}>{contact.phone}</a>}
